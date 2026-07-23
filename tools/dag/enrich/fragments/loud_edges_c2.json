@@ -1,0 +1,161 @@
+{
+  "fragment": "loud_edges_c2",
+  "derived_by": "opus batch C addendum (sub-stage solver/WCS edges; endpoints declared by enrichment fragment stage_order.json — verified present before emission)",
+  "notes": [
+    "Endpoint validity basis: tools/dag/enrich/fragments/stage_order.json declares all sub-stage nodes used here (receipt-replay, schema 2.27.0) — verified by direct read before writing any edge.",
+    "SEMANTIC PRECISION on the gate CONTROL edges: calibrate.m7_analyze / calibrate.sip_gate / calibrate.tps_gate run NESTED INSIDE the m7_refine withStage (orchestrator_session.ts:1713-1721 threads emitSubstageMs into applyAstrometricRefinement). The gates do NOT decide whether m7_refine RUNS — they decide whether its fitted SIP/TPS is EMITTED onto solution.astrometry (the stage's receipt-write). The control edges below carry that meaning in `how`.",
+    "The bc_rematch never-worse fallback is emitted as stage:bc_rematch -> stage:solve: on KEPT_ORIGINAL the original solve-owned solution (matched_stars/astrometry/stamps) survives byte-identical — the guard code is lens_distortion_rematch_pass.ts:330-337, not just the orchestrator comment.",
+    "No edges duplicated from loud_edges_c.json (that fragment carries only coarse-stage pairs; every pair here has a sub-stage endpoint)."
+  ],
+  "nodes": {},
+  "edges": [
+    {
+      "from": "stage:solve.quad_wasm",
+      "to": "stage:solve",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/solver_entry.ts:1754",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "flatMatches from scoreQuadsPlanarLocal (wasm solve_planar_local): flat 9-float stride per candidate [detId x4, catId x4, dist_sq] — geometric quad-match CANDIDATES, unitless code-space distances",
+        "transform": "wasm quad matcher hands candidate correspondences back; the CPU f64 verify + WCS fit downstream own every verdict (candidates are never the answer); attempt clocked via accrueBranchTiming('solve.quad_wasm') at :1770",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the primary solve branch: when it locks, the stage_finished winner is solve.quad_wasm (stages/solve.ts:190, PASS with matched count; uw_sweep/uw_escalation only win via their SUCCESS_UW_* forensics statuses). Without this handoff there is no matched_stars set and nothing downstream (m7, BC, SPCC, forced-confirm) has input.",
+        "cites": [
+          { "path": "src/engine/pipeline/stages/solve.ts", "lines": "186-199" },
+          { "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts", "lines": "1750-1764" }
+        ]
+      }
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:calibrate.m7_analyze",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/calibrate.ts:66",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the PlateSolution: matched_stars (with per-star residual_arcsec) + the fitted WCS (COORDINATE ledger)",
+        "transform": "ResidualAnalyzer.analyze(solution) computes residual RMS (arcsec) + distortion_pattern_detected + a CANDIDATE global order-3 SIP fit (fit whenever distortion fired + >20 matches); result landed on solution.astrometry at :68",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:calibrate.m7_analyze",
+      "to": "stage:calibrate.sip_gate",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/calibrate.ts:91",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "analysis.sip_coefficients (the candidate order-3 SIP, internal convention OBSERVED-IDEAL)",
+        "transform": "gateEmittedSip(solution, analysis.sip_coefficients) — the candidate goes to the out-of-sample CV gate; gate only runs when a candidate exists",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:calibrate.sip_gate",
+      "to": "stage:m7_refine",
+      "type": "control",
+      "cite": "src/engine/pipeline/stages/calibrate.ts:93",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "sipGate.admitted boolean + always-recorded sip_gate verdict",
+        "transform": "ADMITTED => solution.astrometry.sip = analysis.sip_coefficients (m7_refine's receipt-write 'astrometry' carries the SIP); REFUSED => sip stays ABSENT, sip_gate verdict records why (honest-or-absent). Gate = k-fold out-of-sample CV: SIP emitted ONLY when it generalizes better than the no-correction linear baseline AND better than a plain affine plane out of sample — both COMPARISONS, no tuned constant",
+        "lossy": false
+      },
+      "why": {
+        "text": "A low-order global polynomial fit from a sparse, center-weighted matched set EXTRAPOLATES catastrophically at the frame corners — measured 34x worse than astrometry.net on the pinned CR2 frame (OURS 3449 arcsec vs 102 arcsec vs Gaia, test_results/sip_comparison_2026-07-15). Without this gate that SIP would ride the receipt into every export/render consumer.",
+        "cites": [
+          { "path": "src/engine/pipeline/stages/calibrate.ts", "lines": "71-87" }
+        ]
+      }
+    },
+    {
+      "from": "stage:calibrate.tps_gate",
+      "to": "stage:m7_refine",
+      "type": "control",
+      "cite": "src/engine/pipeline/stages/calibrate.ts:114",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "fitTpsGated(solution) => { tps, gate }; fire-gate SAME as SIP (rms > 1.2 arcsec distortion flag AND >20 refinable pairs, calibrate.ts:111)",
+        "transform": "solution.astrometry.tps = model when admitted, else null (explicit); tps_gate verdict ALWAYS recorded. Gate = out-of-sample CV: an interpolating spline whose in-sample rms_after (~3 arcsec) does NOT generalize (measured OOS ~35 arcsec on SeeStar/M66) is REFUSED",
+        "lossy": false
+      },
+      "why": {
+        "text": "TPS is an interpolator — in-sample residuals are nearly meaningless as evidence. The OOS CV refusal is what keeps a spline that memorized the matched set out of the ASDF/GWCS tabular carry. Post-solve COORDINATE observation: the SIP block and every asserted SOLVE field are untouched, so pinned SeeStar/CR2 numbers stay byte-identical.",
+        "cites": [
+          { "path": "src/engine/pipeline/stages/calibrate.ts", "lines": "100-117" }
+        ]
+      }
+    },
+    {
+      "from": "stage:m7_refine",
+      "to": "stage:bc_rematch",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1709",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "solution.astrometry (the KEPT path's final astrometry, incl. gated SIP) as the rematch's candidate-astrometry INPUT",
+        "transform": "P0-4 REORDER runs m7_refine FIRST: the rematch reads solution.astrometry.sip for its rms_before baseline, then RE-RUNS applyAstrometricRefinement on its own densified candidate set (lens_distortion_rematch_pass.ts:260)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:bc_measure",
+      "to": "stage:bc_rematch",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1788",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "this.bcMeasured — the MEASURED per-capture Brown-Conrady fit (k1/k2 + n_used/n_pairs coverage + mustache verdict) from measureBrownConradyFromSolution (:1746); pure observation, mutates nothing (receipt-write lens_distortion_measured)",
+        "transform": "runBcRematchPass consumes bcMeasured; when the fit passed its coverage gates it BC-corrects the FULL detection set's matching coords (COORDINATE ledger), re-matches against the catalog to recover edge stars, re-runs SIP refinement on the densified set, culls under the SAME acceptance the originals cleared, and forced-photometry existence-checks the survivors",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the two-pass rail's measure->apply seam: bc_measure is always-on and side-effect-free precisely so the solve stays byte-identical when the rematch declines; bc_rematch is the ONLY post-solve writer of matched_stars/astrometry/num_stars/matchEpoch (orchestrator_session.ts:1774-1775).",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1731-1741" },
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1763-1778" }
+        ]
+      }
+    },
+    {
+      "from": "stage:bc_rematch",
+      "to": "stage:solve",
+      "type": "fallback",
+      "cite": "src/engine/pipeline/m2_hardware/lens_distortion_rematch_pass.ts:336",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "guard = (neverWorseVerdict === 'APPLIED' && assign.false_guard_passes) ? 'APPLIED' : 'KEPT_ORIGINAL'",
+        "transform": "NEVER-WORSE structural guard (not a calibrated threshold): the densified candidate replaces the solve's solution ONLY with strictly more matches AND no worse post-chain RMS; KEPT_ORIGINAL => applied=false, the ORIGINAL solve-owned matched_stars/astrometry/stamps survive byte-identical (matchEpoch bump lives in the APPLIED branch ONLY, :352)",
+        "lossy": false
+      },
+      "why": {
+        "text": "This guard is LOAD-BEARING for the pinned regressions: well-corrected narrow FITS recover nothing and KEEP, so the sacred SeeStar solve stays bit-identical with the rematch rail default-ON. Downstream consumers never depend on rematch SUCCESS — a throw degrades to bcRematch=null and they run on the original set (orchestrator_session.ts:1776-1778).",
+        "cites": [
+          { "path": "src/engine/pipeline/m2_hardware/lens_distortion_rematch_pass.ts", "lines": "330-337" },
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1770-1773" }
+        ]
+      }
+    },
+    {
+      "from": "stage:m7_refine",
+      "to": "stage:render_apply_sip",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1874",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "solution.astrometry.sip (gated, internal convention) + the PIXEL-ledger previewFloat32 + wcs.crpix scaled to preview coords",
+        "transform": "RENDER-plane crossing (LAW 1: render consumes BOTH ledgers, feeds NEITHER): ImageProcessor.applySipUndistort re-warps the preview through the fitted SIP inverse and rewrites previewUrl ONLY; DEFAULT OFF via PIPELINE_CONSTANTS.RENDER_APPLY_SIP (:1858) — flag/SIP/preview conditions unmet => {applied:false}, byte-identical; never touches WCS / matched_stars / the solve numbers (:1848-1849)",
+        "lossy": true
+      },
+      "why": {
+        "text": "The single explicit COORDINATE->RENDER ledger crossing in step5: a coordinate-ledger product (SIP) reaches pixels, but only display pixels. Default-off keeps the sacred path byte-identical (SeeStar has no SIP so it is a no-op regardless); the internal-convention SIP is correct here BECAUSE in-app consumers use convention (1) end to end — only the FITS/ASDF export boundary negates (see loud_edges_c sip_convention edges).",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1843-1856" },
+          { "path": "src/engine/pipeline/export/sip_convention.ts", "lines": "50-54" }
+        ]
+      }
+    }
+  ]
+}

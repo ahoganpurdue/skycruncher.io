@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SKYCRUNCHER | Native Forensic Visualizer</title>
+    <style>
+      :root {
+        --bg: #09090b;
+        --panel: #18181b;
+        --accent: #6366f1;
+        --danger: #ef4444;
+        --success: #10b981;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .toolbar {
+        background: var(--panel);
+        border-bottom: 1px solid #27272a;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+      }
+      .title {
+        font-weight: 800;
+        font-size: 18px;
+        letter-spacing: -0.05em;
+        color: var(--accent);
+      }
+      .stats-bar {
+        display: flex;
+        gap: 24px;
+        font-size: 12px;
+      }
+      .stat-item span {
+        color: var(--muted);
+        margin-right: 4px;
+      }
+      .main {
+        flex: 1;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at center, #111114 0%, #000 100%);
+        overflow: hidden;
+      }
+      #viewport {
+        transform-origin: center;
+        cursor: grab;
+      }
+      #viewport:active {
+        cursor: grabbing;
+      }
+      .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background: rgba(24, 24, 27, 0.8);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #27272a;
+      }
+      button {
+        background: #27272a;
+        border: 1px solid #3f3f46;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      button:hover {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .tooltip {
+        position: fixed;
+        background: var(--panel);
+        border: 1px solid #3f3f46;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        pointer-events: none;
+        display: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        z-index: 100;
+      }
+      .star-circle {
+        transition: stroke-width 0.1s;
+      }
+      .star-circle:hover {
+        stroke: var(--accent);
+        stroke-width: 2px;
+        opacity: 1 !important;
+      }
+      #bg-image {
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toolbar">
+      <div class="title">SKYCRUNCHER // NATIVE_FORENSICS</div>
+      <div class="stats-bar" id="stats">
+        <div class="stat-item">
+          <span>STAR_DATA:</span>
+          <input type="file" id="loader" accept=".json" title="Load extracted_stars.json">
+        </div>
+        <div class="stat-item">
+          <span>BG_IMAGE:</span>
+          <input type="file" id="img-loader" accept="image/*" title="Load source JPEG for overlay">
+        </div>
+        <div class="stat-item" id="count"><span>STARS:</span> --</div>
+        <div class="stat-item" id="res"><span>RES:</span> --</div>
+        <div class="stat-item" id="fwhm"><span>AVG_FWHM:</span> --</div>
+      </div>
+    </div>
+
+    <div class="main" id="stage">
+      <svg id="viewport" width="5184" height="3456" viewBox="0 0 5184 3456">
+        <rect width="5184" height="3456" fill="black" />
+        <image id="bg-image" width="5184" height="3456" opacity="0.8" />
+        <g id="star-layer"></g>
+      </svg>
+    </div>
+
+    <div class="controls">
+      <button onclick="zoom(1.2)">ZOOM IN (+)</button>
+      <button onclick="zoom(0.8)">ZOOM OUT (-)</button>
+      <button onclick="resetView()">RESET VIEW</button>
+      <button onclick="toggleFlipY()">FLIP Y-AXIS</button>
+      <button onclick="toggleBG()">TOGGLE BG (B)</button>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+      const loader = document.getElementById('loader');
+      const imgLoader = document.getElementById('img-loader');
+      const starLayer = document.getElementById('star-layer');
+      const viewport = document.getElementById('viewport');
+      const stage = document.getElementById('stage');
+      const tooltip = document.getElementById('tooltip');
+      const bgImage = document.getElementById('bg-image');
+ 
+      let currentScale = 0.2;
+      let isDragging = false;
+      let lastX, lastY;
+      let translateX = 0, translateY = 0;
+      let flipY = false;
+      let bgVisible = true;
+      let currentStars = [];
+ 
+      // Pan & Zoom logic
+      stage.onmousedown = (e) => {
+        if (e.button !== 0) return;
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+      };
+      window.onmousemove = (e) => {
+        if (!isDragging) return;
+        translateX += e.clientX - lastX;
+        translateY += e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        updateTransform();
+      };
+      window.onmouseup = () => isDragging = false;
+      stage.onwheel = (e) => {
+        e.preventDefault();
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        zoom(factor);
+      };
+ 
+      // Keyboard shortcuts
+      window.onkeydown = (e) => {
+        if (e.key.toLowerCase() === 'b') toggleBG();
+        if (e.key === '+') zoom(1.2);
+        if (e.key === '-') zoom(0.8);
+      };
+ 
+      function updateTransform() {
+        viewport.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+      }
+ 
+      function zoom(factor) {
+        currentScale *= factor;
+        updateTransform();
+      }
+ 
+      function resetView() {
+        currentScale = 0.2;
+        translateX = 0;
+        translateY = 0;
+        updateTransform();
+      }
+ 
+      function toggleFlipY() {
+        flipY = !flipY;
+        render(currentStars);
+      }
+ 
+      function toggleBG() {
+        bgVisible = !bgVisible;
+        bgImage.style.display = bgVisible ? 'block' : 'none';
+      }
+ 
+      loader.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          currentStars = JSON.parse(event.target.result);
+          render(currentStars);
+        };
+        reader.readAsText(file);
+      };
+ 
+      imgLoader.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          bgImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', event.target.result);
+          // Set opacity to 0.8 to see stars through high-intensity pixels
+          bgImage.setAttribute('opacity', '0.8');
+        };
+        reader.readAsDataURL(file);
+      };
+ 
+      function render(stars) {
+        starLayer.innerHTML = '';
+        if (!stars || stars.length === 0) return;
+        
+        // Find image bounds for Coordinate Mapping
+        let maxX = 0, maxY = 0;
+        stars.forEach(s => {
+          if (s.x > maxX) maxX = s.x;
+          if (s.y > maxY) maxY = s.y;
+        });
+ 
+        // Force logical height if standard APS-C
+        const height = 3456;
+ 
+        let totalFWHM = 0;
+        let maxFlux = 0;
+        stars.forEach(s => {
+          if (s.flux > maxFlux) maxFlux = s.flux;
+          totalFWHM += (s.fwhm || 0);
+        });
+ 
+        const avgFWHM = totalFWHM / stars.length;
+        document.getElementById('count').innerHTML = `<span>STARS:</span> ${stars.length}`;
+        document.getElementById('res').innerHTML = `<span>RES:</span> ${Math.round(maxX+1)}x${Math.round(maxY+1)}`;
+        document.getElementById('fwhm').innerHTML = `<span>AVG_FWHM:</span> ${avgFWHM.toFixed(2)}px`;
+ 
+        stars.forEach((s, i) => {
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", s.x);
+          
+          // Apply Flip-Y if requested (Bayer vs Display)
+          const finalY = flipY ? (height - s.y) : s.y;
+          circle.setAttribute("cy", finalY);
+          
+          const r = Math.max(1.5, Math.sqrt(s.flux / maxFlux) * 15);
+          circle.setAttribute("r", r);
+          circle.setAttribute("fill", s.isPlanet ? "#fbbf24" : "white");
+          circle.setAttribute("stroke", s.isPlanet ? "#d97706" : "#6366f1");
+          circle.setAttribute("stroke-width", "1");
+          circle.setAttribute("opacity", "0.7");
+          circle.classList.add('star-circle');
+ 
+          circle.onmouseenter = (e) => {
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `ID: #${i}<br>POS: ${s.x.toFixed(1)}, ${s.y.toFixed(1)}<br>FLUX: ${Math.round(s.flux)}<br>SNR: ${s.snr?.toFixed(1) || '--'}<br>FWHM: ${s.fwhm?.toFixed(2) || '--'}`;
+          };
+          circle.onmousemove = (e) => {
+            tooltip.style.left = e.clientX + 15 + "px";
+            tooltip.style.top = e.clientY + 15 + "px";
+          };
+          circle.onmouseleave = () => tooltip.style.display = 'none';
+ 
+          starLayer.appendChild(circle);
+        });
+      }
+      
+      updateTransform();
+    </script>
+  </body>
+</html>

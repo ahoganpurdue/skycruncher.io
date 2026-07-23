@@ -1,0 +1,1118 @@
+{
+  "fragment": "review_h",
+  "derived_by": "wave-2 assembler — Haiku check wave: two-model cross-check overlay (owner ruling 2026-07-16: an edge independently confirmed by the Haiku reviewer against the cited code counts as legitimately VERIFIED). Applies ONLY the Haiku-confirmed keys across the 11 Opus-mapped wave-2 fragments; each row flips verification EXTRACTED->VERIFIED and attaches the cross-check note. The underlying data-fragment edge already carries the cite, so no cite is injected here.",
+  "notes": [
+    "One row per Haiku-confirmed edge. 177 verified keys reported across 11 domains; all 177 resolve to a committed fragment edge (166 exact-id, 11 basename for the bare-filename ingest-hw domain); 0 unresolved, 0 duplicate collisions.",
+    "FLAGGED edges are NOT included here — they stay EXTRACTED (dashed) pending an Opus fix pass, recorded in tools/dag/enrich/README.md under \"Haiku check wave (2026-07-16)\".",
+    "ADJUDICATED FALSE POSITIVE: the entire m6_plate_solve flagged set (3 PHANTOM-MODULE + 4 LINE-NUMBER-ERROR) is a stale-checkout artifact. gpu_quads/ exists in HEAD (quad_scoring_backend.ts / gpu_quads_flag.ts / gpu_quad_backend.ts) and all four disputed cites are correct against current source (package.ts:1355 = the classifyConfirmStatus call; package.ts is 1511 lines, not the 805 the reviewer saw; solver_entry.ts:1138 findStarsInField, :1514 escalation accept-gate, :2786 projectCatalogToPixels). All 16 m6 verified keys therefore flip normally; the m6 flags do not enter the follow-up queue.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 19 review-rows referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "edges": [
+    {
+      "from": "boundary:arrow_seam",
+      "to": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "boundary:atlas_rows",
+      "to": "tools/atlas/verify_atlas_repro.mjs",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:arrow_seam",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:atlas_rows",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:fits_io",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:libraw_mem_image",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:rawler_cfa",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:seam_capsule",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:starplates_blobs",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:tauri_native_ipc",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:wgsl_structs",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/AtmosphericManager.ts",
+      "to": "src/engine/core/TimeService.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/ImageProcessor.ts",
+      "to": "src/engine/core/oklab.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/ImageProcessor.ts",
+      "to": "src/engine/pipeline/m2_hardware/scale_manager.ts",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/SkyTransform.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/SkyTransform.ts",
+      "to": "src/engine/core/optics_manager.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/StatisticsProvider.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/StatisticsProvider.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/camera_color_matrix.ts",
+      "to": "src/engine/core/ImageProcessor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/core/optics_manager.ts",
+      "to": "src/engine/core/optics_hint_provider.ts",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/events/capture_persist.ts",
+      "to": "src/engine/ui/widgets/widget_persist.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/events/capture_record.ts",
+      "to": "src/engine/events/capture_aggregate.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/events/capture_record.ts",
+      "to": "src/engine/events/capture_persist.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/events/pipeline_events.ts",
+      "to": "src/engine/events/capture_record.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/events/pipeline_events.ts",
+      "to": "src/engine/events/capture_record.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/events/pipeline_events.ts",
+      "to": "src/engine/events/stage_timing_summary.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/events/stage_timing_summary.ts",
+      "to": "src/engine/pipeline/stages/package.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/export/asdf_writer.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/tps_eval.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/export/asdf_writer.ts",
+      "to": "src/engine/pipeline/stages/receipt_serializer.ts",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/export/fits_writer.ts",
+      "to": "boundary:fits_io",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/nebulosity_layer.ts",
+      "to": "src/engine/pipeline/stages/package.ts",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_core.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_stage.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_core.ts",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "to": "src/engine/pipeline/stages/package.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "to": "src/engine/pipeline/stages/psf_characterize.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_physics.ts",
+      "to": "src/engine/pipeline/stages/psf_attribution.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_physics.ts",
+      "to": "src/engine/pipeline/stages/psf_attribution.ts",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_physics.ts",
+      "to": "src/engine/pipeline/stages/science.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_stage.ts",
+      "to": "src/engine/pipeline/orchestrator_session.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/rl_deconv.ts",
+      "to": "src/engine/pipeline/m10_psf/nebulosity_layer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/rl_deconv.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_stage.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "to": "src/engine/pipeline/m8_photometry/spcc_calibrator.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/format_registry.ts",
+      "to": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "to": "src/engine/pipeline/m1_ingestion/fits_decoder.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "to": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "to": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+      "to": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+      "to": "src/engine/pipeline/m2_hardware/lens_profiles.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/optics_resolver.ts",
+      "to": "src/engine/core/optics_manager.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/optics_resolver.ts",
+      "to": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/AtmosphericPhysics.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/CelestialStructures.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/TerrestrialEnvironment.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_cuts.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_cuts.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/source_extractor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_flatten.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_guard.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_guard.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/hot_pixel_map.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/hot_pixel_map.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/source_extractor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/source_extractor.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/confirm_status.ts",
+      "to": "src/engine/pipeline/stages/package.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/detection_cuts.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/fdr_confirm.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/tps_eval.ts",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+      "to": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+      "to": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+      "to": "src/engine/pipeline/m2_hardware/lens_distortion_refit.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/orchestrator_session.ts",
+      "to": "src/engine/pipeline/stages/ingest.ts",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/calibrate.ts",
+      "to": "src/engine/pipeline/m2_hardware/hardware_profiler.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/calibrate.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/calibrate.ts",
+      "to": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/detect.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/detect.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/ingest.ts",
+      "to": "src/engine/core/ImageProcessor.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/ingest.ts",
+      "to": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/ingest.ts",
+      "to": "src/engine/pipeline/m3_gpu_preprocess/demosaic_pipeline.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/metrology.ts",
+      "to": "src/engine/core/optics_manager.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/metrology.ts",
+      "to": "src/engine/pipeline/m2_hardware/optics_resolver.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/metrology.ts",
+      "to": "src/engine/pipeline/m7_astrometry/metrology.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/package.ts",
+      "to": "src/engine/contracts/binary_layouts.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/package.ts",
+      "to": "src/engine/pipeline/stages/schema_versions.ts",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/psf_characterize.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/psf_characterize.ts",
+      "to": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/science.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_physics.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/science.ts",
+      "to": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/science.ts",
+      "to": "src/engine/pipeline/m8_photometry/spcc_calibrator.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/solve.ts",
+      "to": "src/engine/events/pipeline_events.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/solve.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/hint_resolver.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/pipeline/stages/solve.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/ForensicCalibrationStep.tsx",
+      "to": "src/engine/ui/calibration/CalibrationCharts.tsx",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/ForensicCalibrationStep.tsx",
+      "to": "src/engine/ui/calibration/quiver_model.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/hooks/usePipelineEvents.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/hooks/usePipelineFSM.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/pipeline/m2_hardware/lens_profiles.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/pipeline/orchestrator_session.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/calibration/CalibrationCharts.tsx",
+      "to": "src/engine/ui/calibration/chart_math.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/calibration/quiver_model.ts",
+      "to": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/calibration/quiver_model.ts",
+      "to": "src/engine/ui/calibration/chart_math.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/dashboard/replay/replay_state.ts",
+      "to": "src/engine/events/capture_record.ts",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/utils/save_asdf.ts",
+      "to": "src/engine/pipeline/export/asdf_writer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/pipeline/export/asdf_writer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/pipeline/export/fits_writer.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/pipeline/export/fits_writer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/pipeline/stages/receipt_serializer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/ui/dashboard/solve_queue/connectors.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/utils/save_fits.ts",
+      "to": "src/engine/pipeline/export/fits_writer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "src/engine/ui/utils/save_packet.ts",
+      "to": "src/engine/pipeline/stages/receipt_serializer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "boundary:fits_io",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "src/engine/pipeline/orchestrator_session.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "stage:calibrate",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "tools/community/push_solve.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/run.mjs",
+      "to": "tools/api/solve_to_receipt.runspec.ts",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/solve_to_receipt.runspec.ts",
+      "to": "src/engine/pipeline/constants/pipeline_config.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/solve_to_receipt.runspec.ts",
+      "to": "src/engine/pipeline/stages/receipt_serializer.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/solve_to_receipt.runspec.ts",
+      "to": "src/engine/pipeline/stages/workbench_deposit.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/stage_replay.replayspec.ts",
+      "to": "boundary:seam_capsule",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/api/stage_replay.replayspec.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/atlas/rebucket_sectors.mjs",
+      "to": "tools/atlas/merge_hyg_sectors.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/atlas/verify_atlas_repro.mjs",
+      "to": "boundary:atlas_rows",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/atlas/verify_atlas_repro.mjs",
+      "to": "tools/atlas/merge_hyg_sectors.mjs",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/corpus/run_corpus.mjs",
+      "to": "boundary:atlas_rows",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/corpus/run_corpus.mjs",
+      "to": "boundary:libraw_mem_image",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/corpus/run_corpus.mjs",
+      "to": "tools/corpus/ledger.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/dslr/dump_cr2_solveframe.mjs",
+      "to": "tools/dslr/uw_solve.uwspec.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/dslr/uw_solve.uwspec.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/e2e/lib.mjs",
+      "to": "src/engine/pipeline/orchestrator_session.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/e2e/run_wizard_carina.mjs",
+      "to": "stage:extract.detect",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/e2e/run_wizard_cr2.mjs",
+      "to": "stage:calibrate",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/e2e/run_wizard_cr2.mjs",
+      "to": "stage:solve",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/e2e/run_wizard_cr2_export.mjs",
+      "to": "stage:package",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/e2e/run_wizard_seestar.mjs",
+      "to": "stage:solve",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/psf/corrections.mjs",
+      "to": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/psf/decode_cr2.mjs",
+      "to": "tools/psf/measure_and_clean.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/psf/solution_to_astrometry.mjs",
+      "to": "tools/psf/corrections.mjs",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/stack/fits_io.mjs",
+      "to": "tools/stack/stack.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/stack/solve_lib.mjs",
+      "to": "boundary:atlas_rows",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/stack/solve_lib.mjs",
+      "to": "tools/stack/stack.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/stack/stack.mjs",
+      "to": "tools/psf/imaging.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    },
+    {
+      "from": "tools/stack/stack.mjs",
+      "to": "tools/stack/fits_io.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "haiku cross-check (two-model rule, owner 2026-07-16)"
+    }
+  ]
+}

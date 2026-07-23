@@ -1,0 +1,343 @@
+{
+  "fragment": "wave2_export-events",
+  "derived_by": "opus wave-2 writer (domain: src/engine/pipeline/export/ + src/engine/events/)",
+  "notes": [
+    "Domain-exclusive: every edge below has a FROM node in src/engine/pipeline/export/ or src/engine/events/. TO nodes may be any base node (package.ts, tps_eval.ts, receipt_serializer.ts, widget_persist.ts, boundary:fits_io are all base nodes, confirmed).",
+    "The three already-taken export edges (loud_edges_c) are NOT restated: fits_writer->boundary:fits_io[data-flow], sip_convention->fits_writer[unit-conversion], sip_convention->asdf_writer[unit-conversion]. My fits_writer->boundary:fits_io edge is [control] (the FITTED-only refusal gate) — a distinct (from,to,type) key, distinct semantic.",
+    "DRIFT (routed to orchestrator — stage_timing_summary.ts is in my lane but the fix is a doc edit): stage_timing_summary.ts:24-26 asserts 'RECEIPT-INERT: the summary is a SIDECAR. It is never folded into the receipt (receipts stay IEEE byte-identical...)'. This is STALE — package.ts DECLARES `stage_timings: StageTimingSummary | null` as a receipt field (interface NoSolveReceipt :845) and ASSIGNS `stage_timings: i.stageTimings` in the receipt builders (:1091 and the sibling builder). The adjacent stage_records comment (package.ts:1081-1082) states the correct reconciliation: these blocks ARE in the receipt but are ENVELOPE-class (wall-clock ms), so OUTSIDE the byte-identity contract (stripped before the apispec byte-compare, like solve_time_ms). stage_records.ts:20-27 already phrases this correctly ('ENVELOPE-CLASS ... outside the byte-identical scientific-field contract'); stage_timing_summary.ts should say the same instead of 'never folded into the receipt'.",
+    "No ASDF serialization boundary node exists in dag_base (binary_layouts enumerates fits_io but not asdf), so asdf_writer's byte-emission boundary edges (little-endian block guard, ASDF 1.6.0 header) are unexpressed as node-to-node edges and captured in the asdf_writer WHY instead.",
+    "buildGwcs's honest-absent fallback (gwcs null when unsolved or a required keyword non-finite -> only the labeled wcs_fits fallback is emitted) and the buildLensDistortion/buildSourceProvenance honest-absent slots are INTRA-module branches, not cross-node edges; folded into the asdf_writer WHY.",
+    "The CRPIX+1 pixel-index conversion and the 'must NOT re-multiply CRVAL by 15' double-conversion trap in fits_writer are ALREADY carried by the taken fits_writer->boundary:fits_io[data-flow] how (loud_edges_c) — not duplicated here; the fits_writer WHY restates the trap for the module-level reader.",
+    "Two edges share FROM=pipeline_events.ts to capture_record.ts (one [data-flow] = the buffered event stream, one [control] = the run_finished flush trigger + frame_sha write-race barrier). Distinct keys, distinct semantics.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 1 node-decl + 2 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "src/engine/events/pipeline_events.ts": {
+      "why": {
+        "text": "The typed pipeline event bus and its event union (run/stage begin-end-progress, findings, warnings, provenance changes). The bus stamps each emitted event with t/seq plus the per-run runId/frameSha context and fans out to subscribers behind a per-subscriber try/catch, so a throwing subscriber can never break emission or starve others; a ring-buffer history lets late subscribers replay. Without it every downstream fold goes dark: the capture record, stage_records, stage_timings, the solve flowchart, and the UI event feed all consume this one stream.",
+        "cites": [
+          {
+            "path": "src/engine/events/pipeline_events.ts",
+            "lines": "99-124"
+          },
+          {
+            "path": "src/engine/events/pipeline_events.ts",
+            "lines": "176-213"
+          }
+        ]
+      }
+    },
+    "src/engine/events/capture_record.ts": {
+      "why": {
+        "text": "Turns the ephemeral event ring into a durable per-stage capture record (one CaptureEnvelope per stage per run) that the interactive flowchart and replay dashboard consume. CaptureRecorder is a non-fatal bus subscriber; on run_finished it builds the record and stores it in the bounded in-memory ring, mirrors it to a guarded window object, and invokes every registered sink. The frame_sha write-race barrier (awaitFrameSha) holds the flush until the async content-hash digest settles, so a fast run never persists a record with a null dedup key. Without it the flowchart/replay substrate and persisted run history have no per-stage data, and dedup integrity breaks on quick solves.",
+        "cites": [
+          {
+            "path": "src/engine/events/capture_record.ts",
+            "lines": "31-56"
+          },
+          {
+            "path": "src/engine/events/capture_record.ts",
+            "lines": "197-271"
+          }
+        ]
+      }
+    },
+    "src/engine/events/capture_aggregate.ts": {
+      "why": {
+        "text": "Folds many per-run capture records into the solve-flowchart's hover statistics (per-stage reached/passed/failed and fastest-average-slowest timing over successful solves). Deduped by frame content hash per the owner mandate that repeat runs of one frame must not skew the stats; a null sha is counted distinct (never merged) and flagged. Honest-or-absent: a stage with no timing sample yields null min/avg/max, rendered NOT MEASURED. Without it the flowchart's aggregate view has no source and repeat-run skew would corrupt the pass/fail rates.",
+        "cites": [
+          {
+            "path": "src/engine/events/capture_aggregate.ts",
+            "lines": "28-61"
+          },
+          {
+            "path": "src/engine/events/capture_aggregate.ts",
+            "lines": "105-165"
+          }
+        ]
+      }
+    },
+    "src/engine/events/capture_persist.ts": {
+      "why": {
+        "text": "Mirrors each completed run into a versioned, bounded localStorage blob so the flowchart's local aggregate spans every run this box has seen across reloads and sessions, not just the in-memory ring. Pure consumer of the capture pipeline: it registers a sink and reads the in-memory store, never touching emission or the solve. Versioned (a schema bump invalidates a stale blob instead of crashing the aggregate), bounded (oldest runs dropped past the cap), and non-fatal (a corrupt blob degrades to an empty sample). Without it the local flowchart aggregate resets to in-memory-only runs on every reload.",
+        "cites": [
+          {
+            "path": "src/engine/events/capture_persist.ts",
+            "lines": "31-79"
+          },
+          {
+            "path": "src/engine/events/capture_persist.ts",
+            "lines": "97-110"
+          }
+        ]
+      }
+    },
+    "src/engine/events/stage_timing_summary.ts": {
+      "why": {
+        "text": "Pure fold over the run's event stream into one per-run timing summary: a per-stage ms map plus a total wall span computed as max(stage_end) - min(stage_start) (a SPAN basis, not the sum of stage ms, so nested stages like the calibrate umbrella wrapping psf_field/bc_rematch/forced_confirm are never double-counted and the browser and headless consumers compute an identical comparable total). It is the substrate that finally persists a clocked per-substage number (efficiency review flagged that this timing was computed every run then discarded). It is persisted to a perf JSONL sidecar by the headless/e2e consumers and also carried on the receipt as the envelope-class stage_timings block. Without it every perf claim stays structural/inferred rather than clocked.",
+        "cites": [
+          {
+            "path": "src/engine/events/stage_timing_summary.ts",
+            "lines": "45-75"
+          },
+          {
+            "path": "src/engine/events/stage_timing_summary.ts",
+            "lines": "96-129"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/export/sip_convention.ts": {
+      "why": {
+        "text": "The single place the engine's internal SIP convention (A_internal = OBSERVED - IDEAL, as stored on receipt.solution.astrometry.sip) is negated to the FITS-standard forward convention (A_FITS = IDEAL - OBSERVED = -A_internal). A pure coefficient negation that returns a fresh block and never mutates the receipt; imported by BOTH export serializers so neither can re-derive the sign wrong. Without it (the pre-fix M7 bug) the raw internal coefficients get emitted as FITS A_i_j and astropy applies the distortion backwards, WORSENING catalog residuals instead of improving them; in-app consumers use the internal convention end-to-end and must not be touched.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/export/sip_convention.ts",
+            "lines": "10-54"
+          },
+          {
+            "path": "src/engine/pipeline/export/sip_convention.ts",
+            "lines": "85-92"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/export/fits_writer.ts": {
+      "why": {
+        "text": "The one dependency-free FITS serializer (desktop, browser and headless all run this same serializeFits). It consumes receipt.wcs VERBATIM (already degrees, CD in deg/px, 0-based crpix per generateReceiptWcs) so it must never re-multiply CRVAL by 15 (a double conversion); the only coordinate arithmetic is CRPIX+1 to reach FITS 1-based. It enforces the export law (refuses an absent or non-FITTED WCS, and any non-finite WCS keyword), runs SIP coefficients through toFitsSip so a reader corrects toward the catalog, and preserves NaN as the FITS blank (differs from the stacker's 0-fill). Without it there is no FITS export, or a corrupt / backwards-distortion / double-scaled WCS if the unit and SIP-sign traps are re-broken.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/export/fits_writer.ts",
+            "lines": "20-54"
+          },
+          {
+            "path": "src/engine/pipeline/export/fits_writer.ts",
+            "lines": "99-153"
+          },
+          {
+            "path": "src/engine/pipeline/export/fits_writer.ts",
+            "lines": "204-234"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/export/asdf_writer.ts": {
+      "why": {
+        "text": "The one dependency-free ASDF serializer (desktop, browser and headless all run this same serializeAsdf): the image as a little-endian binary block plus the full receipt as YAML, plus a native astropy-interpretable GWCS transform (LINEAR + SIP, or a TPS tabular lookup when a spline is fitted). Honest-or-absent: the WCS blocks are absent when unsolved, and a present-but-non-FITTED WCS refuses loudly while an absent one is allowed (the asymmetry vs fits_writer is deliberate - ASDF is the full-receipt carrier, FITS the solved-science carrier). Both distortion carriers export the FITS/astropy sign direction (SIP via toFitsSip; the TPS tabular LUT bakes u - f using the fitter's own evalTpsField so nothing drifts). Without it there is no ASDF/GWCS export, or a backwards distortion if the u - f sign is re-broken.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/export/asdf_writer.ts",
+            "lines": "26-58"
+          },
+          {
+            "path": "src/engine/pipeline/export/asdf_writer.ts",
+            "lines": "144-165"
+          },
+          {
+            "path": "src/engine/pipeline/export/asdf_writer.ts",
+            "lines": "579-627"
+          }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/pipeline/export/fits_writer.ts",
+      "to": "boundary:fits_io",
+      "type": "control",
+      "cite": "src/engine/pipeline/export/fits_writer.ts:101",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "EXPORT LAW gate: serializeFits THROWS (writes no bytes across the FITS boundary) unless receipt.wcs is present AND receipt.wcs.SOURCE === 'FITTED' — a SYNTHESIZED approximation is never emitted as if it verified stars. It further refuses a non-finite WCS keyword or a shape/length mismatch, so a corrupt or WCS-less file is never produced. This is the honest-or-absent gate deciding whether the fits_io boundary is crossed at all; the sibling taken edge (loud_edges_c) is the data-flow WHEN it is crossed.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/export/fits_writer.ts",
+            "lines": "99-123"
+          },
+          {
+            "path": "src/engine/pipeline/export/fits_writer.ts",
+            "lines": "368-373"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/export/asdf_writer.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/tps_eval.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/export/asdf_writer.ts:612",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: fitted TPS block (control_points [u,v] pairs, weights_x, weights_y, scale, affine.dx/dy) + frame dims + receipt crpix; out: two 24x24 float64 Tabular2D lookup tables of corrected pixel-offset coordinates on a frame-spanning (u,v) grid",
+        "transform": "buildTpsCorrection samples the LIVE fitted spline via evalTpsField (the IDENTICAL evaluator the fitter used, shared through tps_eval so nothing drifts) at each grid node, baking u' = u - f_dx(u/scale,v/scale), v' = v - f_dy(...) — the SUBTRACTION is the sign fix (the direct Tabular2D output IS the coordinate fed to CD, so it must hold the IDEAL offset)",
+        "lossy": true
+      },
+      "why": {
+        "text": "SIGN (same fix as SIP): the fitted field f reproduces the internal residual dx = OBSERVED - IDEAL (tps_fitter convention). Because the gwcs Tabular2D is a direct lookup with no implicit add, the table must hold IDEAL = OBSERVED - (OBSERVED - IDEAL) = u - f; emitting u + f applied the distortion backwards and worsened the astropy-applied residuals. Lossy: the smooth spline is discretized to a 24x24 grid (exact AT the nodes, where the fidelity gate evaluates).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/export/asdf_writer.ts",
+            "lines": "556-577"
+          },
+          {
+            "path": "src/engine/pipeline/export/asdf_writer.ts",
+            "lines": "603-620"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/export/asdf_writer.ts",
+      "to": "src/engine/pipeline/stages/receipt_serializer.ts",
+      "type": "contract",
+      "cite": "src/engine/pipeline/export/asdf_writer.ts:60",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the DROPPED_KEYS Set (heavy typed-array receipt keys the JSON serializer strips)",
+        "transform": "asdf_writer's sanitize() skips any key in DROPPED_KEYS while normalizing the receipt into YAML-safe values, so the ASDF YAML tree and the JSON receipt agree on exactly which heavy keys are stripped",
+        "lossy": false
+      },
+      "why": {
+        "text": "Sharing DROPPED_KEYS from the JSON serializer is what keeps the two receipt serializations consistent: a key added to the JSON drop-list is automatically stripped from the ASDF YAML too, so the ASDF metadata tree never re-embeds a heavy typed array the JSON receipt intentionally omitted.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/export/asdf_writer.ts",
+            "lines": "737-757"
+          },
+          {
+            "path": "src/engine/pipeline/stages/receipt_serializer.ts",
+            "lines": "20-34"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/events/pipeline_events.ts",
+      "to": "src/engine/events/capture_record.ts",
+      "type": "data-flow",
+      "cite": "src/engine/events/capture_record.ts:224",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the stamped PipelineEvent stream (run_started/stage_started/stage_finished{ok,ms,verdict?,counts?,payloadRef?}/warning/run_finished, each carrying EventStamp {t, seq, runId, frameSha})",
+        "transform": "CaptureRecorder subscribes to the bus and buffers events per run (reset on run_started), then on run_finished builds the per-stage envelopes; the buffer is a raw copy of the emitted events",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/events/pipeline_events.ts",
+      "to": "src/engine/events/capture_record.ts",
+      "type": "control",
+      "cite": "src/engine/events/capture_record.ts:255",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "run_finished is the FLUSH TRIGGER (it snapshots the buffered events and builds/stores/sinks the capture record). The frame_sha write-race barrier orders that flush: awaitFrameSha holds the flush until the async content-hash digest settles (on either fate), so a run that reaches run_finished before the digest resolves does not persist a record with a null dedup key. The barrier defaults settled, so an unarmed run (raw-bus tests, pre-hashed path) flushes synchronously, byte-identical to the pre-fix behavior.",
+        "cites": [
+          {
+            "path": "src/engine/events/capture_record.ts",
+            "lines": "236-266"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/events/capture_record.ts",
+      "to": "src/engine/events/capture_aggregate.ts",
+      "type": "data-flow",
+      "cite": "src/engine/events/capture_aggregate.ts:116",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "CaptureEnvelope[][] — one inner array per run (run_id, frame_sha, stage_id, seq, t_start, t_end, ms, ok, verdict, counts, warnings, payload_ref)",
+        "transform": "aggregateCaptureRuns dedups by frame content hash (latest run of a frame wins; a null sha never merges) then rolls up per-stage reached/passed/failed and min/avg/max ms over successful-solve frames only",
+        "lossy": true
+      },
+      "why": {
+        "text": "The dedup key is the OWNER-mandated frame_sha: multiple runs of one frame must collapse to its latest run so the flowchart's pass/fail and timing stats are not skewed by re-runs. Lossy by design — many envelopes reduce to per-stage aggregates.",
+        "cites": [
+          {
+            "path": "src/engine/events/capture_aggregate.ts",
+            "lines": "10-22"
+          },
+          {
+            "path": "src/engine/events/capture_aggregate.ts",
+            "lines": "116-124"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/events/capture_record.ts",
+      "to": "src/engine/events/capture_persist.ts",
+      "type": "data-flow",
+      "cite": "src/engine/events/capture_record.ts:312",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "(runId: string, envelopes: CaptureEnvelope[], rawEvents) delivered through the CaptureSink callback registered by installCapturePersistSink",
+        "transform": "CaptureRecorder.flush invokes every registered sink after storing/mirroring; capture_persist's sink calls persistRun to mirror the envelopes to localStorage. Each sink runs inside its own try/catch so one sink's failure never breaks the run",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/events/capture_persist.ts",
+      "to": "src/engine/ui/widgets/widget_persist.ts",
+      "type": "data-flow",
+      "cite": "src/engine/events/capture_persist.ts:78",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a versioned PersistedRunMap (runId -> CaptureEnvelope[]) under key 'skycruncher.capture.runs' at CAPTURE_PERSIST_VERSION=1, bounded to PERSIST_RUNS_CAP=60 runs (oldest dropped first)",
+        "transform": "persistRun writes the map via writeVersioned; loadPersistedRunMap reads it via readVersioned with a structural guard, degrading a stale-version or corrupt blob to {} (non-fatal, honest-absent) rather than throwing",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/events/pipeline_events.ts",
+      "to": "src/engine/events/stage_timing_summary.ts",
+      "type": "data-flow",
+      "cite": "src/engine/events/stage_timing_summary.ts:117",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the PipelineEvent stream — run_started (source_format), run_finished (ok), and every stage_finished {stage, ms, t}",
+        "transform": "summarizeStageTimings does one linear pass filling stages[stage]=ms and tracking span endpoints (start = t - ms); total_ms = max(end) - min(start), a SPAN basis (not the sum of stage ms) so nested stages are not double-counted and browser vs headless compute an identical total",
+        "lossy": true
+      },
+      "why": {
+        "text": "The span basis (max end minus min start) rather than summing per-stage ms is the load-bearing choice: the calibrate umbrella wraps psf_field/bc_rematch/forced_confirm, so summing would double-count. Using t - ms as each stage's start lets the fold reconstruct the wall span from durations alone, keeping the block free of nondeterministic epoch timestamps.",
+        "cites": [
+          {
+            "path": "src/engine/events/stage_timing_summary.ts",
+            "lines": "60-68"
+          },
+          {
+            "path": "src/engine/events/stage_timing_summary.ts",
+            "lines": "117-129"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/events/stage_timing_summary.ts",
+      "to": "src/engine/pipeline/stages/package.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/package.ts:1091",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "StageTimingSummary {v, run_id, frame_sha, source_format, decoder_arm, ok, n_stages, total_ms, stages{}} supplied as packageInput.stageTimings",
+        "transform": "the receipt builders assign receipt.stage_timings = i.stageTimings on BOTH the solved and no-solve receipts — an ENVELOPE-class block (wall-clock ms), outside the byte-identity contract",
+        "lossy": false
+      },
+      "why": {
+        "text": "CONTRADICTS the stage_timing_summary.ts docstring claim 'RECEIPT-INERT ... never folded into the receipt' (see fragment DRIFT note): package.ts DOES carry the summary on the receipt as the envelope-class stage_timings field (declared on NoSolveReceipt :845, assigned in the builders). It is additionally persisted to a perf JSONL sidecar by the headless/e2e consumers; the docstring should say envelope-class-on-receipt (like stage_records.ts), not receipt-inert.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "845"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "1091"
+          }
+        ]
+      }
+    }
+  ]
+}

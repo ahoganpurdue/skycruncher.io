@@ -1,0 +1,18 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "popout",
+  "description": "DASHBOARD_DOCKING_SPEC Phase C — dashboard panel popout windows. ADDITIVE beside default.json (which is scoped to 'main' only). Scoped to BOTH the host window ('main') and every popout ('popout-*'): a popout window is NOT covered by default.json's ['main'] scope, so WITHOUT this file every listen/emit/close call inside a popout is ACL-denied (Phase A finding). The two genuinely-new permissions vs core:default are core:webview:allow-create-webview-window (window creation is security-gated, NOT in core:default) and core:webview:allow-get-all-webviews (enumerate live windows; exact id — NOT '...-webview-windows'). The event permissions are re-granted here because the popout window does not inherit default.json's core:default. No fs/dialog/updater — popouts are pure render-plane subscribers.",
+  "windows": [
+    "main",
+    "popout-*"
+  ],
+  "permissions": [
+    "core:webview:allow-create-webview-window",
+    "core:webview:allow-get-all-webviews",
+    "core:window:allow-close",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:event:allow-emit",
+    "core:event:allow-emit-to"
+  ]
+}

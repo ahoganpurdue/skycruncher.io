@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "build": {
+    "devUrl": "http://localhost:3260",
+    "beforeDevCommand": "npm run dev -- --port 3260 --strictPort"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "SkyCruncher — Desktop Test Rail v0",
+        "url": "index.html#/testrail",
+        "width": 1100,
+        "height": 780,
+        "resizable": true,
+        "fullscreen": false,
+        "dragDropEnabled": false
+      }
+    ]
+  }
+}

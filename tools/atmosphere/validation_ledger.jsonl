@@ -1,0 +1,1 @@
+{"ts":"2026-07-09T12:01:02.239Z","frame":"sample_observation.cr2","vertical":"flux","band":"GaiaG","verdict":"ZENITH_REFUSED","fitted":{"ra_z_h":14.368,"dec_z_deg":-80.149,"boresight_off_deg":49.87,"dX":1.434,"k_measured":true},"truth":null,"error_deg":null,"sigma_claimed_deg":13.939,"note":"no EXIF-GPS truth on this frame; recorded for the ledger, not scored"}

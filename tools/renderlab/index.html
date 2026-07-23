@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Render Lab — WebGPU incubator</title>
+  <link rel="stylesheet" href="./tokens.css">
+  <style>
+    /* Layout only — all color/type comes from tokens.css (copied app tokens). */
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--space-950);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      overflow: hidden;
+    }
+    #gpu-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      cursor: grab;
+    }
+    #gpu-canvas.dragging { cursor: grabbing; }
+
+    /* HUD — mono readout, honest numbers or "--". */
+    #hud {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      margin: 0;
+      padding: 10px 14px;
+      background: color-mix(in srgb, var(--space-900) 82%, transparent);
+      border: 1px solid var(--line-subtle);
+      border-radius: 4px;
+      color: var(--data);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.55;
+      font-feature-settings: "tnum" 1, "zero" 1;
+      pointer-events: none;
+      white-space: pre;
+      user-select: none;
+    }
+
+    #controls {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: 250px;
+      padding: 12px;
+      background: color-mix(in srgb, var(--space-900) 88%, transparent);
+      border: 1px solid var(--line-subtle);
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    #controls .row { display: flex; gap: 6px; }
+    #controls button {
+      flex: 1;
+      padding: 6px 0;
+      background: var(--space-800);
+      color: var(--text-secondary);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+    #controls button.active {
+      background: var(--space-700);
+      color: var(--accent-300);
+      border-color: var(--accent-600);
+    }
+    #controls label {
+      display: block;
+      margin: 12px 0 4px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    #controls input[type="range"] { width: 100%; accent-color: var(--accent-500); }
+    #controls .note {
+      margin: 10px 0 0;
+      color: var(--text-muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+    #controls .note strong { color: var(--warn); font-weight: 600; }
+
+    /* CASCADE 2×2 pane labels — peak px per stage or NOT MEASURED (LAW 3). */
+    #cascade-overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      pointer-events: none;
+    }
+    #cascade-overlay .pane { position: relative; }
+    #cascade-overlay .pane-label {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      max-width: min(44ch, calc(100% - 24px));
+      padding: 6px 10px;
+      background: color-mix(in srgb, var(--space-900) 82%, transparent);
+      border: 1px solid var(--line-subtle);
+      border-radius: 4px;
+      color: var(--data);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.5;
+      font-feature-settings: "tnum" 1, "zero" 1;
+      white-space: pre-wrap;
+      user-select: none;
+    }
+    #cascade-overlay .pane-label.absent { color: var(--warn); }
+    #cascade-overlay .pane-label:empty { display: none; }
+
+    /* CASCADE honest-absent state — no receipt, visible setup instructions. */
+    #cascade-missing {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      text-align: center;
+      pointer-events: none;
+    }
+    #cascade-missing h2 {
+      max-width: 46rem;
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--warn);
+      line-height: 1.5;
+    }
+    #cascade-missing p {
+      max-width: 44rem;
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    #cascade-missing pre {
+      max-width: 44rem;
+      margin: 0;
+      padding: 10px 14px;
+      background: var(--space-850);
+      border: 1px solid var(--line-subtle);
+      border-radius: 4px;
+      color: var(--data);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      text-align: left;
+      overflow-x: auto;
+      pointer-events: auto;
+      user-select: text;
+    }
+    #cascade-missing code {
+      font-family: var(--font-mono);
+      color: var(--data);
+      background: var(--space-800);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* Honest fallback — shown instead of a blank canvas when WebGPU is absent. */
+    #fallback {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      background: var(--space-950);
+      text-align: center;
+      z-index: 10;
+    }
+    #fallback h1 {
+      max-width: 46rem;
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--warn);
+      line-height: 1.5;
+    }
+    #fallback p {
+      max-width: 40rem;
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    #fallback code {
+      font-family: var(--font-mono);
+      color: var(--data);
+      background: var(--space-800);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gpu-canvas"></canvas>
+
+  <pre id="hud">booting…</pre>
+
+  <div id="controls">
+    <div class="row">
+      <button id="mode-star" class="active" type="button">STARFIELD</button>
+      <button id="mode-quiver" type="button">QUIVER</button>
+      <button id="mode-cascade" type="button">CASCADE</button>
+    </div>
+
+    <div id="quiver-controls" hidden>
+      <label for="nslider">arrows: <span id="nval">10,000</span></label>
+      <input id="nslider" type="range" min="0" max="300" step="1" value="200">
+      <p class="note"><strong>SYNTHETIC</strong> residual field — generated for
+        GPU load testing, not real solver residuals.</p>
+    </div>
+
+    <div id="cascade-controls" hidden>
+      <div class="row">
+        <button id="surf-fill" class="active" type="button">FILL</button>
+        <button id="surf-wire" class="active" type="button">WIRE</button>
+      </div>
+      <label for="gridslider">grid: <span id="gridval">96×96</span></label>
+      <input id="gridslider" type="range" min="32" max="256" step="32" value="96">
+      <p class="note">2×2 panes of |displacement| px from a <strong>REAL</strong>
+        receipt's fitted distortion models, each normalized to its
+        <strong>own peak</strong> (annotated per pane). Display-only — no
+        solving. drag to orbit · wheel to zoom.</p>
+    </div>
+
+    <p class="note" id="star-note">star tint: <strong>ILLUSTRATIVE</strong>
+      bp_rp ramp — not photometric. drag to pan · wheel to zoom.</p>
+  </div>
+
+  <!-- CASCADE pane labels: real peak px per stage, or the honest NOT
+       MEASURED tile when the receipt lacks that stage (LAW 3). -->
+  <div id="cascade-overlay" hidden>
+    <div class="pane"><span class="pane-label" id="pane-label-0"></span></div>
+    <div class="pane"><span class="pane-label" id="pane-label-1"></span></div>
+    <div class="pane"><span class="pane-label" id="pane-label-2"></span></div>
+    <div class="pane"><span class="pane-label" id="pane-label-3"></span></div>
+  </div>
+
+  <!-- CASCADE honest-absent state: no receipt loaded. -->
+  <div id="cascade-missing" hidden>
+    <h2>no receipt loaded — the cascade has nothing honest to show</h2>
+    <p id="cascade-missing-reason"></p>
+    <p>Provide one (from the repo root, PowerShell — picks the newest e2e run):</p>
+    <pre>$latest = Get-ChildItem test_results\e2e -Directory | Sort-Object LastWriteTime | Select-Object -Last 1
+New-Item -ItemType Directory -Force tools\renderlab\data | Out-Null
+Copy-Item (Join-Path $latest.FullName 'receipt.json') tools\renderlab\data\receipt.json</pre>
+    <p>then reload this page (the dev server checks for the file per request —
+      no restart needed). <code>data/</code> is gitignored; never commit receipts.</p>
+  </div>
+
+  <div id="fallback" hidden>
+    <h1>WebGPU unavailable in this browser — the app&rsquo;s SVG/Canvas paths
+      remain the shipping renderer</h1>
+    <p id="fallback-reason"></p>
+    <p>This page is a standalone rendering incubator; nothing in the app depends
+      on it. To try it, use a browser with WebGPU enabled (Chrome/Edge 113+ on
+      up-to-date GPU drivers) and reload.</p>
+  </div>
+
+  <script type="module" src="./main.mjs"></script>
+</body>
+</html>

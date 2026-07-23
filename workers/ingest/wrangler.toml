@@ -1,0 +1,22 @@
+# [Module: community] SkyCruncher receipt-intake Worker — TEST/DEV tier.
+# Sole writer in front of the skycruncher-intake R2 bucket. R2 + KV are NATIVE
+# bindings (no credentials in code, ever). workers.dev subdomain for now.
+name = "skycruncher-ingest"
+main = "src/index.mjs"
+compatibility_date = "2026-07-01"
+workers_dev = true
+
+# R2 intake bucket (quarantine prefix; nothing serves it).
+[[r2_buckets]]
+binding = "INTAKE"
+bucket_name = "skycruncher-intake"
+
+# Per-IP quota counters (eventually-consistent; abuse floor, not billing).
+[[kv_namespaces]]
+binding = "QUOTA"
+id = "daaaa1baeaa74878994e1492c5c242c3"
+
+[vars]
+MAX_BYTES = "2097152"      # 2 MiB hard payload cap
+QUOTA_PER_HOUR = "60"
+QUOTA_PER_DAY = "500"

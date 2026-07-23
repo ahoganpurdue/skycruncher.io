@@ -1,0 +1,153 @@
+{
+  "schema_version": "0.0.0-FIXTURE",
+  "fixture": true,
+  "note": "DEVELOPMENT FIXTURE — hand-written sample enrichment for UI development ONLY. NOT extractor or verifier output; every text field is prefixed [FIXTURE]. Never copy into tools/dag/enrich/. The UI renders a loud FIXTURE banner whenever this file is the enrichment source.",
+  "generated_at_commit": "FIXTURE",
+  "nodes": {
+    "stage:solve": {
+      "why": { "text": "[FIXTURE] sample why-text for the solve stage — real why-texts come from the enrichment lane with line-cited evidence.", "cites": [{ "path": "src/engine/pipeline/stages/solve.ts", "lines": "1-40" }] },
+      "walked_by": ["CR2", "FITS"]
+    },
+    "stage:ingest": {
+      "why": { "text": "[FIXTURE] sample why-text for the ingest stage.", "cites": [{ "path": "src/engine/pipeline/stages/ingest.ts", "lines": "1-30" }] },
+      "walked_by": ["CR2", "FITS"]
+    },
+    "stage:package": {
+      "walked_by": ["JSON", "ASDF"]
+    },
+    "boundary:fits_io": {
+      "why": { "text": "[FIXTURE] FITS I/O is an enumerated LAW-7 boundary; degrees↔hours isolation lives at this seam.", "cites": [{ "path": "src/engine/contracts/binary_layouts.ts", "lines": "1-1" }] },
+      "walked_by": ["FITS"]
+    },
+    "src/engine/pipeline/orchestrator_session.ts": {
+      "walked_by": ["CR2", "FITS", "JSON"],
+      "badges": { "wrapper": "single live orchestrator" }
+    },
+    "tools/stack/fits_io.mjs": {
+      "walked_by": ["FITS"]
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/pipeline/orchestrator_session.ts",
+      "to": "src/engine/pipeline/stages/ingest.ts",
+      "type": "import",
+      "verification": "VERIFIED",
+      "walked_by": ["CR2", "FITS"],
+      "why": { "text": "[FIXTURE] verified sample: wizard step 1 calls the shared ingest stage.", "cites": [{ "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "58" }] }
+    },
+    {
+      "from": "src/engine/pipeline/orchestrator_session.ts",
+      "to": "src/engine/pipeline/stages/detect.ts",
+      "type": "import",
+      "verification": "STALE"
+    },
+    {
+      "from": "boundary:fits_io",
+      "to": "tools/stack/fits_io.mjs",
+      "type": "contract",
+      "verification": "REFUTED",
+      "why": { "text": "[FIXTURE] refuted sample — exercises the struck/red rendering only.", "cites": [] }
+    },
+    {
+      "from": "stage:ingest",
+      "to": "stage:calibrate",
+      "type": "ordering-only",
+      "verification": "VERIFIED",
+      "cite": "FIXTURE",
+      "why": { "text": "[FIXTURE] sample stage-order edge (this checkout's base has none — receipts are local-only).", "cites": [] }
+    },
+    {
+      "from": "stage:calibrate",
+      "to": "stage:detect",
+      "type": "ordering-only",
+      "verification": "VERIFIED",
+      "cite": "FIXTURE"
+    },
+    {
+      "from": "stage:detect",
+      "to": "stage:solve",
+      "type": "ordering-only",
+      "verification": "VERIFIED",
+      "cite": "FIXTURE"
+    },
+    {
+      "from": "stage:ingest",
+      "to": "stage:solve",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "walked_by": ["CR2", "FITS"],
+      "how": { "what": "[FIXTURE] detected star list", "transform": "[FIXTURE] pixel centroids → matching coordinates", "lossy": false },
+      "why": { "text": "[FIXTURE] sample semantic data-flow edge with a how payload.", "cites": [{ "path": "src/engine/pipeline/stages/solve.ts", "lines": "1-1" }] }
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:package",
+      "type": "unit-frame-conversion",
+      "verification": "VERIFIED",
+      "walked_by": ["JSON", "ASDF"],
+      "how": { "what": "[FIXTURE] crval RA", "transform": "[FIXTURE] HOURS (internal) → DEGREES (FITS boundary)", "lossy": false },
+      "why": { "text": "[FIXTURE] the loud layer: unit conversions render bright by spec.", "cites": [] }
+    },
+    {
+      "from": "stage:package",
+      "to": "boundary:fits_io",
+      "type": "receipt-write",
+      "verification": "EXTRACTED",
+      "walked_by": ["JSON"],
+      "how": { "what": "[FIXTURE] receipt blob", "transform": "[FIXTURE] in-memory session → serialized receipt", "lossy": true }
+    },
+    {
+      "from": "stage:calibrate",
+      "to": "stage:solve",
+      "type": "calibration-consumes",
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:detect",
+      "type": "control-gating",
+      "verification": "EXTRACTED",
+      "why": { "text": "[FIXTURE] sample gating edge: solve verdict gates re-detection.", "cites": [] }
+    },
+    {
+      "from": "stage:metrology",
+      "to": "stage:solve",
+      "type": "fallback-degradation",
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:reproducibility",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "walked_by": ["JSON"]
+    },
+    {
+      "from": "stage:receipt_schema",
+      "to": "stage:receipt_serializer",
+      "type": "inverse-pair",
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "tools/stack/fits_io.mjs",
+      "to": "stage:package",
+      "type": "duplication-shadow",
+      "verification": "EXTRACTED",
+      "why": { "text": "[FIXTURE] sample duplication edge — the corpus lane's own solve loop is the real-world case.", "cites": [] }
+    },
+    {
+      "from": "src/engine/pipeline/orchestrator_session.ts",
+      "to": "stage:schema_versions",
+      "type": "doc-binding",
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "stage:ingest",
+      "to": "tools/fixture/nonexistent_ghost.mjs",
+      "type": "external-dependency",
+      "verification": "EXTRACTED",
+      "why": { "text": "[FIXTURE] deliberately names a node the base does not have — exercises the unknown-endpoint flag path.", "cites": [] }
+    }
+  ]
+}

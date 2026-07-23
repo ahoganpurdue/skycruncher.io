@@ -1,0 +1,19 @@
+{
+  "name": "@skycruncher/librarian",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Documentation librarian — a card catalog (pointers, never a content oracle) over the repo's tracked docs. CLI-first incubator lane; LanceDB (Arrow-native) storage. NEVER import from the vite app bundle (native Node-only).",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "index": "node index_docs.mjs",
+    "index:code": "node index_code.mjs",
+    "index:reports": "node index_reports.mjs",
+    "query": "node query.mjs"
+  },
+  "dependencies": {
+    "@lancedb/lancedb": "0.31.0"
+  }
+}

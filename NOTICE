@@ -1,0 +1,118 @@
+SkyCruncher
+Copyright 2026 ahoganpurdue
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This NOTICE file aggregates the required third-party attributions for
+components this project links, bundles, ships, or builds against. The complete
+third-party documentation list lives in docs/LICENSING.md. Only shipped / redistributed components carry an attribution duty and
+are listed here.
+
+═══════════════════════════════════════════════════════════════════════════════
+WEAK-COPYLEFT COMPONENTS — attribution + source-offer duty
+═══════════════════════════════════════════════════════════════════════════════
+
+rawler 0.7.2 (dnglab)                     [docs/LICENSING.md]
+  License: LGPL-2.1(-only).
+  rawler is the DEFAULT shipped RAW decoder (since the 2026-07-11 cutover),
+  compiled statically into src/engine/wasm_decode's .wasm. It is used UNMODIFIED
+  (the tools/rawlab probe and the uuid `js`-feature shim are this project's, not
+  rawler edits). Per LGPL: the LGPL-2.1 license text is bundled, rawler/dnglab
+  are attributed, and a WRITTEN SOURCE OFFER is published for the wasm_decode
+  build — the rawler 0.7.2 pin plus the build steps enabling relink of a modified
+  version. rawler is kept behind a clean wasm-bindgen seam. Any fork or patch of
+  rawler must itself be published under LGPL.
+  Upstream: https://github.com/dnglab/dnglab (rawler crate)
+
+LibRaw (RAW-decode C++ core, in libraw-wasm 1.1.2)   [docs/LICENSING.md]
+  License: LGPL-2.1-only OR CDDL-1.0 (dual since v0.18). This project ELECTS
+  CDDL-1.0 to avoid the unsettled LGPL-static-into-WASM relink question (CDDL is
+  file-level weak copyleft with no relink duty). LibRaw is the COLD-PATH decoder
+  (VITE_DECODER_RAWLER=0) after the rawler cutover but is still shipped and runs
+  UNMODIFIED. Both the LGPL-2.1 and CDDL-1.0 license texts are bundled; LibRaw is
+  attributed and stated to be unmodified. Exact LibRaw version is inferred (>=0.18)
+  and not resolvable from the repo — noted as unresolved in LICENSING.md.
+  Upstream: https://www.libraw.org/  (via the libraw-wasm ISC wrapper glue)
+
+═══════════════════════════════════════════════════════════════════════════════
+PERMISSIVE COMPONENTS — attribution / NOTICE-retention duty (shipped)
+═══════════════════════════════════════════════════════════════════════════════
+
+apache-arrow 21.1.0 (JS)                  [docs/LICENSING.md]
+arrow / arrow-array / arrow-schema / arrow-buffer / arrow-ipc 54.3.1 (Rust)
+                                          [docs/LICENSING.md]
+  License: Apache-2.0.
+  Apache Arrow. Copyright 2016-2024 The Apache Software Foundation. This product
+  includes software developed at The Apache Software Foundation
+  (https://www.apache.org/). The Apache-2.0 NOTICE is retained and the express
+  patent grant applies; no copyleft.
+
+nalgebra 0.34.1                           [docs/LICENSING.md]
+  License: Apache-2.0. Attribution + NOTICE preservation + explicit patent grant.
+  Upstream: https://nalgebra.org/  (crate `nalgebra`)
+
+Tauri and Tauri plugins (@tauri-apps/api, plugin-dialog, plugin-fs,
+plugin-process, plugin-updater; Rust: tauri, tauri-plugin-*)
+                                          [docs/LICENSING.md]
+  License: Apache-2.0 OR MIT. Attribution; the Apache arm supplies the patent
+  grant. Observe the Tauri trademark guidelines for the product name/logo
+  (LICENSING.md Tauri trademark note).
+
+react 18.3.1, react-dom 18.3.1           [docs/LICENSING.md]
+  License: MIT. Copyright (c) Meta Platforms, Inc. and affiliates. Retain the
+  MIT copyright + license notice.
+
+exifr 7.1.3                               [docs/LICENSING.md]
+  License: MIT. Retain the copyright + license notice.
+
+libraw-wasm 1.1.2 (JS/WASM wrapper glue) [docs/LICENSING.md]
+  License: ISC (governs only the wrapper glue, NOT the LibRaw C++ — see above).
+
+lucide-react 0.300.0                      [docs/LICENSING.md]
+  License: ISC (MIT-equivalent). Icon set; retain the notice.
+
+serde / serde_json / serde-wasm-bindgen / js-sys / wasm-bindgen / uuid /
+console_error_panic_hook (Rust)           [docs/LICENSING.md]
+  License: MIT OR Apache-2.0 (serde-wasm-bindgen: MIT). Attribution; patent grant
+  via the Apache arm.
+
+═══════════════════════════════════════════════════════════════════════════════
+BUNDLED DATA & FONTS — credit / attribution duty (shipped)
+═══════════════════════════════════════════════════════════════════════════════
+
+Gaia DR3 catalog (derived star-atlas extract)   [docs/LICENSING.md]
+  Terms: ESA/Gaia open-data terms (no SPDX; free use, CREDIT REQUIRED).
+  This work has made use of data from the European Space Agency (ESA) mission
+  Gaia (https://www.cosmos.esa.int/gaia), processed by the Gaia Data Processing
+  and Analysis Consortium (DPAC, https://www.cosmos.esa.int/web/gaia/dpac/
+  consortium). Funding for the DPAC has been provided by national institutions,
+  in particular the institutions participating in the Gaia Multilateral Agreement.
+  Credit: ESA/Gaia/DPAC. A derived subset (ra/dec/mag_g/bp_rp/pm/source_id) is
+  redistributed as the bundled atlas sectors and referenced by exported science
+  receipts. No copyleft, no share-alike, no source-offer, no license-text bundling.
+
+  NOTE (HYG database — retired): the previously-bundled HYG faint-tail rows
+  (CC-BY-SA; see docs/LICENSING.md) are NO LONGER SHIPPED — the atlas sectors
+  are Gaia-pure since 2026-07-22, so the CC-BY-SA share-alike obligation is MOOT
+  for the current distribution.
+
+Inter + JetBrains Mono (self-hosted .woff2)     [docs/LICENSING.md]
+  License: SIL Open Font License 1.1 (OFL-1.1). Bundled unmodified; both declare
+  no Reserved Font Name. The OFL text ships alongside the fonts at
+  public/fonts/OFL.txt and is surfaced in the in-app licenses screen.
+
+═══════════════════════════════════════════════════════════════════════════════
+INSTALLER TOOLING (embedded in the distributed .exe)
+═══════════════════════════════════════════════════════════════════════════════
+
+NSIS (via the Tauri `nsis` bundle target)       [docs/LICENSING.md]
+  License: zlib/libpng (core); the LZMA compression module is CPL-1.0 (weak
+  copyleft on that module's source only); the bzip2 module is under the bzip2
+  license. No copyleft reaches this project's code; satisfied by pointing to the
+  unmodified upstream NSIS. Listed here for completeness.
+
+═══════════════════════════════════════════════════════════════════════════════
+See docs/LICENSING.md for the complete third-party documentation list.
+components such as lensfun, study-only references such as RawTherapee, the demo-
+image provenance action, and the standing licensing rules).
+═══════════════════════════════════════════════════════════════════════════════

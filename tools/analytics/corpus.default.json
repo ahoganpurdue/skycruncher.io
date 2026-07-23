@@ -1,0 +1,17 @@
+{
+  "schema": "analytics.corpus_manifest",
+  "schema_version": "1.0.0",
+  "description": "Default analytics corpus: the 2026-07-11 population run (blind solve) + its no-solve rerun + forensic dossiers, joined with the 2026-07-12 hinted-cocoon assisted-solve deposits. Paths are repo-relative or absolute (D:\\ artifact store); loadCorpus resolves relative paths against the repo root. ADDITIVE: append new runs' dirs/ledgers to these arrays when they land — never rewrite history.",
+  "receiptDirs": [
+    "D:/AstroLogic/test_artifacts/population_run_2026-07-11/receipts",
+    "D:/AstroLogic/test_artifacts/population_run_2026-07-11/nosolve_rerun/receipts"
+  ],
+  "ledgers": [
+    "test_results/population_run_2026-07-11/ledger_resolved.jsonl",
+    "test_results/population_run_2026-07-11/nosolve_rerun/ledger.jsonl"
+  ],
+  "dossierDir": "test_results/population_run_2026-07-11/dossiers/dossiers",
+  "envelopeLedgers": [
+    "test_results/hinted_cocoon_2026-07-12/ledger_envelope.jsonl"
+  ]
+}

@@ -1,0 +1,44 @@
+/* renderlab tokens — hex values COPIED from src/index.css (@theme block),
+   which is the single source of truth for the instrument aesthetic.
+   The lab may not import app CSS (LAW 4: zero app risk), so these are
+   deliberate duplicates. If src/index.css tokens change, re-copy by hand. */
+
+:root {
+  /* Surfaces (space ramp, darkest = page) */
+  --space-950: #05060a;
+  --space-900: #0a0c12;
+  --space-850: #0e1118;
+  --space-800: #131722;
+  --space-750: #191e2b;
+  --space-700: #212736;
+
+  /* Lines & borders */
+  --line-subtle: #1c2230;
+  --line: #2a3245;
+  --line-strong: #3d4763;
+
+  /* Text */
+  --text-primary: #e8ecf4;
+  --text-secondary: #9aa5bd;
+  --text-muted: #6a7792;
+  --text-faint: #3d4763;
+
+  /* Accent (instrument cyan) */
+  --accent-300: #7dd3fc;
+  --accent-400: #38bdf8;
+  --accent-500: #0ea5e9;
+  --accent-600: #0284c7;
+
+  /* Semantic status (earned, never decorative) */
+  --solve: #34d399;
+  --warn: #fbbf24;
+  --danger: #f87171;
+
+  /* Data readout */
+  --data: #c7d5f0;
+
+  /* Type — same stacks as the app; the lab does not ship the app's
+     self-hosted fonts, so system fallbacks in these stacks carry it. */
+  --font-sans: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", "Consolas", ui-monospace, monospace;
+}

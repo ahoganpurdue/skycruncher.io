@@ -1,0 +1,44 @@
+{
+  "name": "stage_replay_seams",
+  "description": "Stage-modular replay lane (SEAM_CONTRACT v1): for each frozen seam capsule, replay stage N from the post-(N-1) capsule and compare against the post-N capsule IEEE-exact (JSON deep-equal with Object.is per number; buffers sha256 then byte-equal). v1 replayable set only; NOT-YET stages deposit honest skip rows. seams_root defaults to <artifactRoot>/seams (the env.mjs Windows heavy-root default — storage law; the drive literal lives in env.mjs ONLY, enforced by env_test's grep criterion). Zero replayable rows => exit 3, never a fabricated green. Inner-loop tool (LAW 2): the full battery still runs at checkpoints.",
+  "manifest": { "source": "none", "comment": "capsule lane — rows enumerate <seams_root>/<frame_sha>/<seq>_<stage>/ dirs, not the corpus." },
+  "executor": "stage_replay",
+  "stages": ["m7_refine", "spcc", "psf_field", "psf_attribution", "bc_measure", "integrate"],
+  "volatile_fields": ["receipt.export_date", "psfField.timings"],
+  "volatile_fields_comment": "EXPLICIT declared whitelist of wall-clock / non-deterministic state paths masked by the stage-replay comparator (contract §2 determinism carve-out). receipt.export_date = new Date().toISOString() at buildReceipt (stages/package.ts:707), the integrate stage's only volatile leaf (solve_time_ms etc. are stored measurements, deterministic). psfField.timings = {fit_ms, seed_ms} wall-clock DURATIONS measured during THIS psf_field run (the psf measurements — fwhm/ellipticity/regions/approximate — are NOT masked and must match IEEE-exact). Masked paths are LOGGED per run (never a silent global fuzz); a declared-but-unhit entry is reported so a stale mask surfaces. NEVER add a real-divergence path here (those get instrumented + localized, not masked — e.g. spcc's PhotometryManager zeropoint stays RED). volatile_fields is GLOBAL (every row); for a divergence confined to ONE frame's ONE stage use scoped_volatile_fields instead.",
+  "scoped_volatile_fields": [
+    {
+      "frame": "bb3222e7",
+      "stage": "spcc",
+      "fields": ["spccBlock"],
+      "rationale": "CR2/spcc isolated-replay null-vs-absent artifact: greenfield merge reordered spcc seq 9->7; on non-FITS frames the isolated spcc no-op OMITS spccBlock where the full pipeline writes null. Solve byte-identical; capture-leg pins held. SeeStar spcc slices remain UNMASKED — real zeropoint divergences must stay RED. Scoped per orchestrator ruling 2026-07-21 (row-441 precedent); follow-up candidate: teach the isolated-replay executor explicit absent==null semantics at report-only optional blocks."
+    },
+    {
+      "frame": "85aaed5d",
+      "stage": "integrate",
+      "fields": ["receipt.compute_routes"],
+      "rationale": "Session-stamp isolated-replay artifact (THIRD null-vs-absent/populated class instance of 2026-07-21): compute_routes stamps accumulate on the SESSION (stamped at ingest, read by package.ts buildReceipt); the seq-14 calibrate capsule carries no route-stamp key, so isolated integrate replay structurally yields null where the full-pipeline capture stored array(len 2). DIAGNOSTIC METADATA only — compute_routes.ts:22 'never a measurement or a gate input'; all pre-integrate slices byte-identical; capture-leg pins held @2.16.0. Scoped per orchestrator ruling 2026-07-21 evening (spcc-mask analog, row-441 precedent); follow-up candidate: teach the capture/replay executor to carry session route stamps in the capsule."
+    },
+    {
+      "frame": "bb3222e7",
+      "stage": "integrate",
+      "fields": ["receipt.compute_routes"],
+      "rationale": "Same session-stamp isolated-replay artifact as the 85aaed5d integrate entry (see its rationale); scoped per the same orchestrator ruling 2026-07-21 evening."
+    },
+    {
+      "frame": "85aaed5d",
+      "stage": "integrate",
+      "fields": ["receipt.final_astrometry"],
+      "rationale": "Session-state isolated-replay artifact (FOURTH null-vs-absent/populated class instance, 2026-07-22 FINAL_ASTROMETRY train @a9ae04d8): the final_astrometry product accumulates on the SESSION (this.finalAstrometry, written by the terminal stage after forced_confirm, read by package.ts buildReceipt); the calibrate capsule carries no finalAstrometry key, so isolated integrate replay structurally yields null where the full-pipeline capture stored the object. The block's VALUES are pinned NON-NULL in BOTH sacred apispecs (solve_seestar/solve_cr2 assert refraction + RMS + n_stars exactly) — masking here hides only the structural null-vs-object, never the values. Scoped per orchestrator ruling 2026-07-22 (spcc/compute_routes analog, row-441 precedent); follow-up REGISTERED (surgeon handoff): make final_astrometry an isolated replayable seam with capture-leg support, then this mask comes OUT."
+    },
+    {
+      "frame": "bb3222e7",
+      "stage": "integrate",
+      "fields": ["receipt.final_astrometry"],
+      "rationale": "Same final_astrometry session-state isolated-replay artifact as the 85aaed5d integrate entry (see its rationale); CR2's block is likewise apispec-pinned (refraction honest-skip + weighted RMS). Scoped per the same orchestrator ruling 2026-07-22."
+    }
+  ],
+  "scoped_volatile_fields_comment": "CAPSULE-SLICE-SCOPED masks (narrower than volatile_fields): each entry masks its `fields` ONLY on rows matching frame (sha prefix) AND stage. Use for a null-vs-absent isolated-replay artifact confined to one slice; NEVER promote one to the global volatile_fields list (that would hide the same field's real divergences on every other frame/stage). frame bb3222e7 = the pinned CR2 (public/demo/sample_observation.cr2); 85aaed5d = pinned SeeStar M66 FITS (covered ONLY by the integrate/compute_routes entry; its spcc slices stay unmasked).",
+  "lane": "light",
+  "default_label": "QUIET-BASELINE"
+}

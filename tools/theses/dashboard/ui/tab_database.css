@@ -1,0 +1,145 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Database tab — SkyCruncher analytics roll-up. Reuses the shared .tile/.subhead
+   vocabulary from style.css; only tab-local structure lives here. Dark theme vars
+   only (no hardcoded colors), consistent with the rest of the ledger.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── empty state (analytics not yet generated) ───────────────────────────── */
+.db-empty {
+  margin: 34px auto;
+  max-width: 640px;
+  text-align: center;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  padding: 30px 26px;
+  background: var(--panel);
+}
+.db-empty-badge {
+  display: inline-block;
+  font: 700 11px var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  padding: 5px 12px;
+  margin-bottom: 14px;
+}
+.db-empty p { font: 12px var(--sans); color: var(--ink-2); margin: 8px 0; line-height: 1.55; }
+.db-empty .db-empty-run code,
+.db-empty p code { font: 11px var(--mono); color: var(--accent); background: var(--panel-2); padding: 1px 5px; border-radius: 3px; }
+.db-empty-last { margin-top: 14px; font: 10px var(--mono); color: var(--muted); letter-spacing: 0.06em; }
+
+/* ── module roll-call ────────────────────────────────────────────────────── */
+.db-rollcall {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+.db-rc-lbl { font: 10px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.db-modchip {
+  font: 11px var(--mono);
+  color: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  padding: 3px 8px;
+  background: var(--panel-2);
+}
+.db-modchip b { font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.db-modchip.ok { border-color: var(--pass-line); color: var(--pass); }
+.db-modchip.failed { border-color: var(--warn-line); color: var(--warn); }
+.db-modchip.absent { border-style: dashed; color: var(--muted); }
+.db-modver { color: var(--muted); font-size: 10px; }
+.db-rc-idx { margin-left: auto; }
+
+/* ── sections ────────────────────────────────────────────────────────────── */
+.db-section {
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+.db-shead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+.db-shead h3 { margin: 0; font: 600 13px var(--mono); letter-spacing: 0.08em; color: var(--ink); text-transform: uppercase; }
+.db-src { font: 10px var(--mono); color: var(--muted); text-align: right; }
+.db-srclink { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent-line); }
+.db-srclink:hover { border-bottom-style: solid; }
+
+/* tiles: reuse the shared .tile; just lay them out */
+.db-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.db-tiles .tile.accent { border-color: var(--accent-line); }
+.db-tiles .tile.accent .val { color: var(--accent); }
+.db-tiles .tile.pass { border-color: var(--pass-line); }
+.db-tiles .tile.pass .val { color: var(--pass); }
+.db-tiles .tile.warn { border-color: var(--warn-line); }
+.db-tiles .tile.warn .val { color: var(--warn); }
+.db-frac { font: 400 12px var(--mono); color: var(--muted); }
+
+/* ── tables ──────────────────────────────────────────────────────────────── */
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font: 12px var(--mono);
+}
+.db-table th, .db-table td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.db-table th { font: 10px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.db-table td { color: var(--ink-2); }
+.db-table td.num, .db-table th.num { text-align: right; }
+.db-table tbody tr:last-child td { border-bottom: none; }
+
+/* ── notes + NOT MEASURED ────────────────────────────────────────────────── */
+.db-note { margin-top: 10px; font: 12px var(--sans); color: var(--ink-2); line-height: 1.55; }
+.db-note b { color: var(--ink); }
+.db-thr { font-size: 11px; color: var(--muted); font-style: italic; }
+.db-frameid { display: inline-block; font: 10px var(--mono); color: var(--muted); word-break: break-all; }
+
+.db-nmbox {
+  padding: 10px 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 6px;
+  background: var(--panel-2);
+}
+.db-nm {
+  font: 700 10px var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-right: 8px;
+}
+.db-nmreason { font: 11px var(--sans); color: var(--ink-2); }
+.db-banner { margin: 12px 0; }
+
+/* ── chip rows (confirm statuses) ────────────────────────────────────────── */
+.db-chiprow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.db-statchip {
+  font: 11px var(--mono);
+  color: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  padding: 3px 9px;
+  background: var(--panel-2);
+}
+.db-statchip b { font-weight: 700; }
+.db-statchip.ok { border-color: var(--pass-line); color: var(--pass); }
+.db-statchip.warn { border-color: var(--warn-line); color: var(--warn); }

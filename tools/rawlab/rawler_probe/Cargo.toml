@@ -1,0 +1,32 @@
+# Standalone crate — NOT part of the repo-root wasm_compute workspace. The empty
+# [workspace] table below makes this its own workspace root so cargo never pulls
+# it into ../../../Cargo.toml (which we must not touch).
+[workspace]
+
+[package]
+name = "rawler_probe"
+version = "0.1.0"
+edition = "2021"
+description = "Decoder-cutover #14 pre-stage: rawler CR2 decode ground-truth reproduction + wasm32 compile proof"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[[bin]]
+name = "probe"
+path = "src/main.rs"
+
+[dependencies]
+rawler = "0.7.2"
+# wasm32 uuid js-feature fix (overnight row-91 spike, the SOLE compile fix):
+# rawler -> uuid (v4/v7) -> getrandom needs the browser backend on
+# wasm32-unknown-unknown. Force uuid's "js" feature via a direct dep so feature
+# unification enables getrandom/js for the whole graph. Remove this line and the
+# wasm32 lib build fails at getrandom (the reproduced finding).
+uuid = { version = "1", features = ["js"] }
+md5 = "0.7"
+
+[profile.release]
+opt-level = 2

@@ -1,0 +1,23 @@
+{
+  "version": "2.4.0",
+  "wcs": { "CTYPE1": "RA---TAN", "CTYPE2": "DEC--TAN", "CRVAL1": 170.11880, "CRVAL2": 13.04839 },
+  "solution": {
+    "ra_hours": 11.341253475172621,
+    "dec_degrees": 13.048392248246461,
+    "pixel_scale": 3.6776147325019153,
+    "stars_matched": 272,
+    "confidence": 0.8310893541573466,
+    "astrometry": {
+      "rms_arcsec": 31.085369272200463,
+      "distortion_detected": true,
+      "sip": { "a_order": 3, "b_order": 3 },
+      "tps": { "control_count": 100 }
+    },
+    "bc_rematch": { "attempted": true, "applied": false, "matched_before": 272, "matched_after": 272 }
+  },
+  "psf_field": { "provenance": "MEASURED", "fwhm_median_maj_px": 7.16, "not_measured": null },
+  "psf_attribution": { "provenance": "MEASURED", "not_measured": null },
+  "lens_distortion_measured": { "provenance": "MEASURED", "k1": 0.033, "not_measured": null },
+  "spcc": { "source": "GaiaXP", "zeropoint": 21.4, "n_stars": 180 },
+  "deep_confirmed": { "setGatePassed": true, "examined": 198, "confirmed": 55 }
+}

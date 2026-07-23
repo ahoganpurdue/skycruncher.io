@@ -1,0 +1,209 @@
+
+import { 
+  planckianLocus, planckianXY, xyToXYZ, xyzToSRGB, srgbToXYZ, xyzToLab
+} from '../colormath';
+import { RGBAdapter } from '../adapters/RGBAdapter';
+import { CIE1931Adapter } from '../adapters/CIE1931Adapter';
+import { CIELABAdapter } from '../adapters/CIELABAdapter';
+import { OklabAdapter } from '../adapters/OklabAdapter';
+import { IPTAdapter } from '../adapters/IPTAdapter';
+import { OklchAdapter } from '../adapters/OklchAdapter';
+
+// ════════════════════════════════════════════════════════════════
+// PLANCKIAN LOCUS & ADAPTER VERIFICATION TOOL
+// ════════════════════════════════════════════════════════════════
+
+let totalPass = 0;
+let totalFail = 0;
+
+function pass(msg: string) { totalPass++; console.log(`  ✅ PASS: ${msg}`); }
+function fail(msg: string) { totalFail++; console.error(`  ❌ FAIL: ${msg}`); }
+
+async function verifyPlanckian() {
+    console.log("════════════════════════════════════════════════════════════════════");
+    console.log("PLANCKIAN LOCUS & 3D READINESS AUDIT");
+    console.log("════════════════════════════════════════════════════════════════════");
+    
+    // ── SECTION 1: Strict Endpoint Check ──────────────────────────
+    console.log("\n1. ENDPOINT CHECK (planckianLocus(300))");
+    const points = planckianLocus(300);
+    const start = points[0];
+    const end = points[points.length - 1];
+
+    console.log(`   Start Temp: ${start.T.toFixed(0)}K (Target: 1667K ±10K)`);
+    if (Math.abs(start.T - 1667) <= 10) pass("Start point = 1667K");
+    else fail(`Start point temperature mismatch: ${start.T.toFixed(0)}K`);
+
+    console.log(`   End Temp:   ${end.T.toFixed(0)}K (Target: 25000K ±100K)`);
+    if (Math.abs(end.T - 25000) <= 100) pass("End point = 25000K");
+    else fail(`End point temperature mismatch: ${end.T.toFixed(0)}K`);
+
+    console.log(`   Data Points: ${points.length}`);
+    if (points.length >= 100) pass(`Sufficient resolution (${points.length} points)`);
+    else fail(`Insufficient resolution (${points.length} points, need ≥100)`);
+
+    // ── SECTION 2: Curve Inclusion (every 100K) ───────────────────
+    console.log("\n2. CURVE INCLUSION CHECK (every 100K step)");
+    let inclusionPasses = 0;
+    let inclusionFails = 0;
+    
+    for (let T = 1700; T <= 25000; T += 100) {
+        const expected = planckianXY(T);
+        
+        // Find the closest point in the generated locus
+        let minDist = Infinity;
+        for (const p of points) {
+            const dx = p.xy.x - expected.x;
+            const dy = p.xy.y - expected.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < minDist) minDist = dist;
+        }
+        
+        // Should be within 0.005 xy units (tight interpolation)
+        if (minDist > 0.005) {
+            inclusionFails++;
+            if (inclusionFails <= 3) {
+                fail(`${T}K not in locus (nearest xy dist: ${minDist.toFixed(4)})`);
+            }
+        } else {
+            inclusionPasses++;
+        }
+    }
+    
+    if (inclusionFails === 0) {
+        pass(`All ${inclusionPasses} temperature steps lie on the generated locus`);
+    } else {
+        console.log(`   ${inclusionPasses} passed, ${inclusionFails} failed (only first 3 shown)`);
+        totalFail += Math.max(0, inclusionFails - 3); // count remaining
+    }
+
+    // ── SECTION 3: Fuzzy Color Match (Delta-E) ───────────────────
+    console.log("\n3. FUZZY COLOR MATCH (ΔE check at key temperatures)");
+    const checkTemps = [2700, 4000, 5000, 6500, 10000, 15000, 20000];
+    
+    for (const T of checkTemps) {
+        const expected = planckianXY(T);
+        const xyz = xyToXYZ(expected.x, expected.y, 1.0);
+        const expectedRGB = xyzToSRGB(xyz.X, xyz.Y, xyz.Z);
+        const expectedLab = xyzToLab(xyz.X, xyz.Y, xyz.Z);
+        
+        // Find matching locus point
+        const closest = points.reduce((best, p) =>
+            Math.abs(p.T - T) < Math.abs(best.T - T) ? p : best
+        , points[0]);
+        
+        // Compute Delta-E (CIE76) between expected and actual Lab
+        const closestXYZ = xyToXYZ(closest.xy.x, closest.xy.y, 1.0);
+        const closestLab = xyzToLab(closestXYZ.X, closestXYZ.Y, closestXYZ.Z);
+        
+        const dE = Math.sqrt(
+            (expectedLab.L - closestLab.L) ** 2 +
+            (expectedLab.a - closestLab.a) ** 2 +
+            (expectedLab.b - closestLab.b) ** 2
+        );
+        
+        if (dE < 2.0) {
+            pass(`${T}K: ΔE=${dE.toFixed(2)} (RGB: ${expectedRGB.r},${expectedRGB.g},${expectedRGB.b})`);
+        } else {
+            fail(`${T}K: ΔE=${dE.toFixed(2)} exceeds threshold (max 2.0)`);
+        }
+    }
+
+    // ── SECTION 4: Adapter Geometry ──────────────────────────────
+    console.log("\n4. ADAPTER GEOMETRY CHECK");
+    const size = 500;
+    const center = { x: size / 2, y: size / 2 };
+
+    const adapters = [
+        { name: 'sRGB',    adapter: new RGBAdapter() },
+        { name: 'CIE1931', adapter: new CIE1931Adapter() },
+        { name: 'CIELAB',  adapter: new CIELABAdapter() },
+        { name: 'Oklab',   adapter: new OklabAdapter() },
+        { name: 'IPT',     adapter: new IPTAdapter() },
+        { name: 'Oklch',   adapter: new OklchAdapter() }
+    ];
+
+    for (const test of adapters) {
+        console.log(`\n   --- ${test.name} ---`);
+        const locusPath = test.adapter.getPlanckianLocus(size, center);
+        const boundary = test.adapter.getGamutBoundary(size, center, 100);
+        
+        // Locus visibility check
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        locusPath.forEach(p => {
+            minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+            minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+        });
+        
+        const width = maxX - minX;
+        const height = maxY - minY;
+        
+        if (width > 5 && height > 5) {
+            pass(`Locus visible: ${width.toFixed(0)}×${height.toFixed(0)} px`);
+        } else {
+            fail(`Locus too small: ${width.toFixed(1)}×${height.toFixed(1)} px`);
+        }
+        
+        // Boundary check
+        if (boundary.length >= 3) {
+            pass(`Gamut boundary has ${boundary.length} vertices`);
+        } else {
+            fail(`Gamut boundary has only ${boundary.length} vertices`);
+        }
+    }
+
+    // ── SECTION 5: 3D Readiness Audit ────────────────────────────
+    console.log("\n5. 3D READINESS AUDIT");
+    
+    for (const test of adapters) {
+        console.log(`\n   --- ${test.name} ---`);
+        
+        // Test getGamutEdges
+        try {
+            const edges = test.adapter.getGamutEdges(size, center);
+            if (edges.length >= 12 && edges.every(e => e.length > 0)) {
+                pass(`getGamutEdges: ${edges.length} edges (>=12), ${edges.reduce((s, e) => s + e.length, 0)} total points`);
+            } else {
+                fail(`getGamutEdges: ${edges.length} edges (expected >=12)`);
+            }
+        } catch (e: any) {
+            fail(`getGamutEdges threw: ${e.message}`);
+        }
+        
+        // Test get3DPosition
+        try {
+            const pos3d = test.adapter.get3DPosition({ x: 250, y: 250 }, center, size);
+            if (typeof pos3d.x === 'number' && typeof pos3d.z === 'number' && !isNaN(pos3d.z)) {
+                pass(`get3DPosition: (${pos3d.x.toFixed(0)}, ${pos3d.y.toFixed(0)}, ${pos3d.z.toFixed(0)})`);
+            } else {
+                fail(`get3DPosition returned invalid values`);
+            }
+        } catch (e: any) {
+            fail(`get3DPosition threw: ${e.message}`);
+        }
+        
+        // Test xyYToPoint
+        try {
+            const pt = test.adapter.xyYToPoint({ x: 0.3127, y: 0.3290, Y: 1.0 }, center, size);
+            if (typeof pt.x === 'number' && typeof pt.z === 'number' && !isNaN(pt.x)) {
+                pass(`xyYToPoint(D65): (${pt.x.toFixed(0)}, ${pt.y.toFixed(0)}, ${pt.z.toFixed(0)})`);
+            } else {
+                fail(`xyYToPoint returned invalid values`);
+            }
+        } catch (e: any) {
+            fail(`xyYToPoint threw: ${e.message}`);
+        }
+    }
+
+    // ── SUMMARY ──────────────────────────────────────────────────
+    console.log("\n════════════════════════════════════════════════════════════════════");
+    console.log(`SUMMARY: ${totalPass} passed, ${totalFail} failed`);
+    if (totalFail === 0) {
+        console.log("🎉 ALL CHECKS PASSED");
+    } else {
+        console.log("⚠️  SOME CHECKS FAILED — Review above");
+    }
+    console.log("════════════════════════════════════════════════════════════════════");
+}
+
+verifyPlanckian();

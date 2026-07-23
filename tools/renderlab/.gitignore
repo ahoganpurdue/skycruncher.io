@@ -1,0 +1,3 @@
+# owner-provided starplate blobs — never commit binaries from here
+data/
+node_modules/

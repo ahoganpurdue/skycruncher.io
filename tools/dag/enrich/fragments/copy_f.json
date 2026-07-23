@@ -1,0 +1,897 @@
+{
+  "fragment": "copy_f",
+  "derived_by": "copy wave F + nuance pass (owner-facing prose with operational guards + substrate badges; Opus-rewrite / Haiku cross-check per owner two-model tiering)",
+  "notes": [
+    "55 entries with copy; 54 carry a substrate badge (copy nuance pass, owner-style; Opus-rewritten / Haiku cross-checked).",
+    "3 previously-withheld entries admitted this pass (boundary:gpu_quad_scoring, boundary:wgsl_structs, stage:psf_attribution) — Opus-rewritten + Haiku-checked.",
+    "1 entry kept from the copy wave unchanged (flagged/unchecked, honest): stage:psf_field.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 9 node-decls referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "boundary:arrow_seam": {
+      "copy": {
+        "text": "When the reference-star catalog crosses from storage into the plate solver, its rows can be carried in the Apache Arrow columnar binary format — little-endian typed data buffers, one column per field, with a validity bitmap only on the optional columns — instead of parsed text. A one-byte per-row tag marks each row as a Gaia or a legacy bright-star record, because the two carry right ascension in different units (degrees for Gaia, hours for the legacy rows); the value is stored exactly as read and is never normalized at this boundary. Every numeric column is kept at full 64-bit precision, and the catalog identifier rides as a 64-bit floating-point value rather than a 64-bit integer, so a decoded row reproduces the original numbers and their text form exactly and downstream matching cannot tell the binary source from the older text one. This columnar path is an optional, off-by-default alternative to text parsing that returns the same materialized rows with a faster load and a smaller transfer.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/atlas_arrow_codec.ts",
+            "lines": "12-72"
+          },
+          {
+            "path": "tools/atlas/atlas_to_arrow.mjs",
+            "lines": "11-46"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "208-224"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "boundary:atlas_rows": {
+      "copy": {
+        "text": "Reference-star rows cross into the solver from stored catalog files, grouped into sky regions and written as JSON text, and the records are hybrid: rows from the Gaia survey carry right ascension in degrees while the older Hipparcos-derived rows carry it in hours. Because the two shapes share the same file, each row is classified individually — a row is read as Gaia when it carries a survey source identifier or a Gaia G magnitude — and its right ascension is divided by fifteen to reach the internal hours convention only for the Gaia shape, leaving the already-hours rows untouched. The catalog habit of tagging the Sun with a zero identifier is honored only for the legacy shape, since Gaia rows write a zero identifier on every star, so a per-row guard keeps the Gaia stars from being silently dropped. Each row is also stamped with the photometric band it reports so downstream magnitude use never mixes the two systems.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+            "lines": "710-748"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "145-188"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "JSON text · TypeScript (CPU)"
+      }
+    },
+    "boundary:fits_io": {
+      "copy": {
+        "text": "Reading and writing FITS image files crosses a units boundary: right ascension is stored in degrees in the file header but carried in hours everywhere inside the engine, so on read the header value is divided by 15 to get hours and on write it is multiplied by 15 back to degrees, while declination stays in degrees throughout. There is deliberately no single conversion point — the ingest reader, the stacking-lane reader/writer, and the receipt export each perform the conversion independently — so every site must apply the same factor or the same number gets interpreted in the wrong units. Export writers further downstream consume the already-converted world-coordinate values and must not convert a second time. The file itself is big-endian with pixels laid out row by row and one-indexed reference pixels, mapped to the engine's zero-based convention at the boundary.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m1_ingestion/fits_decoder.ts",
+            "lines": "1125-1127"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "159-186"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "293-318"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "boundary:libraw_mem_image": {
+      "copy": {
+        "text": "On the retained fallback decode path, a raw Canon frame is turned into an interleaved 16-bit RGB buffer by the bundled decoder, and a probe then samples the frame to decide how to read it. If fewer than about two percent of sampled pixels carry light in two or more channels, the frame is treated as a one-color-per-site mosaic and each pixel is collapsed to a neutral gray of its measured value, which keeps the color-filter pattern from imprinting a checkerboard on later star detection; otherwise the three channels are kept and simply normalized. A separate median channel-ratio test, tripped below about 0.15, independently flags the mosaic case so the brightness reduction can fall back to equal channel weights. When the pixel count factors into image dimensions two different ways, the ambiguity is resolved by whichever layout is most self-consistent from row to row. This arm is kept byte-for-byte identical to the pre-cutover pipeline; a separate decoder is the current default.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+            "lines": "725-758"
+          },
+          {
+            "path": "tools/psf/decode_cr2.mjs",
+            "lines": "160-175"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "118-143"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "C++→WASM (LibRaw) + TypeScript · CPU"
+      }
+    },
+    "boundary:rawler_cfa": {
+      "copy": {
+        "text": "On the default decode path, a raw Canon frame is decoded into a full-sensor single-channel Bayer mosaic — optical-black borders included — and then demosaiced into full-color pixels by an integer bilinear interpolation over the 2×2 color-filter tile. The interpolation reads each pixel's filter color from its absolute sensor coordinates, so cropping to the active image area stays correctly phased, and neighbor samples are clamped at the active-area edge so the dark border pixels never leak into the science pixels. Alongside the pixels it records the per-channel black and white (saturation) levels, white-balance coefficients, and the dark-border pixels as measured metadata that is recorded but never applied — by default the pixels keep their raw black pedestal, and an optional black-level subtraction is left off so the output is bit-for-bit reproducible. This has been the default path since the mid-2026 decoder cutover; the earlier decoder is retained as a cold-path fallback.",
+        "cites": [
+          {
+            "path": "src/engine/wasm_decode/src/lib.rs",
+            "lines": "319-347"
+          },
+          {
+            "path": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+            "lines": "100-111"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "325-363"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "Rust→WASM (rawler decode + integer demosaic) + TypeScript · CPU"
+      }
+    },
+    "boundary:seam_capsule": {
+      "copy": {
+        "text": "A test-only capture format that records the pipeline's working state to disk after each processing stage finishes, so a single stage can later be re-run in isolation and its output compared exactly against a stored reference. Each capsule pairs a JSON sidecar — holding the coordinate results and metadata inline — with separate raw little-endian binary files for the large pixel buffers; the sidecar is the sole authority on every buffer's layout and records a checksum that is re-verified when the data is reloaded. The capsule written after one stage is the input to the next, so replaying a stage loads the previous capsule, runs the real stage, and compares the result byte-for-byte. Capture is off by default: the enable flag is read once at startup, and when it is off the capture call is a dead branch that allocates nothing and reads no state, so results are identical whether or not it runs. It refuses rather than guesses — it skips when no frame identifier is supplied or the host is not little-endian, and any capture failure produces a warning and an absent or partial capsule instead of a fabricated value.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/seam_capture.ts",
+            "lines": "6-45"
+          },
+          {
+            "path": "src/engine/pipeline/seam_capture.ts",
+            "lines": "392-466"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "459-482"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU (Node)"
+      }
+    },
+    "boundary:starplates_blobs": {
+      "copy": {
+        "text": "The reference-star catalog is packaged for release as Apache Arrow columnar files split by position on the sky: one bright all-sky file holding the brightest stars down to a fixed magnitude cut, plus one deeper file per cell on a hierarchical equal-area grid, so a solver fetches only the cells near a frame's estimated pointing. Each row carries a star's celestial position, proper motion, a Gaia G magnitude, a colour index, and its catalog identifier, and cells are assigned by a direct bit-shift of the survey identifier rather than a recomputed sky-pixel lookup. The build is deterministic — rows are totally ordered by magnitude ascending with the identifier breaking ties, so identical input yields byte-identical output — and an accompanying manifest content-addresses every file by hash and records each cell's centre and radius, which is what lets a reader both verify integrity and resolve which cells a search cone touches. The record stride of the separate magnitude-banded blind-search index is not transcribed here and must be read from the builder before any consumer relies on it.",
+        "cites": [
+          {
+            "path": "tools/starplates/build_release.mjs",
+            "lines": "9-26"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "190-206"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "Apache Arrow IPC · Node builder (CPU)"
+      }
+    },
+    "boundary:tauri_native_ipc": {
+      "copy": {
+        "text": "On the desktop build, raw-sensor demosaicing can be dispatched from the application's web layer to a native GPU backend, and the pixel data crosses that inter-process boundary as raw little-endian bytes: a single-channel 16-bit Bayer mosaic goes in and an interleaved 32-bit-float RGBA frame comes back. Before dispatch the native side validates the request — it rejects a non-binary (JSON) body, rejects zero or over-200-megapixel dimensions, and requires the byte length to be exactly two bytes per pixel for the stated width and height — returning an error rather than processing a mismatched buffer. The frame is then demosaiced on the GPU and returned as raw bytes; an earlier version encoded the same arrays as JSON number lists, so this is a transport-only change that leaves the data layout and units unchanged while removing a large copy cost. This native path is a rare fallback taken only when no explicit color-filter pattern is supplied, and its shader assumes the Canon RGGB Bayer arrangement.",
+        "cites": [
+          {
+            "path": "src-tauri/src/lib.rs",
+            "lines": "44-112"
+          },
+          {
+            "path": "src/engine/core/NativeGpuBridge.ts",
+            "lines": "50-59"
+          },
+          {
+            "path": "src/engine/pipeline/m3_gpu_preprocess/shaders/demosaic_bayer.wgsl",
+            "lines": "2-17"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript ↔ Rust → WGSL · GPU (native wgpu)"
+      }
+    },
+    "boundary:toolchest_arrow_export": {
+      "copy": {
+        "text": "After a run finishes, its tabular results are packaged as Apache Arrow columnar files (the little-endian Feather v2 format) for external tools and dashboards: the matched catalog stars, the detected sources, the catalog-forced confirmed photometry, and a single-row run summary carrying the solve center, pixel scale, and confirmation verdict. Every column is labelled with its physical units in the field metadata, which heads off the recurring right-ascension unit confusion — the run summary reports right ascension in hours while the matched-star table reports it in degrees, and both say so; residuals are in arcseconds and positions in pixels. The export only reads a completed run and performs no new computation, and it is honest about absence: when a product is missing it writes an empty table carrying the full column schema rather than a fabricated row. Columns that can never be null carry no validity bitmap, and the catalog identifier is written as text so a large integer id is not rounded.",
+        "cites": [
+          {
+            "path": "packages/toolchest/src/tables.ts",
+            "lines": "1-9"
+          },
+          {
+            "path": "packages/toolchest/src/tables.ts",
+            "lines": "119-146"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "419-437"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "boundary:wasm_typed_array": {
+      "copy": {
+        "text": "Numeric typed arrays — double- and single-precision floats and sixteen-bit integers — are copied across the boundary between the host and the compiled compute module in little-endian order, each routine using a fixed element stride. The main measured crossing is point-spread-function fitting: the caller passes a batch of star pixel stamps plus initial Gaussian parameters, and the module returns thirteen values per star — six fitted parameters, their six formal one-sigma uncertainties, and a status code. The uncertainties are returned as not-a-number with a nonzero status, rather than a fabricated value, whenever the fit has too few pixels to leave any residual degrees of freedom, the curvature matrix is singular or ill-conditioned, or a computed variance comes out non-finite or negative; the six fitted parameters themselves are unaffected. Data is copied rather than referenced in place because growing the module's memory would invalidate a direct view into it.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "245-291"
+          },
+          {
+            "path": "src/engine/wasm_compute/src/lib.rs",
+            "lines": "455-501"
+          },
+          {
+            "path": "src/engine/wasm_compute/src/photometry.rs",
+            "lines": "146-191"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM"
+      }
+    },
+    "stage:calibrate": {
+      "copy": {
+        "text": "After the plate is solved, this step refines the astrometry and profiles the instrument without altering the solved coordinates. It measures the leftover position error between detected stars and catalog stars projected through the solution — a residual scatter in arcseconds — and when that scatter exceeds about 1.2 arcseconds over more than twenty matched stars it fits two optical-distortion models to the residuals, a polynomial (SIP) and a thin-plate spline. Each model is admitted onto the solution only if out-of-sample cross-validation shows it predicts held-out star positions better than applying no correction; a model that fits the sparse, center-weighted star set well in-sample but extrapolates badly toward the frame edges is refused and left absent, with the gate's verdict recorded either way. It also derives a hardware profile — focal length from the pixel scale, approximate radial-distortion and vignetting terms, and per-channel color bias — from the matched stars, and attaches every distortion product alongside the world coordinate system rather than folding it in, so the reported solve numbers stay unchanged.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "60-127"
+          },
+          {
+            "path": "src/engine/pipeline/m7_astrometry/sip_gate.ts",
+            "lines": "353-358"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/hardware_profiler.ts",
+            "lines": "155-235"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM"
+      }
+    },
+    "stage:metrology": {
+      "copy": {
+        "text": "Resolves the image's angular pixel scale through a trust ladder: FITS header optics are tried first, then the EXIF focal length combined with a sensor-database pixel pitch, and finally a blind triangulation from the brightest detected stars if neither is available. It records which rung produced the lock and emits any focal length it had to assume as a separately labelled finding — never folded into the scale as if it were measured — so the receipt shows the chain of trust; the header rung consults no focal length and so carries no assumption. It also builds the ephemeris guest list of planets, moons, and satellites, but only when both the capture timestamp and an observer location are trusted, since a default clock or a missing site would compute a guest list for the wrong sky; otherwise the list is left empty.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/metrology.ts",
+            "lines": "89-127"
+          },
+          {
+            "path": "src/engine/pipeline/stages/metrology.ts",
+            "lines": "135-146"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:package": {
+      "copy": {
+        "text": "Assembles every computed pipeline product into a single, schema-versioned document, emitting the version from the one shared schema-version constant rather than a hand-written number. It prefers the real fitted world coordinate solution — the matrix that actually verified the matched stars — and only falls back to a re-synthesized approximation, explicitly labelled as such, when no fitted matrix exists. The solution summary filters sentinel values out of the residuals (dropping planet-verification markers and non-finite entries) and reports the real mean star width from the matched stars, falling back to the forensic estimate only when no width samples survive and to null when even that is absent. It reads both the coordinate and pixel ledgers but mutates neither; the heavy pixel arrays are dropped later, at serialization time, so the assembled object still carries live references.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "1166-1187"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "146-194"
+          },
+          {
+            "path": "src/engine/pipeline/stages/receipt_serializer.ts",
+            "lines": "20-44"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:receipt_serializer": {
+      "copy": {
+        "text": "Converts the assembled receipt object into JSON text through a replacer that drops a fixed set of heavy typed-array fields — the science image buffer, segmentation masks, the horizon vector, and grid arrays — which JSON encoding would otherwise expand into hundreds of megabytes of index-keyed text. The serialization is pure, with no browser download or document machinery, so a command-line consumer produces receipts byte-identical to the browser's. A companion helper names the output file from the solution's spatial hash, falling back to a timestamp when no solve produced one.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/receipt_serializer.ts",
+            "lines": "20-35"
+          },
+          {
+            "path": "src/engine/pipeline/stages/receipt_serializer.ts",
+            "lines": "42-49"
+          },
+          {
+            "path": "src/engine/pipeline/stages/receipt_serializer.ts",
+            "lines": "6-12"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:schema_versions": {
+      "copy": {
+        "text": "Holds, in one place, the schema version numbers stamped onto the pipeline's serialized products. It defines two deliberately separate constants — the receipt schema version, which is the versioned contract for the exported solve receipt returned to callers, and an independent science-packet version that tracks a separate compact export format — each bumped only on a genuine schema change so a version reliably distinguishes products of different shapes. A version number is never advanced without a real structural change, which would be dishonest versioning. A third version, used by an in-memory result wrapper, deliberately lives elsewhere and is not centralized here.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/schema_versions.ts",
+            "lines": "6-25"
+          },
+          {
+            "path": "src/engine/pipeline/stages/schema_versions.ts",
+            "lines": "442-445"
+          },
+          {
+            "path": "src/engine/types/manifest.ts",
+            "lines": "261-266"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:solve": {
+      "copy": {
+        "text": "First resolves a search hint through a fixed ladder — an explicit user target, then a telescope pointing read from the FITS header, then a zenith estimate, then a full-sky blind search. The zenith rung is used only when both the observer location and the capture clock are trusted, because a zenith hint from a defaulted location or an unset camera clock points at the wrong part of the sky and would push the true center outside a radius-limited search; a user target or header pointing is marked trusted while zenith and blind are not, and when no rung fires the search falls back to the full sky (180-degree radius). It then hands the detected stars and the chosen hint to the plate solver, which forms four-star geometric groups from the brightest stars, matches their rotation- and scale-invariant shapes against a catalog index, fits the world coordinate system, and verifies the fit by checking that detected stars fall on cataloged positions. It returns the image-center coordinates (right ascension in hours, declination in degrees), rotation, and pixel scale together with the matched stars and a confidence score, and reports failure rather than a guessed pose when no candidate verifies.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/solve.ts",
+            "lines": "80-149"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "25-36"
+          },
+          {
+            "path": "src/engine/types/Main_types.ts",
+            "lines": "218-242"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM · CPU"
+      }
+    },
+    "stage:solve_context": {
+      "copy": {
+        "text": "Builds the plate solver's option contract from a single shared builder so the two pipelines can no longer drift apart: base pixel scale, focal length, sensor pixel pitch, lens-distortion model, a trust-gated observation time, observer location, a blind-search wall-clock budget (90 seconds by default), and any search hints. For a narrow field — frame diagonal under 6 degrees — it relaxes the verification gate to accept a lock on four anchor-star matches at 0.5 confidence, because the wide-field thresholds reject genuine deep-stack solves whose match confidence is honestly lower; wider fields keep the caller's defaults. The observation time must already be trust-gated by the caller, so an untrusted camera clock is passed as absent and planetary anchors are never placed from a default date, and the observer site is omitted when the location was only a default.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/solve_context.ts",
+            "lines": "57-71"
+          },
+          {
+            "path": "src/engine/pipeline/stages/solve_context.ts",
+            "lines": "134-152"
+          },
+          {
+            "path": "src/engine/pipeline/stages/solve_context.ts",
+            "lines": "36-48"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:solve_provenance": {
+      "copy": {
+        "text": "Records which category of search prior was active when the solve locked — blind, user-assisted, metadata-assisted, or tool-assisted — by mapping the winning hint rung (blind to blind, an explicit user target to user-assisted, a FITS header pointing or a zenith estimate to metadata-assisted). It returns nothing rather than a guessed label when the hint source is not honestly known, never defaulting to blind; the tool-assisted category is defined but never emitted because no autonomous tool feeds the solve today; and a failed-attempts list exists in the shape but is attached only when an earlier attempt genuinely failed before a later one recovered, carrying no wall-clock timing so the block stays deterministic. A hinted solve is not a lesser solve — acceptance never consults the hint — so this is denominator bookkeeping for detection-improvement analysis, not a quality tag.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/solve_provenance.ts",
+            "lines": "73-81"
+          },
+          {
+            "path": "src/engine/pipeline/stages/solve_provenance.ts",
+            "lines": "92-108"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "1375-1377"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:user_annotations": {
+      "copy": {
+        "text": "Captures the observer's free-text testimony — a target description, location text, a sky-quality note, rig notes, and any session issues — as strings only, never parsed into a number, a knob, or any solve input. These annotations are kept structurally separate from the metadata that feeds the physics model, so testimony can never be laundered into evidence. When every field is empty the block is recorded as null rather than an empty skeleton, which keeps the pinned reference solves byte-identical since their receipts carry a null block. Provenance is recorded as either typed directly by the observer or drafted by an assistant and then explicitly confirmed in the export interface before being applied — the assistant tool never writes a session on its own.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/user_annotations.ts",
+            "lines": "84-107"
+          },
+          {
+            "path": "src/engine/pipeline/stages/user_annotations.ts",
+            "lines": "5-27"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:user_target_hint": {
+      "copy": {
+        "text": "Records the structured target hint a user supplied on upload — a display label plus a sky pointing, right ascension in hours and declination in degrees — but only when that hint actually seeded the winning search. The block is present only for a user-assisted solve and is null on a blind one or when no hint was given; the azimuth-mode sentinel and any non-finite coordinate are screened out with the same guard the hint resolver applies, so a hint that could not have seeded the solve never appears. A hint is treated as a search prior, always flagged assumed: it only narrows the search and never affects whether the solution is accepted, which the verification gate alone decides. Field of view is not part of the supplied hint, so it is reported null rather than fabricated.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/user_target_hint.ts",
+            "lines": "48-62"
+          },
+          {
+            "path": "src/engine/pipeline/stages/user_target_hint.ts",
+            "lines": "5-23"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:workbench_deposit": {
+      "copy": {
+        "text": "After packaging completes, writes a compact side-channel record — keyed by the camera body and lens model — that copies scalar receipt fields (pixel scale, matched-star count, measured lens-distortion and point-spread summaries, photometric zero point) for later per-rig pooling. The whole hook is wrapped so it can never fail a solve or alter the receipt: the extractor only reads the receipt, and any storage failure, synchronous or asynchronous, is swallowed. It is on by default, but a row persists only when a storage backend is available — an injected file-backed store on the command line, or the browser's own persistent storage — and otherwise is a silent no-op, which is why the headless smoke test stays byte-identical. It returns nothing when the receipt has no solution, since there is nothing to pool, and otherwise assigns a version epoch against the rig's prior deposits before appending.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/workbench_deposit.ts",
+            "lines": "85-110"
+          },
+          {
+            "path": "src/engine/pipeline/stages/workbench_deposit.ts",
+            "lines": "64-78"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/workbench_store.ts",
+            "lines": "272-373"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:load": {
+      "copy": {
+        "text": "Reads the frame's metadata before any pixels are decoded: it identifies the container format from the file's magic bytes, then pulls instrument and capture fields — camera and lens model, focal length, aperture, ISO, exposure time, capture time, and observer coordinates — from either the FITS header or the EXIF/TIFF tags of a camera raw file, and derives a Julian Date from the capture-time claim. It is deliberate about honesty: when no capture time is present it leaves the timestamp empty rather than substituting the current clock (which would silently misplace later ephemeris work), a zero-vector or camera-default position is recorded as absent rather than as a real fix, and an EXIF time whose primary field is unparseable is either rescued from a secondary date field at a lower hint tier or dropped entirely. An already-rendered 8-bit input such as a phone JPEG or TIFF is flagged as approximate photometry, and the step refuses to run at all if the image buffer was released beforehand. It writes no receipt block of its own — the fields it reads and any degradation notices flow into the receipt's provenance and warnings at packaging time.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "633-697"
+          },
+          {
+            "path": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+            "lines": "225-356"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:extract.decode": {
+      "copy": {
+        "text": "Decodes the loaded raw or FITS file into pixels at the start of the extraction phase. It first checks a content-fingerprint cache and reuses a prior decode of the same frame; on a miss it decodes the sensor bitstream — camera raw through the default raw decoder (or a byte-identical fallback decoder for formats the default cannot handle), FITS directly, and an already-rendered JPEG or TIFF through the browser image decoder — and demosaics a Bayer color-filter mosaic into a full-resolution linear RGB frame. It emits both the untouched sensor buffer and the demosaiced RGB with the image dimensions, and records which decoder actually ran along with the sensor's black and white levels and filter pattern. If the file cannot be decoded it stops with an error rather than continuing on empty data; if a frame is already demosaiced it passes through without a second demosaic; and if the Bayer phase is unknown it refuses to guess a color demosaic — which would imprint a checkerboard artifact — and instead block-averages the mosaic into a phase-agnostic grayscale that keeps the geometry solvable while marking color as not measured.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "880-911"
+          },
+          {
+            "path": "src/engine/pipeline/stages/ingest.ts",
+            "lines": "207-250"
+          },
+          {
+            "path": "src/engine/pipeline/stages/ingest.ts",
+            "lines": "289-317"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU orchestration; Rust→WASM decode; WGSL/GPU (WebGPU) demosaic, CPU fallback"
+      }
+    },
+    "stage:extract.luminance": {
+      "copy": {
+        "text": "Reduces the decoded three-channel RGB frame to a single-channel luminance image — one value per pixel — producing the science buffer that later stages read for star detection, point-spread measurement, and forced-photometry confirmation. By default it combines the channels with the standard Rec. 709 luminance weights; when the frame is a single-color-per-site Bayer mosaic rather than true RGB, a guard switches to equal channel weights so the reduction does not imprint a two-pixel checkerboard on detection, and that guard is off by default and engages only on the flagged mosaic case. It scans the result for non-finite pixels and reports their count rather than substituting made-up values. It writes no receipt block — it hands the buffer downstream and records only its own timing.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "2507-2531"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "995-998"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:extract.detect": {
+      "copy": {
+        "text": "Detects stars in the extracted frame. When an un-demosaiced 16-bit Bayer sensor buffer is available it detects on that native data with 2×2 binning; otherwise it detects on the single-channel luminance buffer, and the same condition drives the status text so the reported path cannot drift from the one actually taken. Source extraction runs with multi-pass background masking, morphological filtering to reject non-stellar blobs, and foreground/horizon culling to drop terrain, yielding clean detections with sub-pixel centroids plus, on raw frames, a color-filter-array verdict. These are recorded to the receipt's signal block; if signal analysis returns no result the step raises an error and halts rather than continuing downstream.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/detect.ts",
+            "lines": "143-177"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1130-1158"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "1029-1038"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM (blob extraction)"
+      }
+    },
+    "stage:extract.spectral_peek": {
+      "copy": {
+        "text": "Just before the full-resolution decoded image is released from memory, this sub-step records the color of each detected star. For every star in the detection list it reads the interleaved red, green, and blue values at that star's center pixel and stores them on the star, along with a rough blue-over-green color index. A star whose center falls outside the image bounds is left without color values rather than given fabricated ones, and the color index is computed only where the green channel is above zero. It writes no receipt block of its own; the per-star colors it attaches are carried forward and read later by the hardware-profile report's spectral analysis.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1652-1672"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1167-1177"
+          },
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "144-168"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:extract": {
+      "copy": {
+        "text": "Turns the loaded raw or FITS frame into a list of detected stars. It decodes and demosaics the frame into linear RGB, reduces that to a luminance science buffer, runs multi-pass star detection with morphological filtering and terrain culling, and samples each detected star's color before releasing the raw buffer. It produces the signal packet — the clean detections plus flagged anomalies — that later stages solve against, and records the decode calibration (white balance, black and white levels, sensor color pattern) and the status of any supplied master dark or flat frame. It also vets the capture timestamp and observer location: a timestamp that predates the camera format, sits in the future, or matches a dead-battery reset signature is treated as an unset clock, and a missing or out-of-range location as absent — in either case only the planet and ephemeris overlays are disabled and the run says so, since the plate solve itself does not depend on the clock or the observing site.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "880-911"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "947-990"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1126-1148"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU; Rust→WASM decode + blob extraction; WGSL/GPU demosaic, CPU fallback"
+      }
+    },
+    "stage:solve.quad_wasm": {
+      "copy": {
+        "text": "The primary plate-solving branch for normal and narrow fields. It takes the detected star positions and a magnitude-ranked subset of nearby catalog stars — capped at thirty and one hundred respectively by default — and first drops any detection whose coordinates are non-finite, which would otherwise crash the compiled matcher; it then forms four-star geometric groups, hashes each into a rotation- and scale-invariant descriptor, matches those descriptors against the catalog, and for every candidate correspondence fits a world coordinate system and checks that the detected stars land on cataloged positions. If the matcher returns no candidate quads, or if every fitted candidate fails that verification, this branch reports no lock and the solver falls through to its wider-field fallbacks; the first candidate that verifies becomes the recorded solution. Either way it logs its own elapsed time and attempt count to the receipt's per-branch solve-timing block, which is left absent — never a fabricated zero — for any branch that was not attempted.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "1539-1541"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "1880-1992"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "1040-1054"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM · CPU"
+      }
+    },
+    "stage:calibrate.m7_analyze": {
+      "copy": {
+        "text": "This sub-stage measures how well the solved linear world coordinate system reproduces the observed star positions. It projects each matched catalog star back to a predicted pixel location, combines the detected-minus-predicted offsets into a residual scatter (RMS in arcseconds) plus a mean shift vector, and — when that scatter exceeds about 1.2 arcseconds over more than twenty matched stars — fits a candidate order-3 distortion polynomial by least squares. The residual scatter and a distortion-detected flag are written to the solution's astrometry record, but the candidate polynomial is kept downstream only if a separate cross-validation gate accepts it. With fewer than fifteen usable matches — planetary-verification markers and gross outliers are excluded — it reports zero residual and no distortion rather than guessing, and a rank-deficient star layout makes the polynomial fit abstain instead of emitting non-finite coefficients.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "60-105"
+          },
+          {
+            "path": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+            "lines": "52-118"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM"
+      }
+    },
+    "stage:calibrate.sip_gate": {
+      "copy": {
+        "text": "This sub-stage decides whether the fitted distortion polynomial (SIP) is worth keeping. It takes the candidate polynomial fit to the matched-star position residuals and runs deterministic k-fold out-of-sample cross-validation, comparing the polynomial's held-out accuracy against two baselines: applying no correction at all (the linear residual over the matched stars) and a plain affine tilt plane scored on the same held-out stars. The polynomial is admitted onto the solution only if, out of sample, it beats the no-correction residual and does no worse than the affine plane; otherwise it is refused with a specific reason — too few points to test, a singular fit, worse than no correction, or an overfit the affine plane already matches — because a low-order polynomial from a sparse, center-weighted star set extrapolates badly toward the frame corners. Either way it records a verdict carrying the cross-validation residuals and the corner-versus-hull extrapolation reach, attaches the polynomial only when admitted, and never touches the world coordinate system, matched stars, or confidence.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "88-94"
+          },
+          {
+            "path": "src/engine/pipeline/m7_astrometry/sip_gate.ts",
+            "lines": "298-359"
+          },
+          {
+            "path": "src/engine/pipeline/m7_astrometry/sip_gate.ts",
+            "lines": "72-77"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM"
+      }
+    },
+    "stage:calibrate.tps_gate": {
+      "copy": {
+        "text": "After the plate solution is fixed, this sub-stage fits a thin-plate spline to the leftover position errors between matched catalog stars and the linear solution, modeling residual optical distortion; it runs only when distortion was flagged (residual scatter above about 1.2 arcseconds) and more than twenty stars are matched. Generalized cross-validation selects the spline's smoothing strength over a grid, and the spline is admitted only if it clears every arm of a four-part gate: its out-of-sample error must stay within a set multiple of its in-sample error, must beat applying no correction, and its peak displacement must stay under a physical refraction budget scaled to the field span — with too-few or lopsided control points, or a singular system, refused up front. The fitted model (or an explicit null) and the full verdict — the measured out-of-sample and in-sample residuals, the smoothing value chosen, and a machine-readable reason — are written to the solution's astrometry record. It only observes and annotates and never alters the world coordinate system, matched stars, or confidence, so the reported solve values are identical whether the spline is admitted or refused.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "111-121"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+            "lines": "410-439"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+            "lines": "103-109"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM"
+      }
+    },
+    "stage:m7_refine": {
+      "copy": {
+        "text": "After the plate is solved, this stage measures how well the fitted world coordinate system matches the star catalog, computing the residual scatter (RMS, in arcseconds) between each matched star's catalog position and its measured position on the frame. When distortion is flagged and more than twenty stars are matched, it also fits two optical-distortion models — a polynomial (SIP) and a thin-plate spline — but emits each one only if out-of-sample cross-validation shows it generalizes better than applying no correction, with the polynomial additionally required to beat a plain affine tilt plane; otherwise the model is left absent with a recorded reason. The results — residual scatter, a distortion-detected flag, and any admitted model — are written to the solution's astrometry record. This is a read-only measurement layered on top of the solve: it never alters the world coordinate system, the matched stars, or the confidence score, and any internal failure leaves the record absent rather than halting the pipeline.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "60-121"
+          },
+          {
+            "path": "src/engine/pipeline/m7_astrometry/sip_gate.ts",
+            "lines": "353-356"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+            "lines": "433-436"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU + Rust→WASM"
+      }
+    },
+    "stage:bc_measure": {
+      "copy": {
+        "text": "After the plate solve, this step fits a Brown-Conrady lens-distortion model to the frame's own solver-verified star matches, comparing each matched star's detected position against where the linear plate solution predicts it. It always fits the primary radial term (k1), but admits the higher-order radial terms (k2, k3) only when the matched stars actually reach the frame corners, and the tangential decentering terms only when the stars fill enough of the azimuth around the center — otherwise those terms are refused rather than fit from a coverage hole. The fit is a pure measurement: it reads the world coordinate system and matched stars but changes none of them, so the astrometric result is identical whether or not it runs. It reports honestly instead of guessing — no result when there is no usable coordinate solution, and a \"not measured\" record when fewer than ten matched pairs are available or the fit is degenerate; where the azimuthal coverage is too thin to separate lens distortion from a decentered optic, it still reports k1 but flags the magnitude as upper-bound-honest and the sign as tentative. It also records the residual scatter before and after correction and, when the higher-order terms are available, whether the radial profile changes sign across the field.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1731-1752"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/lens_distortion_refit.ts",
+            "lines": "302-324"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/lens_distortion_refit.ts",
+            "lines": "390-419"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:bc_rematch": {
+      "copy": {
+        "text": "This step recovers stars near the frame edges that the initial plate solve missed because its matching had not yet accounted for lens distortion. It applies the measured distortion model to the catalog star positions, re-matches the full detection list against them, re-runs the astrometric (SIP) refinement on the enlarged set, and keeps a recovered star only if its residual after that refit lands inside the same acceptance envelope the original matches already cleared; when a native science image is present it additionally requires forced photometry to confirm real flux at the predicted position, and records that flux check as not-measured when no such image is available. The denser match set replaces the original solution only when it clears two guards together: a never-worse structural check (strictly more matched stars and residual error no worse than before) and a wrong-sign control that confirms the recovery beats a rerun with the distortion sign reversed. If either guard fails, the original solution is kept unchanged and left byte-identical — a well-corrected narrow field recovers nothing and keeps — so this step can never degrade a good solve. The match counts before and after, the residuals, the recovered stars, and the keep-or-replace decision are recorded.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1786-1797"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/lens_distortion_rematch_pass.ts",
+            "lines": "282-337"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/lens_distortion_rematch.ts",
+            "lines": "369-397"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:calibrate.hardware_profile": {
+      "copy": {
+        "text": "This sub-stage runs after the plate solution and star matching are final and produces a forensic instrument profile. From the solved pixel scale it infers a focal length, and from the matched stars — each carrying per-channel brightness samples and a catalog color — it fits approximate radial-distortion and vignetting terms, a per-channel color bias, and flags for likely filters or sensor modifications. The distortion and vignetting fit runs only when at least ten clean matched stars survive after planetary markers and gross-residual outliers are excluded; below that it falls back to a coarse single-coefficient estimate, and every distortion value is labeled approximate rather than a calibrated lens model. The profile is written to the receipt's hardware block — null when there is no solution to profile — and carries a label tied to the final match generation, so a profile based on an outdated match set would be flagged rather than silently trusted.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m2_hardware/hardware_profiler.ts",
+            "lines": "155-235"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/hardware_profiler.ts",
+            "lines": "277-293"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "1490-1493"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:render_apply_sip": {
+      "copy": {
+        "text": "This display-only step redraws the on-screen preview with the fitted lens distortion removed: it reads the preview image, the fitted distortion polynomial (SIP), and the reference pixel, then applies a single inverse warp so the distortion the solve measured is taken out of the pixels the viewer sees. It rewrites only the preview image and never touches the world coordinate system, the matched stars, or the solve numbers. It is turned off by default and reports a skip when the feature flag is off, when the solve carried no distortion polynomial, or when preview rendering is disabled; it reports applied only when it actually re-warps the preview, and the warp is a provable no-op that returns the image untouched when no distortion is present. It writes no receipt entry, and on any rendering error it leaves the preview unchanged.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1856-1885"
+          },
+          {
+            "path": "src/engine/pipeline/constants/pipeline_config.ts",
+            "lines": "595-602"
+          },
+          {
+            "path": "src/engine/core/ImageProcessor.ts",
+            "lines": "434-443"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:spcc": {
+      "copy": {
+        "text": "Spectrophotometric color calibration. After the plate solve, measure each matched star's brightness in the red, green, and blue channels at its catalog-matched position on the retained full-resolution linear frame, then fit the instrument's color response — a straight line relating instrumental blue-minus-red color to catalog Gaia BP-RP color — plus a photometric zero point that transfers instrumental magnitude onto the Gaia G scale. The color fit is invariant to sensor gain, but the absolute zero point rides an approximate gain model and is demoted to a hint whenever no exposure time is present; below eight usable stars the color fit is left uncalibrated while a zero point may still be recorded. Stars whose catalog band is not Gaia G are kept out of the fit rather than blended across two photometric systems, and air mass is recorded as absent rather than fabricated when no trusted clock or location is available. The stage refuses honestly with a null-valued block for a monochrome sensor, an unknown or unsupported color-filter layout, or a downscaled solve whose full-resolution coordinates were not restored, and it works only in pixel space, never modifying the coordinate solution.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/science.ts",
+            "lines": "315-371"
+          },
+          {
+            "path": "src/engine/pipeline/m8_photometry/spcc_calibrator.ts",
+            "lines": "673-712"
+          },
+          {
+            "path": "src/engine/pipeline/stages/science.ts",
+            "lines": "383-388"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:spcc_render_gains": {
+      "copy": {
+        "text": "A display-only step that redraws the on-screen preview using the per-channel white-balance gains the color-calibration step derived from catalog star colors, replacing the earlier estimate taken from the average color of the bright stars in the frame. The gains are anchored to the green channel and clamped to a safe range, and the sky background level is left untouched so the background stays neutral. It applies only if those gains passed their quality check and previews are enabled; otherwise it makes no change and reports a skip, leaving the preview on its existing empirical white balance. Because the plate-solve, point-spread, and forced-photometry measurements all read the original unscaled linear data, no measured value changes, and any rendering error is caught and leaves the preview as it was.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1962-1981"
+          },
+          {
+            "path": "src/engine/core/ImageProcessor.ts",
+            "lines": "197-205"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:psf_field": {
+      "copy": {
+        "text": "After the plate solve, this stage measures how star images are shaped across the frame (the point-spread function). Using the solved, catalog-matched star positions, it fits a two-dimensional Gaussian to each star on the image's own luminance pixel grid — native or 2×2-binned, never resampled before measurement — producing per-star full-width-at-half-maximum, ellipticity, and orientation, summarized as a three-by-three map across the field. It reads only the luminance buffer and never alters the world-coordinate solution, the matched-star list, or the solve confidence. Results are written to the psf_field receipt block; if there is no solution, no image buffer, or the buffer dimensions are inconsistent, the stage records psf_field as null instead of a fabricated map.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1990-1996"
+          },
+          {
+            "path": "src/engine/pipeline/stages/psf_characterize.ts",
+            "lines": "43-77"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_field.ts",
+            "lines": "5-10"
+          }
+        ]
+      }
+    },
+    "stage:forced_confirm": {
+      "copy": {
+        "text": "This step independently checks whether the plate solution is real by testing for the catalog stars it predicts rather than trusting the fit. It projects reference-catalog positions through the fitted world-coordinate solution — re-projecting through the active lens-distortion model when one is present so the probes land on native pixels — measures the brightness at each predicted position on the untouched full-resolution luminance frame, and applies a single set-level significance test that compares the real set's confirmation rate against repeated scrambled on-frame draws made through the identical per-star test; the set passes only when its excess clears the calibrated threshold and more stars confirm than the null would yield. The outcome — how many positions were examined and confirmed, the set-level significance, a pass-or-fail flag, and the grid label — is written to a separate confirmation record and later summarized as confirmed, refused, insufficient-targets, or not-run, while the coordinate solution, its scale, matched stars, and confidence are never altered. When there is no valid world-coordinate solution, no coherent science frame, or no in-frame catalog stars, it records an honest not-measured marker instead of a number, and the per-color check is likewise reported as not measured because only combined luminance is available at this stage.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "2928-2966"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "2987-3011"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "2069-2084"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "stage:psf_attribution": {
+      "copy": {
+        "text": "After the point-spread function has been measured, this step explains the measured star shapes by predicting the physical effects that broaden or elongate them and comparing each prediction against the measurement, which stays the sole arbiter; it changes nothing it reads and is purely additive. It computes the expected star trail from an untracked mount using exposure time, declination, and pixel scale, then tests it: a predicted trail below about half a pixel is marked negligible, and otherwise it is confirmed only when the measured elongation agrees in direction to within about twenty degrees and in size to within about a third — a confirmed trail is then trusted as exact for its share and the rest reported as an unexplained core. It also reports the diffraction limit per color channel, an approximate seeing estimate scaled by air mass from an assumed zenith value, and — only when both the observation time and observer location are trusted — an approximate atmospheric-refraction stretch and chromatic-dispersion elongation, which are predictors only and are never fed back into the solve; when the clock or location is untrusted these are recorded as not measured with the reason stated. From the trail test it infers whether the mount tracked, did not track, or is indeterminate, and every quantity is tagged by how it was obtained (calculated, confirmed, fitted, approximate, or inferred) so a fabricated number is never presented as a measurement.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/psf_attribution.ts",
+            "lines": "358-400"
+          },
+          {
+            "path": "src/engine/pipeline/stages/psf_attribution.ts",
+            "lines": "466-505"
+          },
+          {
+            "path": "src/engine/pipeline/stages/psf_attribution.ts",
+            "lines": "625-643"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "TypeScript · CPU"
+      }
+    },
+    "boundary:wgsl_structs": {
+      "copy": {
+        "text": "This is the layout agreement for the small parameter blocks the host code packs and hands to the graphics compute shaders. The shading language aligns each field to its own size, aligns a three-component vector to sixteen bytes, and rounds a uniform block's total size up to a multiple of sixteen — so the host that fills the buffer must insert exactly the same padding, or the shader reads every field shifted. Concrete cases follow this rule: the parameterized demosaic shader takes a forty-eight-byte block of image dimensions, colour-filter offsets, black and white levels, and white-balance gains ending in two explicit padding words, while the quad-match shader takes a sixteen-byte block of two counts, a tolerance, and a cap. One older sixteen-byte demosaic block is embedded verbatim in the native desktop build and is frozen, because a single shader is consumed under several bind layouts and any field change would ripple across all of them — new layouts are introduced beside it rather than by editing it.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "226-244"
+          },
+          {
+            "path": "src/engine/pipeline/m3_gpu_preprocess/shaders/demosaic_bayer_param.wgsl",
+            "lines": "5-34"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/gpu_quads/gpu_quad_backend.ts",
+            "lines": "65-70"
+          }
+        ]
+      },
+      "badges": {
+        "substrate": "WGSL · GPU (WebGPU); TypeScript buffer packing · CPU"
+      }
+    }
+  }
+}

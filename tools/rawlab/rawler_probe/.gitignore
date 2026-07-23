@@ -1,0 +1,9 @@
+# Build artifacts NEVER belong in the repo (vite watcher + git hygiene). This
+# crate builds with CARGO_TARGET_DIR pointed OUTSIDE the repo tree; these lines
+# are defence-in-depth in case someone builds with the default target dir.
+/target/
+target/
+**/*.wasm
+*.rlib
+*.rmeta
+# Cargo.lock IS committed (binary-ish crate: reproducible dep graph for the cutover).

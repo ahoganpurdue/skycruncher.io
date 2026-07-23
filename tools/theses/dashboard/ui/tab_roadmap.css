@@ -1,0 +1,296 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ROADMAP tab — work items + client-side dependency DAG.
+   Reuses the ledger vocabulary (space-black grounds, sky accent, emerald=done,
+   steel=closed/retired, amber reserved for the un-bypassable HUMAN-REQUIRED
+   warning, danger red never used for routine state — only the warning border).
+   Kept in a dedicated file so three parallel surgeons never touch style.css tail.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rm-intro {
+  margin-top: 16px;
+  font: 12px var(--sans);
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 820px;
+}
+
+/* ── toolbar ─────────────────────────────────────────────────────────────── */
+.rm-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--panel);
+}
+.rm-tb-left, .rm-tb-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rm-tb-count { font: 11px var(--mono); letter-spacing: 0.08em; color: var(--ink-2); }
+.rm-tb-human { font: 10px var(--mono); letter-spacing: 0.06em; color: var(--warn); }
+.rm-tb-tokwarn { font: 10px var(--mono); color: var(--muted); border: 1px dashed var(--line-strong); border-radius: 3px; padding: 2px 8px; }
+
+.rm-btn {
+  appearance: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--panel-2);
+  color: var(--ink-2);
+  font: 10.5px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.rm-btn:hover:not(:disabled) { border-color: var(--steel); color: var(--ink); }
+.rm-btn:disabled { opacity: 0.4; cursor: not-allowed; border-style: dashed; }
+.rm-btn.emit { color: var(--accent); border-color: var(--accent-line); background: var(--accent-dim); }
+.rm-btn.emit:hover:not(:disabled) { border-color: var(--accent); }
+.rm-btn.ghost { background: none; color: var(--muted); }
+
+.rm-notice { font: 11px var(--mono); letter-spacing: 0.03em; }
+.rm-notice.ok { color: var(--pass); }
+.rm-notice.err { color: var(--warn); }
+
+.rm-tier-hint { font: 10px var(--sans); font-style: italic; text-transform: none; letter-spacing: 0; color: var(--faint); margin-left: 4px; }
+
+/* ── item list ───────────────────────────────────────────────────────────── */
+.rm-list { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); overflow: hidden; }
+
+.rm-item { border-bottom: 1px solid var(--line); }
+.rm-item:last-child { border-bottom: none; }
+.rm-item.checked { background: var(--panel-2); }
+
+.rm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  cursor: pointer;
+  min-width: 0;
+}
+.rm-row:hover { background: var(--panel-2); }
+.rm-caret { color: var(--faint); font-size: 10px; transition: transform 0.12s; flex: none; }
+.rm-item.open .rm-caret { transform: rotate(90deg); color: var(--accent); }
+.rm-title { color: var(--ink); font-size: 13px; line-height: 1.35; flex: 1 1 auto; min-width: 0; }
+
+/* editorial status chip (no forced uppercase — the strings are prose).
+   These statuses are long curated prose (e.g. "blocked (owner 3-rig ruling: 2/3
+   confirmed, morning ruling pending)"), so the chip MUST wrap: a nowrap chip was
+   ~600px wide, clipped by the list's overflow:hidden on mobile and crushing the
+   title into a one-word-per-line column on desktop. It wraps inside a capped box
+   and yields horizontal room to the title. */
+.rm-status {
+  display: inline-flex;
+  align-items: center;
+  font: 10px var(--mono);
+  letter-spacing: 0.03em;
+  line-height: 1.35;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: min(100%, 46ch);
+}
+.rm-status.mini { font-size: 9px; padding: 2px 6px; }
+.rm-status.done { color: var(--pass); border-color: var(--pass-line); background: var(--pass-dim); }
+.rm-status.run { color: var(--accent); border-color: var(--accent-line); background: var(--accent-dim); }
+.rm-status.steel { color: var(--steel); border-color: var(--steel-line); background: var(--steel-bg); }
+.rm-status.parked { color: var(--faint); border-style: dashed; }
+.rm-status.blocked { color: var(--muted); border-style: dashed; }
+.rm-status.open { color: var(--accent); border-color: var(--accent-line); }
+
+/* live telemetry chip */
+.rm-live {
+  font: 9.5px var(--mono);
+  letter-spacing: 0.07em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+  flex: none;
+}
+.rm-live.na { color: var(--faint); border-style: dashed; }
+.rm-live.run { color: var(--accent); border-color: var(--accent-line); background: var(--accent-dim); }
+.rm-live.done { color: var(--pass); border-color: var(--pass-line); }
+.rm-live.parked { color: var(--faint); border-style: dashed; }
+.rm-live.queued { color: var(--ink-2); }
+.rm-live.gate { color: var(--warn); border-color: var(--warn-line); background: var(--warn-dim); }
+
+/* doc reference tags */
+.rm-docrefs { display: inline-flex; gap: 5px; flex-wrap: wrap; flex: none; }
+.rm-docref { font: 9.5px var(--mono); color: var(--faint); border: 1px solid var(--line); border-radius: 3px; padding: 1px 6px; }
+
+/* lane checkboxes */
+.rm-lanes { display: inline-flex; gap: 6px; flex: none; }
+.rm-chk {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font: 9.5px var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  cursor: pointer;
+}
+.rm-chk:hover { border-color: var(--steel); color: var(--ink-2); }
+.rm-chk .rm-box {
+  width: 12px; height: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px; color: var(--bg);
+}
+.rm-chk.on { color: var(--accent); border-color: var(--accent-line); background: var(--accent-dim); }
+.rm-chk.on .rm-box { background: var(--accent); border-color: var(--accent); }
+
+/* ── pre-flight panel ────────────────────────────────────────────────────── */
+.rm-preflight {
+  border-top: 1px dashed var(--line-strong);
+  background: var(--panel);
+  padding: 12px 16px 14px;
+}
+.rm-pf-head { font: 10.5px var(--mono); letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.rm-cls { font: 9px var(--mono); letter-spacing: 0.08em; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+.rm-cls.human { color: var(--warn); border: 1px solid var(--warn-line); background: var(--warn-dim); }
+.rm-cls.proxy { color: var(--pass); border: 1px solid var(--pass-line); background: var(--pass-dim); }
+
+.rm-warn {
+  border: 1px solid var(--warn-line);
+  border-left: 3px solid var(--warn);
+  background: var(--warn-dim);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.rm-warn-h { font: 700 12px var(--mono); letter-spacing: 0.06em; color: var(--warn); }
+.rm-warn-b { font-size: 12px; color: #ecd9ad; line-height: 1.55; margin-top: 5px; }
+.rm-hazards { margin: 8px 0 0; padding-left: 18px; color: #ecd9ad; font-size: 11.5px; }
+
+.rm-ok { font: 11.5px var(--mono); color: var(--pass); background: var(--pass-dim); border: 1px solid var(--pass-line); border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; }
+
+.rm-decs { display: grid; gap: 5px; }
+.rm-decrow { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font: 11px var(--mono); }
+.rm-decrow code { color: var(--ink-2); }
+.rm-dec-state { color: var(--muted); font-size: 10px; }
+.rm-dec-why { color: var(--faint); font-size: 10.5px; font-family: var(--sans); }
+.rm-dec-plain { flex-basis: 100%; margin-top: 3px; color: var(--ink-2); font-size: 11px; font-family: var(--sans); line-height: 1.5; }
+.rm-dec-plain b { color: var(--accent); font-weight: 600; }
+
+/* ── detail / prereq tree ────────────────────────────────────────────────── */
+.rm-detail { background: var(--panel-2); padding: 14px 18px 18px; border-top: 1px solid var(--line); }
+.rm-oneliner { margin: 0 0 12px; color: var(--ink-2); font-size: 12.5px; line-height: 1.55; }
+.rm-block + .rm-block { margin-top: 14px; }
+.rm-block h4 { font: 10px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.rm-none { font: 11px var(--mono); color: var(--faint); }
+
+ul.rm-tree { list-style: none; margin: 0; padding: 0 0 0 4px; }
+ul.rm-tree ul.rm-tree { margin-left: 14px; border-left: 1px solid var(--line); padding-left: 12px; }
+.rm-node { padding: 4px 0; font-size: 12px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.rm-node > ul.rm-tree { flex-basis: 100%; }
+.rm-n-title { color: var(--ink); text-decoration: none; font-size: 12.5px; }
+.rm-n-title:hover { color: var(--accent); }
+.rm-n-dec { font: 9.5px var(--mono); color: var(--muted); }
+.rm-node.cycle .rm-n-mark { color: var(--warn); font: 700 10px var(--mono); letter-spacing: 0.08em; }
+.rm-node.unmapped .rm-n-mark { color: var(--warn); font: 700 10px var(--mono); letter-spacing: 0.08em; border: 1px solid var(--warn-line); border-radius: 3px; padding: 1px 6px; }
+.rm-node.cycle code, .rm-node.unmapped code { color: var(--ink-2); font-size: 11px; }
+.rm-n-why { color: var(--faint); font-size: 10.5px; font-family: var(--sans); }
+
+/* id / unlocks chips */
+.rm-idchips, .rm-decchips { display: flex; gap: 6px; flex-wrap: wrap; }
+.rm-idchip {
+  display: inline-flex; align-items: center;
+  font: 10.5px var(--mono); text-decoration: none;
+  color: var(--accent); border: 1px solid var(--accent-line); background: var(--accent-dim);
+  border-radius: 3px; padding: 3px 9px;
+}
+.rm-idchip:hover { border-color: var(--accent); }
+.rm-idchip.dead { color: var(--warn); border-color: var(--warn-line); background: var(--warn-dim); border-style: dashed; }
+
+.rm-decchip { font: 10px var(--mono); border-radius: 3px; padding: 3px 8px; }
+.rm-decchip.human { color: var(--warn); border: 1px solid var(--warn-line); background: var(--warn-dim); }
+.rm-decchip.proxy { color: var(--pass); border: 1px solid var(--pass-line); background: var(--pass-dim); }
+
+/* ── legend ──────────────────────────────────────────────────────────────── */
+.rm-legend {
+  margin-top: 28px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  display: grid;
+  gap: 6px;
+  font: 11px var(--sans);
+  color: var(--muted);
+  line-height: 1.55;
+}
+.rm-legend .rm-leg-h { font: 10px var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+.rm-legend b { color: var(--ink-2); font-weight: 600; }
+
+/* ── decisions-tab join affordance (part C) ──────────────────────────────── */
+a.rm-unlocks {
+  display: inline-flex; align-items: center;
+  font: 10px var(--mono); letter-spacing: 0.06em;
+  text-decoration: none;
+  color: var(--accent);
+  border: 1px solid var(--accent-line);
+  background: var(--accent-dim);
+  border-radius: 3px;
+  padding: 2px 8px;
+}
+a.rm-unlocks:hover { border-color: var(--accent); }
+
+/* ── long-token safety (all widths) ──────────────────────────────────────────
+   ids / titles / dep keys have no spaces (verify-status-solved-unconfirmed-tier,
+   THESIS-2026-…) — let them break rather than force a horizontal scroll. */
+.rm-title, .rm-oneliner, .rm-n-title, .rm-n-why, .rm-dec-why, .rm-dec-plain { overflow-wrap: anywhere; }
+.rm-idchip, .rm-decchip, .rm-node code, .rm-decrow code, .rm-docref { overflow-wrap: anywhere; word-break: break-word; }
+
+/* ── mobile (≤720px) ─────────────────────────────────────────────────────────
+   The header row already wraps (flex-wrap, base). On a phone the two lane
+   checkboxes become a full-width pair of ≥40px tap targets on their own line,
+   the prereq tree de-indents and scrolls in its own box if a deep DAG demands
+   it, and paddings tighten. Presentation only — no markup / classifier change. */
+@media (max-width: 720px) {
+  .rm-intro { margin-top: 14px; }
+
+  /* the header row wraps ONLY here (desktop keeps its single-line right-aligned
+     column layout untouched). title stays inline with caret+status (base
+     flex:1 1 auto) and grows to fill line 1, pushing the docref/live/lane chips
+     onto the lines below rather than overflow-clipping off the right edge. */
+  .rm-row { flex-wrap: wrap; gap: 8px 10px; padding: 12px 14px; }
+
+  /* lanes: their own full-width row of two large, centred, tappable buttons */
+  .rm-lanes { flex: 1 1 100%; gap: 8px; margin-top: 2px; }
+  .rm-lanes .rm-chk { flex: 1 1 0; min-height: 40px; justify-content: center; font-size: 10px; padding: 6px 10px; }
+
+  /* toolbar: stack the two halves full-width, buttons stay tappable */
+  .rm-toolbar { justify-content: flex-start; gap: 10px 12px; padding: 10px 12px; }
+  .rm-tb-left, .rm-tb-right { width: 100%; }
+  .rm-tb-right { justify-content: flex-end; }
+  .rm-btn { min-height: 38px; }
+
+  /* detail + pre-flight: tighter side padding, decision rows already wrap */
+  .rm-detail { padding: 14px 12px 16px; }
+  .rm-preflight { padding: 12px 12px 14px; }
+
+  /* prereq DAG: shallower indent + its own scroll box so a deep chain never
+     widens the page (rm-node content still wraps, so this rarely engages) */
+  ul.rm-tree.root { max-width: 100%; overflow-x: auto; }
+  ul.rm-tree ul.rm-tree { margin-left: 8px; padding-left: 10px; }
+
+  .rm-legend { margin-top: 20px; }
+}

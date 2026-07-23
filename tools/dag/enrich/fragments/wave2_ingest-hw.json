@@ -1,0 +1,305 @@
+{
+  "fragment": "wave2_ingest-hw",
+  "derived_by": "opus enrichment wave-2 writer, domain ingest-hw (m1_ingestion + m2_hardware): EXIF/FITS trust ladders, optics/scale resolution, sensor_db, lens-distortion prior, decode arms",
+  "notes": [
+    "Domain = src/engine/pipeline/m1_ingestion/* + src/engine/pipeline/m2_hardware/*. Every emitted edge has from INSIDE that set.",
+    "Only pre-existing enrichment edge whose FROM is in this domain is fits_decoder.ts -> boundary:fits_nan_mask [data-flow] (enrichment.json, VERIFIED). Not restated here. No domain node carried a why before this fragment.",
+    "WHY omitted for fits_decoder.ts and lens_profiles.ts (both load-bearing, imported by 6 and 5): NOT read this session, so LAW 3 forbids a cited why. Their content is referenced only via edges whose cite lines live in files I DID read (metadata_reaper.ts / lens_distortion.ts).",
+    "src/engine/core/optics_manager.ts is OUTSIDE this domain (core/) but is a valid base 'to' node; used as the focal-length-resolution target for optics_resolver (the lying-EXIF focal trap lives there, cited on the optics_resolver call site I read).",
+    "optical_train.ts (SHA256(camera|lens|filter) identity key) has 0 in-domain importers in dag_base (rung-0 identity path is flag-gated / store-mediated), so it is neither an edge FROM node nor a why here — kept out to respect the load-bearing bar.",
+    "unit-conversion edges emitted where FROM authors/performs the conversion and TO is the consumer: optics_resolver 206.265*pitch/FL->arcsec/px (metrology), scale_manager NATIVE<->science 2x2-bin arcsec/px (detect). RA HOURS<->DEGREES at the FITS boundary is already covered by boundary:fits_io -> fits_decoder.ts in enrichment.json — not duplicated.",
+    "All edges verification=EXTRACTED (writer never self-marks VERIFIED).",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 2 node-decls + 3 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "src/engine/pipeline/m1_ingestion/metadata_reaper.ts": {
+      "why": {
+        "text": "The ingest front door: a unified forensic EXIF/FITS autopsy that turns a raw file buffer into HardMetadata plus the sensor pixel payload, and routes the RAW decode arm. It is honest-or-absent by construction — an absent capture time becomes '' (never wall-clock now, which would silently pass the ephemeris gate) and an absent lens becomes the truthy placeholder 'Unknown Lens'. Without it nothing downstream has metadata or pixels to work on, and the honest-absent defaults are what keep phantom planets and lying optics out of the solve.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+            "lines": "40-53"
+          },
+          {
+            "path": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+            "lines": "90-141"
+          },
+          {
+            "path": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+            "lines": "187-207"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m1_ingestion/rawler_decoder.ts": {
+      "why": {
+        "text": "The DEFAULT RAW decode arm since the 2026-07-11 cutover (#14): it decodes the full-frame Bayer CFA in a wasm crate and integer-demosaics the active area into normalized Float32 RGB, keeping the value in the raw-ADU-over-65535 domain (no black-subtract or white-scale by default, LAW 2). The libraw path is retained as a cold fallback selected by VITE_DECODER_RAWLER=0. Without this module the default RAW ingest has no decoder; a wrong flag read would silently swap decode contracts, so the flag defaults to true and any read error also returns true.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+            "lines": "64-76"
+          },
+          {
+            "path": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+            "lines": "503-595"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m1_ingestion/format_registry.ts": {
+      "why": {
+        "text": "The single source of truth for which formats the instrument can ingest: magic-byte dispatch where the first positive sniff wins (so CR2's TIFF+'CR' signature must precede the bare-TIFF fallback), plus the science-vs-demo honesty tier every downstream surface reads. Both the pipeline and the UI derive from this one table, so there are no scattered extension checks. Without it, adding or reordering a format would require touching the front end and could mis-route a CR2 to the demo raster decoder or over-claim calibrated radiometry on an 8-bit demo frame.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m1_ingestion/format_registry.ts",
+            "lines": "88-124"
+          },
+          {
+            "path": "src/engine/pipeline/m1_ingestion/format_registry.ts",
+            "lines": "305-311"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m2_hardware/sensor_db.ts": {
+      "why": {
+        "text": "The camera profile database: per-body pixel pitch, QE curve, RGB->XYZ color matrix, read noise, and vendor gain curves, looked up by camera-body string. The solve-critical field is pixel_size_um — a full-frame body silently defaulting to the APS-C 4.30um pitch produces roughly a 45% scale error that pins an anchored sweep off the sky, so lookups are exact-first and return null on ambiguity rather than guessing. getGainForSetting converts a ZWO gain SETTING to e-/ADU (dividing by 2^adu_bit_shift for the 12->16-bit ADC expansion). Without accurate pitch the EXIF scale rung and every photometric calibration are wrong.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+            "lines": "132-142"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+            "lines": "647-655"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+            "lines": "717-735"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m2_hardware/identifier_matcher.ts": {
+      "why": {
+        "text": "The one canonical identifier->registry lookup (camera body / lens / rig tag), so the loose-substring bug class cannot recur: exact-first, then overlap-scored substring, then a residual-token guard that refuses a confident match when the query drops or adds a distinguishing token (R6 vs R6 II, T7 vs T7i). Ambiguity resolves to an honest null over a wrong entry. Without this shared ladder, a longer wrong body outranked an exact hit and mis-resolved 5D Mark II to the Mark III profile — a silent scale error.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m2_hardware/identifier_matcher.ts",
+            "lines": "88-95"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/identifier_matcher.ts",
+            "lines": "113-154"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m2_hardware/optics_resolver.ts": {
+      "why": {
+        "text": "The EXIF-derived pixel-scale entry point that kills the slow blind Tri-Lock default for DSLR frames: when the file carries no header scale but does carry an EXIF focal length and a known sensor body, the scale is plain geometry (206.265 * pitch_um / FL_mm). It returns null when the focal length is absent, the camera model is empty (an empty search would substring-match every profile), or no sensor profile exists — falling back honestly to the blind path. The focal length is nominal, so the result seeds the solver but does not earn the FITS-header trust skip.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m2_hardware/optics_resolver.ts",
+            "lines": "54-90"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m2_hardware/scale_manager.ts": {
+      "why": {
+        "text": "The central coordinate/scale translator between three resolution spaces: NATIVE sensor pixels, the 2x2-binned science buffer used for detection, and the browser preview canvas. It converts both (x,y) positions and arcsec/px scales across those spaces (the science scale is roughly double the native because the buffer is half-size each axis). Without it, detected stars, overlays, and the pixel scale would be reported in the wrong resolution space and misalign with the sensor grid.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m2_hardware/scale_manager.ts",
+            "lines": "24-39"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/scale_manager.ts",
+            "lines": "78-95"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m2_hardware/lens_distortion.ts": {
+      "why": {
+        "text": "The lens-distortion prior as COORDINATE-ledger functions: radial Brown-Conrady (k1,k2) that moves star POSITIONS so a barrel-warped frame's asterism code lines up with the rectilinear catalog before quad formation, with the native->corrected inverse solved by a 10-iteration radial fixed point; the original native pixels are kept for photometry (never an image resample). resolveLensDistortion returns a NO-OP (null) unless a lens is confidently resolved and rejects the placeholder/lying EXIF, so it must return null for the bundled CR2 whose 50mm/Unknown-Lens EXIF lies. Without that placeholder guard the prior would fire on a lying EXIF and break the byte-identical-by-construction guarantee.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+            "lines": "64-106"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+            "lines": "302-372"
+          }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "to": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts:450",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "camera_model string + FITS GAIN header card (ZWO gain SETTING, integer) -> SensorProfile + gain_e_adu (e-/ADU) seeded onto the FrameContext",
+        "transform": "parseFitsMetadata: findSensorByCamera(camera_model) then getGainForSetting(sensor, GAIN) = piecewise-linear over gain_curve, divided by 2^adu_bit_shift for the 12->16-bit ADC expansion; falls back to gain_e_adu 0.05 when no gain curve resolves (honest default)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "to": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts:549",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "flag-and-format gated decode-arm selection inside extractRawSensorData",
+        "transform": "RAF (Fuji X-Trans) sets forceLibrawArm and bypasses rawler unconditionally (no X-Trans on the rawler wasm rail); otherwise isRawlerDecoderEnabled() (default TRUE) routes to decodeRawlerForPipeline, and VITE_DECODER_RAWLER=0/'false' selects the retained libraw cold path (byte-identical pre-cutover)",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the decoder-cutover #14 fork at the module seam: rawler is the default RAW arm but libraw is a never-delete cold path, and RAF must force libraw because the rawler crate hardcodes a 2x2 Bayer CFA and cannot decode the 6x6 X-Trans mosaic. The two arms carry different contracts, so the selection is a real fork, not a drop-in.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+            "lines": "541-559"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "to": "src/engine/pipeline/m1_ingestion/fits_decoder.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts:418",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "FITS byte buffer -> parsed header cards + HardMetadata mapping + decoded image + wide-sample value domain + NaN mask",
+        "transform": "parseFitsMetadata calls parseFitsHeader -> fitsHeaderToHardMetadata (header cards -> HardMetadata: RA degrees->hours, DATE-OBS->timestamp) and computeFitsValueDomain (retains physical domain for BITPIX +/-32 wide-sample frames as recording only; the normalized [0,1] pixels are untouched, null on the int16 SeeStar path)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+      "to": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts:503",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "decode payload { data: Float32 interleaved RGB (length active_w*active_h*3, values [0,1]), width/height (active area), stride, isDemosaiced:true, arrowTable, rawler: RawlerCfaRecord } returned to extractRawSensorData",
+        "transform": "decodeRawlerForPipeline: wasm full-frame CFA -> integer-bilinear demosaic of the ACTIVE area -> rgb16 * (1/65535) in the raw-ADU-pedestal domain (NO black-subtract/white-scale by default, LAW 2); the additive rawler record (OB areas, per-channel levels, WB, active/crop rects) is carried honest-or-absent (undefined on the libraw path)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m1_ingestion/format_registry.ts",
+      "to": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/m1_ingestion/format_registry.ts:305",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "magic-byte format dispatch (RegistryFormatId | null) + honesty tier that gates the isRaw / science-vs-demo arm",
+        "transform": "sniffFormatId iterates FORMAT_REGISTRY and returns the FIRST descriptor whose magic-byte sniff matches (CR2's TIFF II|MM + 'CR' marker before the bare-TIFF fallback); metadata_reaper.detectMagicFormatSync delegates its FITS/CR2 verdict here, then routes RAW/FITS down the sensor-data arm and demo formats to the raster decoder",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/optics_resolver.ts",
+      "to": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m2_hardware/optics_resolver.ts:79",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "camera body string -> SensorProfile.pixel_size_um (micrometers)",
+        "transform": "findSensorByCamera(cameraModel) (exact-first, overlap-scored, ambiguity->null); a null profile or non-positive pitch makes resolveOpticsFromExif return null so the DSLR frame falls through to the blind solve instead of a fabricated scale",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/optics_resolver.ts",
+      "to": "src/engine/core/optics_manager.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m2_hardware/optics_resolver.ts:72",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "HardMetadata -> effective focal length (mm) + OpticsHint | null (the labelled assumption for the receipt)",
+        "transform": "OpticsManager.resolveFocalLengthWithHint trust ladder: explicit focal_length_hint_mm (user evidence) > hint-provider seam (wide-field prior, triggered by the fl===50 + placeholder-lens discriminator) > raw EXIF focal_length",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the LYING-EXIF trap gate: the bundled CR2 carries focal_length=50 (a factory-default lie; the real lens is a 14mm Rokinon) with no LensModel. Reading that 50 as truth would seed the scale search at the wrong focal length, so the resolver never trusts the raw EXIF focal directly — it routes through the hint providers, which encapsulate the fl===50 + placeholder-lens discriminator and can replace it with a named wide-field assumption that rides out to the receipt.",
+        "cites": [
+          {
+            "path": "src/engine/core/optics_manager.ts",
+            "lines": "102-131"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/optics_resolver.ts",
+      "to": "src/engine/pipeline/stages/metrology.ts",
+      "type": "unit-conversion",
+      "cite": "src/engine/pipeline/m2_hardware/optics_resolver.ts:54",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: focal length (mm) + sensor pixel pitch (micrometers); out: pixel scale (arcsec/px) tagged source EXIF_SENSOR_DB",
+        "transform": "computeScaleFromOptics = 206.265 * pitch_um / FL_mm (the 206265 arcsec/radian small-angle constant with the um->mm folding pre-applied); metrology consumes it as the EXIF/USER scale seed but it does NOT earn the FITS-header trust skip, so Vector Consensus still refines",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/scale_manager.ts",
+      "to": "src/engine/pipeline/stages/detect.ts",
+      "type": "unit-conversion",
+      "cite": "src/engine/pipeline/m2_hardware/scale_manager.ts:78",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: native arcsec/px + native (x,y) sensor pixels; out: science-buffer arcsec/px + science (x,y) coordinates (and the inverse scienceToNative)",
+        "transform": "science buffer = floor(sensor/2) on each axis (2x2 Bayer bin), so getscienceScale = nativeScale * (nativeW/scienceW) ~= x2 and scienceToNative maps detected stars back to sensor pixels by (nativeW/scienceW); NATIVE<->science<->PREVIEW are the three tracked resolution spaces",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m2_hardware/lens_distortion.ts:302",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "LensDistortionResolution { k1, k2, coeffs, provenance, lensKey, focalLength } -> undistorted MATCHING coordinates (native distorted -> corrected)",
+        "transform": "resolveLensDistortion picks the prior (rung-0 measured identity > USER_HINT > EXIF_TRUSTED), then makeBrownConradyDistortion(k1,k2,w,h).toCorrected undistorts detection POSITIONS via a 10-iteration radial fixed point (r normalized to the half-diagonal, center=frame center) BEFORE quad/code formation; ORIGINAL native pixel coordinates are kept for photometry (COORDINATE ledger, no pixel resample)",
+        "lossy": false
+      },
+      "why": {
+        "text": "resolveLensDistortion returns null (identity NO-OP) unless a lens is confidently resolved, and it rejects the truthy placeholder 'Unknown'/'Unknown Lens' via the same guard optics_manager uses, keying on the LENS MODEL and never on the (possibly lying) focal-length value. It must return null for the bundled CR2, which is what preserves the byte-identical-by-construction guarantee when no trusted lens resolves.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+            "lines": "170-181"
+          },
+          {
+            "path": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+            "lines": "354-360"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+      "to": "src/engine/pipeline/m2_hardware/lens_profiles.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m2_hardware/lens_distortion.ts:138",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "LensProfile.distortion table (keyed by sampled focal lengths) + a chosen focal length (mm) -> DistortionCoeffs { k1, k2, k3?, p1, p2 }",
+        "transform": "findLensByModel/LENS_DB then interpolateDistortion: exact-match passthrough, clamp to the sampled bounds, else linear blend of the two nearest sampled focal lengths; sorts a COPY of profile.focal_lengths so the shared LENS_DB is never mutated (radial k1/k2 only are applied downstream; p1/p2 carried but not applied)",
+        "lossy": false
+      }
+    }
+  ]
+}

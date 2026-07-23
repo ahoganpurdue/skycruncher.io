@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SKYCRUNCHER | Star Field Visualizer</title>
+    <style>
+      :root {
+        --bg: #0a0a0c;
+        --panel: #16161a;
+        --accent: #4f46e5;
+        --text: #e2e8f0;
+        --star: #fff;
+      }
+      body {
+        margin: 0;
+        padding: 20px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .title {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .title span {
+        color: var(--accent);
+      }
+      .stats {
+        display: flex;
+        gap: 20px;
+        font-family: monospace;
+        font-size: 14px;
+        color: #94a3b8;
+        align-items: center;
+      }
+      .stats input {
+        font-family: inherit;
+      }
+      .view-container {
+        flex: 1;
+        background: #000;
+        border-radius: 12px;
+        border: 1px solid #2d2d33;
+        position: relative;
+        overflow: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .placeholder {
+        color: #475569;
+        font-size: 14px;
+      }
+      svg {
+        background: #000;
+        cursor: crosshair;
+      }
+      .tooltip {
+        position: fixed;
+        background: var(--panel);
+        border: 1px solid #334155;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        pointer-events: none;
+        display: none;
+        z-index: 100;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      }
+      circle {
+        transition: stroke-width 0.1s;
+      }
+      circle:hover {
+        stroke: var(--accent);
+        stroke-width: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="title">SKYCRUNCHER <span>FORENSICS</span></div>
+      <div class="stats" id="stats">
+        <label>
+          Stars:
+          <input type="file" id="fileInput" accept=".json" title="Select extracted_stars.json">
+        </label>
+        <label>
+          Image:
+          <input type="file" id="imgInput" accept="image/*" title="Select source JPEG">
+        </label>
+        <span id="label">Drop JSON/JPEG here</span>
+      </div>
+    </div>
+ 
+    <div class="view-container" id="container">
+        <div class="placeholder">Selection needed for data visualization</div>
+    </div>
+ 
+    <div class="tooltip" id="tooltip"></div>
+ 
+    <script>
+      const fileInput = document.getElementById('fileInput');
+      const imgInput = document.getElementById('imgInput');
+      const container = document.getElementById('container');
+      const stats = document.getElementById('stats');
+      const tooltip = document.getElementById('tooltip');
+ 
+      let currentStars = null;
+      let currentImage = null;
+ 
+      fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) handleFile(file);
+      });
+ 
+      imgInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) handleImage(file);
+      });
+ 
+      container.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          container.style.borderColor = 'var(--accent)';
+      });
+      container.addEventListener('dragleave', () => {
+          container.style.borderColor = '#2d2d33';
+      });
+      container.addEventListener('drop', (e) => {
+          e.preventDefault();
+          container.style.borderColor = '#2d2d33';
+          const files = Array.from(e.dataTransfer.files);
+          files.forEach(f => {
+              if (f.name.endsWith('.json')) handleFile(f);
+              else if (f.type.startsWith('image/')) handleImage(f);
+          });
+      });
+ 
+      function handleFile(file) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+              try {
+                  currentStars = JSON.parse(ev.target.result);
+                  render();
+              } catch (err) {
+                  alert('Error parsing JSON: ' + err.message);
+              }
+          };
+          reader.readAsText(file);
+      }
+ 
+      function handleImage(file) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+              currentImage = ev.target.result;
+              render();
+          };
+          reader.readAsDataURL(file);
+      }
+ 
+      function render() {
+        if (!currentStars) return;
+        
+        container.innerHTML = '';
+        const stars = currentStars;
+ 
+        // Find bounds
+        let maxX = 0, maxY = 0, maxFlux = 0;
+        stars.forEach((s) => {
+          if (s.x > maxX) maxX = s.x;
+          if (s.y > maxY) maxY = s.y;
+          if (s.flux > maxFlux) maxFlux = s.flux;
+        });
+ 
+        const width = 5184; // Canonical res
+        const height = 3456;
+ 
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        svg.setAttribute("width", "95%");
+        svg.setAttribute("height", "95%");
+ 
+        if (currentImage) {
+            const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+            img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', currentImage);
+            img.setAttribute("width", width);
+            img.setAttribute("height", height);
+            img.setAttribute("opacity", "0.7");
+            svg.appendChild(img);
+        }
+ 
+        stars.forEach((s, i) => {
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", s.x);
+          circle.setAttribute("cy", s.y);
+          const r = Math.max(2, Math.sqrt(s.flux / maxFlux) * 15);
+          circle.setAttribute("r", r);
+          circle.setAttribute("fill", s.isPlanet ? "#fbbf24" : "white");
+          circle.setAttribute("opacity", s.isPlanet ? "1" : "0.8");
+ 
+          circle.addEventListener("mousemove", (e) => {
+            tooltip.style.display = "block";
+            tooltip.style.left = e.clientX + 15 + "px";
+            tooltip.style.top = e.clientY + 15 + "px";
+            tooltip.innerHTML = `
+                        <strong>Star #${i}</strong><br>
+                        X: ${s.x.toFixed(2)}<br>
+                        Y: ${s.y.toFixed(2)}<br>
+                        Flux: ${Math.round(s.flux)}<br>
+                        FWHM: ${s.fwhm?.toFixed(2) || "N/A"}<br>
+                        ${s.label ? "LABEL: " + s.label : ""}
+                    `;
+          });
+ 
+          circle.addEventListener("mouseout", () => {
+            tooltip.style.display = "none";
+          });
+ 
+          svg.appendChild(circle);
+        });
+ 
+        container.appendChild(svg);
+      }
+    </script>
+  </body>
+</html>
+    </script>
+  </body>
+</html>

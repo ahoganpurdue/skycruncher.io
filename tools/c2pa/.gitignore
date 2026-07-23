@@ -1,0 +1,9 @@
+# The c2patool binary + its shipped DEV test-signing certs are fetched, never committed.
+# Restore them with:  node tools/c2pa/fetch_c2patool.mjs
+bin/
+
+# Signed / verified assets and scratch outputs land under test_results/c2pa/ (already
+# globally gitignored), but ignore any stray local outputs written into the lane too.
+out/
+*.signed.png
+*.c2pa

@@ -1,0 +1,652 @@
+{
+  "fragment": "stage_order",
+  "derived_by": "replay_stage_order.js union-merge (mechanical, zero-LLM)",
+  "notes": [
+    "union-merged stage-order walk covering filetype(s): cr2, fits",
+    "23 unique runtime stage ids, 22 VERIFIED stage-order edges",
+    "walked_by tags exist only for receipt classes actually replayed — absent classes are honestly absent",
+    "edges are stage_finished EMISSION-ORDER adjacencies; aggregate stages (extract/solve/calibrate) finish after their sub-stages"
+  ],
+  "nodes": {
+    "stage:load": {
+      "why": null,
+      "walked_by": [
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0"
+      }
+    },
+    "stage:extract.decode": {
+      "why": null,
+      "walked_by": [
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0"
+      }
+    },
+    "stage:extract.luminance": {
+      "why": null,
+      "walked_by": [
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0"
+      }
+    },
+    "stage:extract.detect": {
+      "why": null,
+      "walked_by": [
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0"
+      }
+    },
+    "stage:extract.spectral_peek": {
+      "why": null,
+      "walked_by": [
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0"
+      }
+    },
+    "stage:extract": {
+      "why": null,
+      "walked_by": [
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0"
+      }
+    },
+    "stage:metrology": {
+      "why": null,
+      "walked_by": [
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0"
+      }
+    },
+    "stage:solve.quad_wasm": {
+      "why": null,
+      "walked_by": [
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "receipt_write": "solution"
+      }
+    },
+    "stage:solve": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:calibrate.m7_analyze": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:calibrate.sip_gate": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:calibrate.tps_gate": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:m7_refine": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "receipt_write": "astrometry",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:bc_measure": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "receipt_write": "lens_distortion_measured",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:bc_rematch": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:calibrate.hardware_profile": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:render_apply_sip": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:spcc": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "receipt_write": "spcc",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:spcc_render_gains": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:psf_field": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:psf_attribution": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:forced_confirm": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    },
+    "stage:calibrate": {
+      "why": null,
+      "walked_by": [
+        "cr2",
+        "fits"
+      ],
+      "badges": {
+        "observed_in": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+        "receipt_version": "2.27.0",
+        "merge_notes": [
+          "observed_in=test_results/dag_receipts/cr2_2026-07-17T01-29-43-816Z.receipt.json from cr2 walk"
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "stage:load",
+      "to": "stage:extract.decode",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.luminance",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:extract.luminance",
+      "to": "stage:extract.detect",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:extract.spectral_peek",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:extract.spectral_peek",
+      "to": "stage:extract",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:metrology",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:metrology",
+      "to": "stage:solve.quad_wasm",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:solve.quad_wasm",
+      "to": "stage:solve",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:calibrate.m7_analyze",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:calibrate.m7_analyze",
+      "to": "stage:calibrate.sip_gate",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:calibrate.sip_gate",
+      "to": "stage:calibrate.tps_gate",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:calibrate.tps_gate",
+      "to": "stage:m7_refine",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:m7_refine",
+      "to": "stage:bc_measure",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:bc_measure",
+      "to": "stage:bc_rematch",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:bc_rematch",
+      "to": "stage:calibrate.hardware_profile",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:calibrate.hardware_profile",
+      "to": "stage:render_apply_sip",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:render_apply_sip",
+      "to": "stage:spcc",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:spcc",
+      "to": "stage:spcc_render_gains",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:spcc_render_gains",
+      "to": "stage:psf_field",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:psf_attribution",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:psf_attribution",
+      "to": "stage:forced_confirm",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    },
+    {
+      "from": "stage:forced_confirm",
+      "to": "stage:calibrate",
+      "type": "stage-order",
+      "cite": "test_results/e2e/seestar_2026-07-16T23-30-58-723Z/receipt.json",
+      "verification": "VERIFIED",
+      "how": {
+        "what": "stage_finished emission order (StageRecord fold)",
+        "transform": "consecutive adjacency in receipt.stage_records — fold order, not asserted data hand-off",
+        "lossy": false
+      },
+      "walked_by": [
+        "cr2",
+        "fits"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@skycruncher/results-etl",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Results ETL lane — flatten banked solve/crash receipts into partitioned parquet (frames/stars/crashes) and publish to R2 for the DuckDB-over-R2 results query surface (TEST/DEV tier, schema NOT locked). Incubator lane, lane-local deps (never installs into root node_modules). NEVER import from the vite app bundle.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "etl": "node --max-old-space-size=8192 etl_receipts.mjs",
+    "upload": "node upload_r2.mjs",
+    "verify": "node verify_r2.mjs",
+    "drain": "node drain_to_r2.mjs",
+    "query": "node query_results.mjs"
+  },
+  "dependencies": {
+    "@duckdb/node-api": "1.5.4-r.1"
+  }
+}

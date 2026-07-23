@@ -1,0 +1,8 @@
+{
+  "name": "golden",
+  "description": "LAW 7 layout-contract battery (tools/contracts/check_layout_contracts.mjs --json) → deposited counts vs docs/GATES.md. Fast, no solve, no corpus enumeration.",
+  "manifest": { "source": "none", "comment": "singleton executor — the battery runs once; no frames to enumerate." },
+  "executor": "golden_vector",
+  "lane": "light",
+  "default_label": "QUIET-BASELINE"
+}

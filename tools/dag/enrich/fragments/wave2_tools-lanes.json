@@ -1,0 +1,367 @@
+{
+  "fragment": "wave2_tools-lanes",
+  "derived_by": "opus wave-2 writer (domain: tools/psf, tools/stack, tools/dslr, tools/corpus, tools/atlas)",
+  "notes": [
+    "FROM node is INSIDE the tools-lanes domain on every edge. Consumer-of-boundary relationships (a tool reading the atlas_rows / libraw_mem_image contract) are typed 'contract' rather than 'data-flow' because the honest data direction is boundary->tool and this domain cannot place a boundary node as FROM — a contract edge reads 'this tool conforms to that layout' without reversing the flow.",
+    "Did NOT restate the four already-declared edges whose FROM is in this domain: tools/atlas/atlas_to_arrow.mjs->boundary:arrow_seam, tools/atlas/build_gaia_cells.mjs->boundary:atlas_gaia_cells, tools/atlas/merge_hyg_sectors.mjs->boundary:atlas_rows, tools/stack/fits_io.mjs->boundary:fits_io (all present in enrichment.json).",
+    "The Gaia-DEGREES / HYG-HOURS per-row discriminator (the 15x mislocation trap) is DUPLICATED across three separate lane implementations — the corpus runner's `norm`, the stack lane's `loadAtlas` (ported verbatim), and the engine's star_catalog_adapter (out of domain, already edged). Each occurrence is edged separately on purpose: the duplication IS the finding (LAW 4 incubator drift risk).",
+    "decode_cr2 producer edge grounded at the CONSUMER wiring (measure_and_clean.mjs imports fixHotPixelsCFA/demosaicBilinear/splitRGB and builds the linear planes with them); the boundary:libraw_mem_image->decode_cr2 crossing is already declared, so this adds only the downstream hand-off.",
+    "solve_lib->stack and fits_io->stack over-import the base import graph, but the semantic payload (raw-float-original-units read contract, ported solve machinery + REFINE_MIN_N deep-verify gate) is the value the base import edge cannot carry."
+  ],
+  "nodes": {
+    "tools/corpus/run_corpus.mjs": {
+      "why": {
+        "text": "Headless triage sweep over every FITS (and CR2) under the corpus dir plus the M66 control: real WASM extraction + matcher + verification against the real atlas, emitting a per-file verdict table. It runs its OWN solve loop (decode -> extractStars -> solve_planar_local -> fitWCS -> scale-gate -> verify -> consensus), a known duplication of the wizard/engine path kept as fast triage tooling. Without it there is no headless breadth check that new frames still solve and no feed into the cumulative corpus ledger.",
+        "cites": [
+          { "path": "tools/corpus/run_corpus.mjs", "lines": "1-19" },
+          { "path": "tools/corpus/run_corpus.mjs", "lines": "647-800" }
+        ]
+      }
+    },
+    "tools/corpus/ledger.mjs": {
+      "why": {
+        "text": "Append-only cumulative record of every corpus-frame solve outcome across runs, preserving the history that run_corpus's overwritten corpus_report.json throws away. Each JSONL line ties a result to the git commit, so a fix flips a frame failed->solved as MEASURED improvement; it also backs the 2-solve churn purge and the pooled-failure labeled dataset. run_corpus imports and calls ingestReport at the end of every sweep; without it, improvement across commits could only be asserted.",
+        "cites": [
+          { "path": "tools/corpus/ledger.mjs", "lines": "1-21" },
+          { "path": "tools/corpus/ledger.mjs", "lines": "37-60" }
+        ]
+      }
+    },
+    "tools/stack/stack.mjs": {
+      "why": {
+        "text": "Entry point of the v1 solve-first stacker/drizzler (headless, tools-lane only): inventory -> prep -> solve -> registration -> stack/drizzle -> validation -> report+PNG+float32 FITS. It enforces the coordinate/pixel ledger separation (registration is pure coordinate math; no pixel is touched until the single resample) and wires together fits_io, solve_lib, and the psf-lane imaging writer. Without it there is no headless N-frame stack product.",
+        "cites": [
+          { "path": "tools/stack/stack.mjs", "lines": "1-40" },
+          { "path": "tools/stack/stack.mjs", "lines": "46-51" }
+        ]
+      }
+    },
+    "tools/stack/solve_lib.mjs": {
+      "why": {
+        "text": "The stack lane's solve machinery, ported from the proven corpus-runner patterns: hybrid Gaia/HYG atlas loading, spherical/tangent-plane math, hinted quad solve, and N-point WCS refinement against matched stars. It fixes the coordinate-ledger conventions (crval[0] in HOURS internally, cd in deg/px, 0-based pixel centers) that stack.mjs relies on. Without it stack.mjs cannot register frames.",
+        "cites": [
+          { "path": "tools/stack/solve_lib.mjs", "lines": "1-11" },
+          { "path": "tools/stack/solve_lib.mjs", "lines": "27-52" }
+        ]
+      }
+    },
+    "tools/stack/fits_io.mjs": {
+      "why": {
+        "text": "Plane-level FITS reader in ORIGINAL units plus the minimal writer for the stack lane. Reads without normalization because per-frame background subtraction and cross-frame flux normalization must happen in raw values, and treats non-finite AND exact-0.0 float samples as out-of-footprint NaN markers. Its wcsCards writer is one of the two HOURS->DEGREES (x15) + CRPIX+1 conversion boundaries and eats an engine-internal (HOURS) WCS — never a receipt WCS. Without it the stacker cannot read frames or emit output FITS.",
+        "cites": [
+          { "path": "tools/stack/fits_io.mjs", "lines": "1-13" },
+          { "path": "tools/stack/fits_io.mjs", "lines": "190-224" }
+        ]
+      }
+    },
+    "tools/psf/decode_cr2.mjs": {
+      "why": {
+        "text": "Shared CR2 decode lane: libraw-wasm (browser-Worker bridged onto worker_threads via worker_shim) returns an active-area interleaved RGB16 DOMINANT-CHANNEL mem_image (G sites pure [0,G,0]; R/B carry ~4-7% deterministic cross-leak). It infers true (w,h) from the element count with a stride-coherence tie-break (the 60Da near-tied-dims shear guard), repairs hot pixels at the CFA level, and bilinear-demosaics the dominant channels so data stays linear and camera-native. Imported by measure_and_clean/refit_distortion; without the tie-break a near-miss factorization shears the frame diagonally.",
+        "cites": [
+          { "path": "tools/psf/decode_cr2.mjs", "lines": "1-14" },
+          { "path": "tools/psf/decode_cr2.mjs", "lines": "56-60" }
+        ]
+      }
+    },
+    "tools/psf/corrections.mjs": {
+      "why": {
+        "text": "Lens-corrections + solve-socket module: vignette is a PIXEL-lane multiplicative radial gain applied first; distortion is a COORDINATE FUNCTION (Brown-Conrady k1/k2 on star positions, not an image warp). Its `--astrometry <file.json>` seam swaps the APPROXIMATE_PROFILE prior for measured corrections through the same getCorrections() path. Its makeBrownConrady is the fast-iteration incubator twin of the live engine's makeBrownConradyDistortion and must stay in sync when the radial model changes.",
+        "cites": [
+          { "path": "tools/psf/corrections.mjs", "lines": "1-25" },
+          { "path": "tools/psf/corrections.mjs", "lines": "48-57" }
+        ]
+      }
+    },
+    "tools/psf/solution_to_astrometry.mjs": {
+      "why": {
+        "text": "Bridges the wizard plate-solve receipt (or an e2e summary.json) to the measured `--astrometry` JSON the PSF cleanup lane consumes, closing the solve->cleanup loop. It navigates this codebase's unit land mines explicitly: the engine-internal fitted WCS stores crval[0] in HOURS while the packet FITS-style wcs block stores CRVAL1 in DEGREES, and it emits DEGREES per the socket contract. It fits Brown-Conrady k1/k2 about the FRAME CENTER with an extra linear term to absorb WCS scale degeneracy. Without it, measured corrections cannot reach corrections.mjs.",
+        "cites": [
+          { "path": "tools/psf/solution_to_astrometry.mjs", "lines": "1-34" },
+          { "path": "tools/psf/solution_to_astrometry.mjs", "lines": "36-60" }
+        ]
+      }
+    },
+    "tools/atlas/merge_hyg_sectors.mjs": {
+      "why": {
+        "text": "The HYG gap-fill merge — the atlas chain link that was a one-off never committed. It appends STRICT mag>6.8 HYG rows (ra in HOURS) wholesale after each sector's Gaia block (ra in DEGREES), byte-exact to the shipped minified sector format (one object per line, LF, no dedup). It is additive only (never retires rows) and writes to a caller-supplied out dir, never over live sectors; imported as a library by verify_atlas_repro. Without it the frozen deep-catalog sectors cannot be reproduced.",
+        "cites": [
+          { "path": "tools/atlas/merge_hyg_sectors.mjs", "lines": "1-37" },
+          { "path": "tools/atlas/merge_hyg_sectors.mjs", "lines": "43-55" }
+        ]
+      }
+    },
+    "tools/atlas/verify_atlas_repro.mjs": {
+      "why": {
+        "text": "The standing byte-proof gate that the shipped, gitignored, irreplaceable deep catalog (L1/L2 anchors + 36 level-3 sectors) is byte-for-byte regenerable from committed inputs and tooling. It carries an INDEPENDENT reference re-implementation of the generator+rebucket steps (a stronger claim than re-running the script) and imports the HYG-merge rule from the tool under proof. It documents that the frozen atlas was built with legacy buggy (ra-degrees-as-hours) bucketing, so byte-repro must replicate that. Without it, atlas regenerability is unverifiable.",
+        "cites": [
+          { "path": "tools/atlas/verify_atlas_repro.mjs", "lines": "1-47" }
+        ]
+      }
+    },
+    "tools/atlas/rebucket_sectors.mjs": {
+      "why": {
+        "text": "Re-buckets the deep Gaia level-3 sector files so their numeric ids match star_catalog_adapter.getSectorId (raIndex=floor(ra_hours/4), decIndex=floor((dec+90)/30), id=decIndex*6+raIndex), deduping by source_id. Gaia rows carry ra in DEGREES (raH=ra/15). It is the middle link of the generate_star_atlas -> rebucket -> merge_hyg chain, emitting Gaia-only sectors that merge_hyg then HYG-fills. Without it the mixed-generation numeric sectors have inconsistent, non-adapter ids.",
+        "cites": [
+          { "path": "tools/atlas/rebucket_sectors.mjs", "lines": "1-3" },
+          { "path": "tools/atlas/rebucket_sectors.mjs", "lines": "19-41" }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "tools/atlas/rebucket_sectors.mjs",
+      "to": "tools/atlas/merge_hyg_sectors.mjs",
+      "type": "data-flow",
+      "cite": "tools/atlas/rebucket_sectors.mjs:37",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "Gaia-only re-bucketed sectors written to _rebuilt/level_3_sector_<id>.json — minified one-object-per-line (rows comma+LF-joined, wrapped in square brackets), each row JSON.stringify of a Gaia object (ra in DEGREES, mag_g, source_id); id = decIndex*6 + raIndex",
+        "transform": "merge_hyg reads these as its --rebuilt Gaia block, then appends the STRICT mag>6.8 HYG rows (ra in HOURS) contiguously after; rebucket dedups by source_id first",
+        "lossy": false
+      },
+      "why": {
+        "text": "The atlas reproduce chain is generate_star_atlas -> rebucket_sectors (Gaia-only, adapter-correct ids) -> merge_hyg_sectors (HYG-filled final sectors). rebucket's output is exactly merge_hyg's --rebuilt input; the two row shapes it stitches carry ra in DIFFERENT units (Gaia degrees vs HYG hours), the per-row trap consumers must re-discriminate downstream.",
+        "cites": [
+          { "path": "tools/atlas/merge_hyg_sectors.mjs", "lines": "6-8" },
+          { "path": "tools/atlas/merge_hyg_sectors.mjs", "lines": "13-27" }
+        ]
+      }
+    },
+    {
+      "from": "tools/atlas/verify_atlas_repro.mjs",
+      "to": "tools/atlas/merge_hyg_sectors.mjs",
+      "type": "evidence",
+      "cite": "tools/atlas/verify_atlas_repro.mjs:22",
+      "how": {
+        "what": "byte-proof gate imports the HYG-merge RULE from the tool under proof (mergeHygIntoSectors et al.) rather than re-duplicating it, and asserts all 38 files byte-EQUAL to the shipped atlas (exit 0 iff equal, or an honest content-hash fallback with recorded reason)",
+        "transform": "n/a",
+        "lossy": false
+      },
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "tools/atlas/verify_atlas_repro.mjs",
+      "to": "boundary:atlas_rows",
+      "type": "evidence",
+      "cite": "tools/atlas/verify_atlas_repro.mjs:6",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "standing gate proving the frozen atlas_rows layout (L1/L2 anchors + 36 minified level-3 sectors) is byte-for-byte regenerable from committed inputs; independent reference reimplementation lands on the same bytes",
+        "transform": "n/a",
+        "lossy": false
+      },
+      "why": {
+        "text": "The shipped deep catalog is gitignored and irreplaceable, so its layout contract has no other authority than 'we can regenerate it byte-exact'. This gate IS that authority; it also records that the frozen bytes encode the legacy buggy (ra-degrees-treated-as-hours) generator bucketing, so a corrected-generator regen would be content-identical but byte-different and need an owner rebaseline.",
+        "cites": [
+          { "path": "tools/atlas/verify_atlas_repro.mjs", "lines": "25-34" }
+        ]
+      }
+    },
+    {
+      "from": "tools/corpus/run_corpus.mjs",
+      "to": "boundary:atlas_rows",
+      "type": "contract",
+      "cite": "tools/corpus/run_corpus.mjs:49",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "level_3 sector rows in TWO shapes mixed per file: Gaia rows (mag_g/source_id present) store ra in DEGREES; HYG rows store ra in HOURS",
+        "transform": "norm(s) = (mag_g!==undefined || source_id!==undefined) ? {raH: s.ra/15, mag: s.mag_g} : {raH: s.ra, mag: s.mag}; per-row discrimination normalizes everything to internal HOURS",
+        "lossy": false
+      },
+      "why": {
+        "text": "Parsing an hour-based HYG row as degrees (ra/15) scattered every mag<10 star ~150 deg away, so the brightest-50 catalog slice shared at most 1 star with the top-30 detections and no true quad could form (M66 FAIL_NO_LOCK). The mag_g/source_id discriminator is the load-bearing fix, and it is the SAME rule the engine's star_catalog_adapter and the stack lane's solve_lib each re-implement.",
+        "cites": [
+          { "path": "tools/corpus/run_corpus.mjs", "lines": "42-64" }
+        ]
+      }
+    },
+    {
+      "from": "tools/corpus/run_corpus.mjs",
+      "to": "tools/corpus/ledger.mjs",
+      "type": "data-flow",
+      "cite": "tools/corpus/run_corpus.mjs:840",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "test_results/corpus_report.json {when, total, byStatus, rows:[{file,status,scale,matches,...}]} written at sweep end, path handed to ingestReport",
+        "transform": "ingestReport reads the report and appends one JSONL line per row to the cumulative test_results/corpus_ledger.jsonl, prepending {ts, commit, frame:basename, solved: PASS||startsWith('SOLVED')}; wrapped in try/catch so ledger I/O never breaks the sweep",
+        "lossy": false
+      },
+      "why": {
+        "text": "run_corpus overwrites corpus_report.json every sweep; the ledger is the only place the per-frame history survives, and the commit tag on each line is what turns a frame's failed->solved flip into MEASURED improvement across code versions.",
+        "cites": [
+          { "path": "tools/corpus/ledger.mjs", "lines": "37-60" }
+        ]
+      }
+    },
+    {
+      "from": "tools/corpus/run_corpus.mjs",
+      "to": "boundary:libraw_mem_image",
+      "type": "contract",
+      "cite": "tools/corpus/run_corpus.mjs:437",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "libraw-wasm imageData() with {noInterpolation, outputBps:16, noAutoBright, useCameraWb:false, useAutoWb:false} returns INTERLEAVED RGB16, meta.width*meta.height*3 Uint16, row stride width*3, values 0..65535 (NOT a CFA mosaic)",
+        "transform": "explicit payload-contract-violation guard: throw DECODE_UNSUPPORTED if u16.length !== W*H*3; luminance for detection = (R+G+B)/3 normalized to [0,1]",
+        "lossy": true
+      },
+      "why": {
+        "text": "The corpus CR2 lane is a SECOND consumer of the libraw interleaved-RGB16 contract (distinct from tools/psf/decode_cr2.mjs and tools/color/rgb_to_xyz.mjs), and it hard-asserts the w*h*3 element count so a decoder that silently returns a CFA mosaic or a different plane count fails loudly instead of mislocating stars.",
+        "cites": [
+          { "path": "tools/corpus/run_corpus.mjs", "lines": "400-447" }
+        ]
+      }
+    },
+    {
+      "from": "tools/stack/solve_lib.mjs",
+      "to": "boundary:atlas_rows",
+      "type": "contract",
+      "cite": "tools/stack/solve_lib.mjs:28",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "same hybrid level_3 sector rows: Gaia rows ra in DEGREES (mag_g/source_id), HYG rows ra in HOURS",
+        "transform": "loadAtlas's norm is the corpus runner's discriminator verbatim (mag_g||source_id ? ra/15 : ra); everything normalized to internal HOURS; crval[0] stays HOURS through the whole solve lane",
+        "lossy": false
+      },
+      "why": {
+        "text": "The stack lane re-implements the Gaia-deg/HYG-hours per-row discriminator as a literal port of the corpus runner's `norm`; this is the third independent copy of the 15x trap and a LAW-4 drift hazard — a fix to the atlas row units must land in all three (adapter, corpus, stack) or the copies diverge.",
+        "cites": [
+          { "path": "tools/stack/solve_lib.mjs", "lines": "25-52" }
+        ]
+      }
+    },
+    {
+      "from": "tools/stack/fits_io.mjs",
+      "to": "tools/stack/stack.mjs",
+      "type": "data-flow",
+      "cite": "tools/stack/stack.mjs:46",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "per-frame FITS planes in ORIGINAL (un-normalized) units + parsed header cards, via openFits/readPlaneRaw/readLuminanceNormalized/readFitsHeaderFd",
+        "transform": "stack's prep phase decodes luminance and detects stars from these raw planes; raw units are required because per-frame background subtraction and cross-frame flux normalization happen in original units; BITPIX=-32 out-of-footprint samples (non-finite AND exact 0.0) arrive as NaN so bilinear sampling auto-invalidates at edges",
+        "lossy": false
+      }
+    },
+    {
+      "from": "tools/stack/stack.mjs",
+      "to": "tools/stack/fits_io.mjs",
+      "type": "data-flow",
+      "cite": "tools/stack/stack.mjs:39",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "final stacked/drizzled float32 plane(s) on the output tangent grid + the output-grid engine WCS (crval[0] in HOURS, crpix 0-based)",
+        "transform": "writeFitsPlanar serializes the float32 image; wcsCards turns the engine WCS into FITS keywords, applying CRVAL1 = crval[0]*15 (HOURS->DEGREES) and CRPIX1 = crpix[0]+1 (0-based -> 1-based) at THIS boundary",
+        "lossy": false
+      },
+      "why": {
+        "text": "The stacker feeds wcsCards an engine-internal (HOURS) WCS; wcsCards is the stacker-path conversion boundary and multiplies by 15 here. A receipt WCS (already DEGREES) must never be fed to wcsCards or the CRVAL is doubly x15'd — the two WCS->FITS paths convert at different boundaries by design.",
+        "cites": [
+          { "path": "tools/stack/fits_io.mjs", "lines": "190-224" }
+        ]
+      }
+    },
+    {
+      "from": "tools/stack/stack.mjs",
+      "to": "tools/psf/imaging.mjs",
+      "type": "data-flow",
+      "cite": "tools/stack/stack.mjs:51",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "validation/preview raster arrays (stacked render, Siril side-by-side crop, rejection sanity crop)",
+        "transform": "writePNG (imported from the psf lane) encodes them to PNG files in the stack output dir",
+        "lossy": true
+      }
+    },
+    {
+      "from": "tools/stack/solve_lib.mjs",
+      "to": "tools/stack/stack.mjs",
+      "type": "data-flow",
+      "cite": "tools/stack/stack.mjs:47",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the ported solve machinery: initWasm/loadAtlas region query, gnomonic/inverseGnomonic/pixToSky/skyToPix, extractStars/refineCentroids/medianFwhm, solveAtHint quad locks, refineWCS N-point catalog refit, blindHintGrid",
+        "transform": "stack's solve+registration phases call these; a quad lock is only accepted once refineWCS corroborates it (stack's REFINE_MIN_N=12 / REFINE_MAX_RMS_PX=2.5 deep-verify gate) — a coincidence lock cannot find even 8 anchors",
+        "lossy": false
+      }
+    },
+    {
+      "from": "tools/dslr/uw_solve.uwspec.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "type": "evidence",
+      "cite": "tools/dslr/uw_solve.uwspec.ts:30",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "vitest spec drives the REAL solver_entry.solvePlate ultra-wide path (anchored rotation sweep -> TS verify) headlessly at test speed, with an atlas-from-disk fetch shim; planet anchors from the Stage-A dump injected as extraSearchCenters priors",
+        "transform": "isolates candidate-generator + verifier + detection quality from blind center generation; the per-center loop catches the quad fallback's missing-fn panic so peak-z is observable even on frames that never lock, and CR2_EXPECT_RA asserts the solved RA within CR2_RA_TOL",
+        "lossy": false
+      }
+    },
+    {
+      "from": "tools/dslr/dump_cr2_solveframe.mjs",
+      "to": "tools/dslr/uw_solve.uwspec.ts",
+      "type": "data-flow",
+      "cite": "tools/dslr/uw_solve.uwspec.ts:34",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "Stage-A dump JSON (CR2_DUMP path): detections + pixel scale + planet centers (correct Schlyter ephemeris) for one decoded CR2 frame",
+        "transform": "the harness reads it (no re-decode) and injects the planet centers as extraSearchCenters, plus optional CR2_CENTERS 'ra,dec' priors in hours,deg; answers 'given a good center, does the sweep+verify lock, at what sigma?'",
+        "lossy": false
+      },
+      "why": {
+        "text": "Splitting decode (Stage A) from solve (Stage B) lets the ultra-wide solver be exercised at test speed without a browser or re-decode — the dump is the sole input carrying detections/scale/ephemeris into the headless spec.",
+        "cites": [
+          { "path": "tools/dslr/uw_solve.uwspec.ts", "lines": "5-19" }
+        ]
+      }
+    },
+    {
+      "from": "tools/psf/solution_to_astrometry.mjs",
+      "to": "tools/psf/corrections.mjs",
+      "type": "unit-conversion",
+      "cite": "tools/psf/solution_to_astrometry.mjs:24",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: exported AstroPacket receipt (engine solution.wcs crval[0] in HOURS; packet FITS-style wcs block CRVAL1 in DEGREES via generateWCS *15). out: the --astrometry socket JSON {wcs: {crpix, crval:[ra_deg, dec_deg], cd deg/px}, distortion: brown-conrady k1/k2, psf_anchors}",
+        "transform": "emits crval in DEGREES per SOLVE_SOCKET_CONTRACT; fits Brown-Conrady about the FRAME CENTER as delta = a*r + k1*r^3 + k2*r^5 (linear term absorbs WCS scale degeneracy, only k1/k2 exported), one 3-sigma reclip; consumed by corrections.getCorrections in place of APPROXIMATE_PROFILE",
+        "lossy": true
+      },
+      "why": {
+        "text": "The socket JSON crosses the HOURS/DEGREES land mine deliberately: the engine-internal fitted WCS is HOURS but the tool emits DEGREES (ra_deg) to match corrections.mjs's documented contract. Reading the emitted crval as hours would mislocate the whole correction frame by 15x; the tool handles both packet matched-star shapes (ra_deg vs internal ra_hours) explicitly rather than guessing.",
+        "cites": [
+          { "path": "tools/psf/solution_to_astrometry.mjs", "lines": "22-34" },
+          { "path": "tools/psf/corrections.mjs", "lines": "14-25" }
+        ]
+      }
+    },
+    {
+      "from": "tools/psf/corrections.mjs",
+      "to": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+      "type": "contract",
+      "cite": "tools/psf/corrections.mjs:53",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the Brown-Conrady radial coordinate function makeBrownConrady(k1,k2,w,h) — r_d = r_u*(1 + k1 r_u^2 + k2 r_u^4), r normalized to the half-diagonal, optical center at frame center",
+        "transform": "faithfully ported to the live engine as makeBrownConradyDistortion (the solve-path lens-prior consumer); this lane stays the fast-iteration incubator + CLI driver",
+        "lossy": false
+      },
+      "why": {
+        "text": "INCUBATOR DUPLICATION (LAW 4): the same radial model lives in two files by design — the tools lane for fast iteration and the engine for the solve path. The in-file note names the twin explicitly and requires keeping them in sync when the radial model changes; a silent divergence would apply different distortion in the CLI vs the app.",
+        "cites": [
+          { "path": "tools/psf/corrections.mjs", "lines": "53-70" }
+        ]
+      }
+    },
+    {
+      "from": "tools/psf/decode_cr2.mjs",
+      "to": "tools/psf/measure_and_clean.mjs",
+      "type": "data-flow",
+      "cite": "tools/psf/measure_and_clean.mjs:31",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the decode primitives fixHotPixelsCFA, demosaicBilinear, splitRGB (plus inferDims for the stride-coherence-verified dims), operating on the interleaved RGB16 dominant-channel mem_image",
+        "transform": "measure_and_clean builds its linear camera-native working planes: demosaicBilinear(rgb16, w, h, layout.pat) after CFA-level hot-pixel repair (before any interpolation smears them); no white-balance or color matrix applied",
+        "lossy": true
+      }
+    }
+  ]
+}

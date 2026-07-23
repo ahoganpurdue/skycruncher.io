@@ -1,0 +1,421 @@
+{
+  "fragment": "wave2_tools-api",
+  "derived_by": "opus wave-2 writer (domain tools/api + tools/e2e: headless driver, apispec/e2e harnesses, seam-replay)",
+  "notes": [
+    "Domain = base nodes whose id starts with tools/api/ or tools/e2e/. Every edge FROM is one of those nodes; TO endpoints are base module/boundary/stage ids or the runtime stage ids declared by fragments/stage_order.json (stage:load etc.), which resolve in the same build.",
+    "NOT-A-NODE gap: the .apispec.ts gate files (solve_seestar/solve_cr2/confirm_null_evidence/arrow_sink/...) exist ON DISK under tools/api/ but are ABSENT from dag_base.json (the base extractor did not emit them as module nodes). They therefore cannot be edge endpoints here; evidence_b.json already cites them as `cite` strings on stage->stage edges. The e2e scenario .mjs files and the *.runspec/*.replayspec/*.config/*.corpspec/*.previewspec.ts files ARE base nodes and are used as FROM here.",
+    "toolchest producer is not a base node: headless_driver's Arrow sink writes through packages/toolchest (exportAllTables/writeArrowFile), and packages/toolchest/src/* is outside the extractor's src/+tools/ walk (confirmed absent from dag_base.json). So the Arrow edge targets the boundary:toolchest_arrow_export node (a real base node) rather than the toolchest module — same modelling choice loud_edges_c.json recorded for that boundary.",
+    "carina evidence edge: only lines 1-40 of run_wizard_carina.mjs were read this session; the step-3 detection assert itself lives further down and was NOT read, so the edge is cited to the header CONTRACT (5-9) + the get_cfa_input_ptr crash-detector (26-29) that were read, and framed as a repro/verify harness relationship rather than pinning a specific numeric assert.",
+    "lib.mjs -> orchestrator_session is a DEV-EXPOSED read, not an import: sessionSnapshot reads window.__astroSession (the app's dev-only global) inside page.evaluate — a browser-context observation, scalar-only. Recorded as data-flow with that mediation stated in the how/why.",
+    "seam_capsule consumer gap FILLED: loud_edges_c.json noted the boundary:seam_capsule consumer (tools/testkit stage_replay executor .mjs) is not a base node so its consumer edge was skipped. The vitest-hosted half (tools/api/stage_replay.replayspec.ts) IS a base node and is the actual capsule loader/writer, so the consumer edge is expressed from it here."
+  ],
+  "nodes": {
+    "tools/api/headless_driver.ts": {
+      "why": {
+        "text": "The single headless entry point: runWizardPipeline boots the real compiled wasm, installs an fs-backed atlas loader, and drives the real OrchestratorSession step1_Load->step6_Integrate in Node, returning a receipt value-identical to the browser wizard export. Imported by every apispec/runspec/previewspec and by run.mjs's runspec. Without it there is no headless pipeline execution and the CR2/SeeStar sacred api-gates, the Arrow sink, and the community push sink have nothing to run.",
+        "cites": [
+          { "path": "tools/api/headless_driver.ts", "lines": "1-33" },
+          { "path": "tools/api/headless_driver.ts", "lines": "399-506" }
+        ]
+      }
+    },
+    "tools/e2e/lib.mjs": {
+      "why": {
+        "text": "The shared Playwright harness (createRun) for every wizard e2e scenario: it spawns-or-attaches a vite dev server (refusing to spawn or kill the owner's reserved port 3005), launches system Chrome, blocks all non-same-origin requests for a hermetic run, and exposes the step/assert/sessionSnapshot/finish helpers plus the artifact + per-stage-timing sidecar. Imported by run_wizard_seestar, run_wizard_cr2, run_wizard_cr2_export, run_wizard_carina, and capture_ui_wave. Without it no wizard e2e runs and the two pinned reference solves lose their driver.",
+        "cites": [
+          { "path": "tools/e2e/lib.mjs", "lines": "42-74" },
+          { "path": "tools/e2e/lib.mjs", "lines": "191-318" }
+        ]
+      }
+    },
+    "tools/api/run.mjs": {
+      "why": {
+        "text": "Thin CLI projection wrapper over runWizardPipeline: a plain .mjs cannot resolve the engine @/ alias or boot the compiled wasm, so it forks vitest against run.config.ts (env-passing the FITS path + receipt-out path + optional knob overrides), dumps the FULL canonical receipt to disk, and prints ONLY a --select dot-path projection to stdout with honest-or-absent MISSING for absent paths. Exit 0 on solve, 2 on no-solve, 1 on error. Entry point for agents and the overnight FITS driver. FITS lane only.",
+        "cites": [
+          { "path": "tools/api/run.mjs", "lines": "1-33" },
+          { "path": "tools/api/run.mjs", "lines": "84-138" }
+        ]
+      }
+    },
+    "tools/api/solve_to_receipt.runspec.ts": {
+      "why": {
+        "text": "The vitest-hosted half of run.mjs: runs the real calibrated FITS wizard on the env-supplied buffer, applies optional runtime PIPELINE_CONSTANTS overrides pre-solve (config-as-argument seam), injects the headless JSONL workbench store so the post-package deposit hook persists a per-rig row, and writes canonical receipt bytes via serializeReceipt (byte-identical to the browser download) to API_RUN_RECEIPT_OUT. Without it run.mjs has no engine-capable child to fork.",
+        "cites": [
+          { "path": "tools/api/solve_to_receipt.runspec.ts", "lines": "1-71" }
+        ]
+      }
+    },
+    "tools/api/stage_replay.replayspec.ts": {
+      "why": {
+        "text": "The vitest-hosted seam-replay executor (SEAM_CONTRACT v1): loads a sha256-verified input capsule (loud fail on mismatch), boots the real compiled wasm, runs exactly ONE real engine stage (m7_refine/spcc/psf_field/psf_attribution/bc_measure/psf/integrate) with the exact orchestrator_session wiring, and writes the replayed capsule; all IEEE-exact/byte comparison lives in the .mjs executor. Without it a single real stage cannot be re-run over a frozen capsule for divergence localization.",
+        "cites": [
+          { "path": "tools/api/stage_replay.replayspec.ts", "lines": "1-32" },
+          { "path": "tools/api/stage_replay.replayspec.ts", "lines": "174-421" }
+        ]
+      }
+    },
+    "tools/api/api_harness.config.ts": {
+      "why": {
+        "text": "Isolated vitest config for the Toolchest API headless harness (the api-smoke gate): scopes include to *.apispec.ts so the sacred `npx vitest run` gate never collects it, CLEARS the base setupFiles after merge so it drives the REAL compiled wasm instead of the suite's pure-JS wasm mock, and sets fileParallelism:false so parallel spec files can't starve the 90s blind-solve wall-clock budget. Without this discipline the api-smoke gate would run against the mock and/or false-no-lock.",
+        "cites": [
+          { "path": "tools/api/api_harness.config.ts", "lines": "1-44" }
+        ]
+      }
+    },
+    "tools/api/run.config.ts": {
+      "why": {
+        "text": "Isolated vitest config for run.mjs's *.runspec.ts, mirroring api_harness.config: it clears the base wasm-mock setup after the merge so the CLI drives the real narrow wizard solve, and uses the distinct *.runspec.ts include suffix so this spec is collected by NEITHER the sacred `npx vitest run` gate nor the api-smoke gate nor the CR2/FITS rails — it never pollutes any standing gate's pass/skip count.",
+        "cites": [
+          { "path": "tools/api/run.config.ts", "lines": "1-35" }
+        ]
+      }
+    },
+    "tools/api/a5_summarize.mjs": {
+      "why": {
+        "text": "Mechanical corpus-pass summarizer: folds the per-frame a5_results.jsonl into a5_summary.json with honest-or-absent accounting (frames enumerated in the manifest but absent from the jsonl are reported under not_run, never counted as solved/failed), computing per-source/per-lane/per-rig crack rates, CR2 blind-vs-hinted provenance, a failure taxonomy, and truth-graded TP/FP counts. Editorial fields are left empty for the orchestrator relay.",
+        "cites": [
+          { "path": "tools/api/a5_summarize.mjs", "lines": "1-13" },
+          { "path": "tools/api/a5_summarize.mjs", "lines": "97-129" }
+        ]
+      }
+    },
+    "tools/e2e/run_wizard_seestar.mjs": {
+      "why": {
+        "text": "The SeeStar M66 FITS pinned reference solve driven through all 7 wizard steps plus the Glass-Pipeline inspector and the step-7 receipt export/download. It asserts the sacred blind-solve geometry (RA about 11.336h, scale about 3.68 arcsec/px, matched >= 5, confidence >= 0.6, unit parity); a break here is a revert trigger.",
+        "cites": [
+          { "path": "tools/e2e/run_wizard_seestar.mjs", "lines": "1-8" },
+          { "path": "tools/e2e/run_wizard_seestar.mjs", "lines": "106-120" }
+        ]
+      }
+    },
+    "tools/e2e/run_wizard_cr2.mjs": {
+      "why": {
+        "text": "The bundled Canon CR2 DSLR pinned reference on the same harness as SeeStar: steps 1-4 must genuinely work (decode, honest badges, detection, instant EXIF scale lock at the 14mm-override 63.35 arcsec/px), step 5 is the ultra-wide BLIND solve (honest outcome either way for arbitrary files; bundled sample pins scale/matched), and step 6 pins the post-solve bc_rematch outcome (KEPT_ORIGINAL, matched 56->56, rms 630.8214->616.8437, wrong-sign guard holding).",
+        "cites": [
+          { "path": "tools/e2e/run_wizard_cr2.mjs", "lines": "1-15" },
+          { "path": "tools/e2e/run_wizard_cr2.mjs", "lines": "156-183" }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "src/engine/pipeline/orchestrator_session.ts",
+      "type": "control",
+      "cite": "tools/api/headless_driver.ts:441",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the source ArrayBuffer + RunWizardOptions (atlasRoot, overrides, callerHint, searchPriors, masterDark/Flat paths); frameSha256 hashed once BEFORE step1 to survive the libraw buffer-detach",
+        "transform": "constructs OrchestratorSession(generatePreviews:false) and awaits step1_Load -> step2_Extract -> step3_Metrology -> step4_Solve -> step5_Calibrate -> step6_Integrate in order; the returned receipt is used directly (no second export-date-skewed copy)",
+        "lossy": false
+      },
+      "why": {
+        "text": "This ordered drive of the real session IS the mechanism that makes the headless receipt value-identical to the browser wizard export (LAW 2). generatePreviews:false + the fs atlas loader are the only headless deltas; the step sequence and every stage are the real engine, which is why the CR2/SeeStar apispec pins can assert browser numbers byte-for-byte.",
+        "cites": [
+          { "path": "tools/api/headless_driver.ts", "lines": "413-482" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "data-flow",
+      "cite": "tools/api/headless_driver.ts:219",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the FINISHED WizardReceipt object + the pre-decode frame sha (12-hex content id)",
+        "transform": "persistArrowTables calls exportAllTables(receipt) then writeArrowFile for each of the four tabular products (matched_stars/detections/forced_confirmed/run_summary) into <SKYCRUNCHER_ARROW_SINK>/<runId>__<sha>/, plus a manifest.json",
+        "lossy": true
+      },
+      "why": {
+        "text": "This is the FIRST production consumer of the Arrow-export boundary (LAW 7: exportAllTables in packages/toolchest owns the schema/strides — nothing is defined here). Env-gated (SKYCRUNCHER_ARROW_SINK unset => zero behaviour), fires AFTER the receipt is built, and fully guarded (a read-only/racy FS degrades to null, never a thrown run) so the receipt is byte-identical whether the sink is on or off. Only the tabular SUBSET of the receipt rides Arrow — rasters ride typed arrays, never mixed — hence lossy.",
+        "cites": [
+          { "path": "tools/api/headless_driver.ts", "lines": "186-248" },
+          { "path": "tools/api/headless_driver.ts", "lines": "492-495" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "tools/community/push_solve.mjs",
+      "type": "data-flow",
+      "cite": "tools/api/headless_driver.ts:286",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "receiptBytes = Buffer.from(JSON.stringify(receipt)) + the pre-decode frameSha256 hex + an optional engineRef",
+        "transform": "pushCommunitySolve forwards them to pushSolveFromReceipt, which content-addresses by frame+artifact sha (two-level dedup) and uploads to the community R2 store; returns the 12-hex frame content id or null",
+        "lossy": false
+      },
+      "why": {
+        "text": "Same discipline as the Arrow sink: env-gated (SKYCRUNCHER_COMMUNITY_PUSH unset => no-op), fires AFTER the receipt is built, creds-absent OR any error => silent no-op, so the receipt is byte-identical either way. Network I/O is a tools-lane concern — the engine never imports this; the driver hands the finished receipt across. Content-addressing uses the PRE-decode frame sha because the libraw arm may have detached the source buffer.",
+        "cites": [
+          { "path": "tools/api/headless_driver.ts", "lines": "250-298" },
+          { "path": "tools/api/headless_driver.ts", "lines": "497-500" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "boundary:fits_io",
+      "type": "data-flow",
+      "cite": "tools/api/headless_driver.ts:383",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "an optional master dark/flat FITS file path -> a MasterFrame {data: Float32Array plane 0, width, height, md5, source}",
+        "transform": "loadMasterFits opens the FITS via openFits + readPlaneRaw(f,0) (tools/stack/fits_io.mjs), copies plane 0 to Float32, and maps NaN/+-Inf out-of-footprint pixels to 0 so the master is a plain additive/divisive plane",
+        "lossy": true
+      },
+      "why": {
+        "text": "The R3 master-calibration seam consumes the FITS I/O boundary through the shared stacker reader. The NaN->0 flatten is lossy but the README notes calibration frames sit far from 0 so the exact-0 mask never bites. UNITS CAVEAT (open item): the master is loaded in its native FITS units and reconciling them to the engine's normalized detection buffer is unfinished — the seam, dim-validation refusal, and receipt are what this proves today, not the units match.",
+        "cites": [
+          { "path": "tools/api/headless_driver.ts", "lines": "371-392" },
+          { "path": "tools/api/headless_driver.ts", "lines": "339-349" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/headless_driver.ts",
+      "to": "stage:calibrate",
+      "type": "fallback",
+      "cite": "tools/api/headless_driver.ts:455",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the null session.solution after step4_Solve",
+        "transform": "on no geometric lock the driver SKIPS step5_Calibrate + step6_Integrate, emits run_finished{ok:false}, and returns an honest exportFailurePacket receipt (stageOfDeath:'solve') with arrowDir:null and no community push",
+        "lossy": false
+      },
+      "why": {
+        "text": "Honest-or-absent degradation: a frame that produced no lock still banks a FAILURE receipt instead of throwing at the engine's step5 calibrate guard (`if (!this.solution) throw`). This branch is HEADLESS-ENTRY-SCOPED and fires ONLY when there is no solution, so the SOLVED path (both pinned reference solves + the apispec gates) is byte-identical by construction. The Arrow/community sinks are solve-products (need matched_stars) and are correctly skipped on this arm.",
+        "cites": [
+          { "path": "tools/api/headless_driver.ts", "lines": "446-476" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/run.mjs",
+      "to": "tools/api/solve_to_receipt.runspec.ts",
+      "type": "control",
+      "cite": "tools/api/run.mjs:111",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the resolved FITS input path, the receipt output path, and an optional validated {KEY:value} config-override JSON, handed over as the env vars API_RUN_FITS / API_RUN_RECEIPT_OUT / API_RUN_CONFIG",
+        "transform": "spawnSync(vitest run -c tools/api/run.config.ts) forks a FRESH vitest process whose collected spec is solve_to_receipt.runspec.ts; the child runs the real solve and writes the receipt, then run.mjs reads it back, projects --select paths, and sets the exit code",
+        "lossy": false
+      },
+      "why": {
+        "text": "A plain .mjs cannot resolve the engine @/ alias or boot the compiled wasm, so the CLI forks the vitest-hosted runspec (the same mechanism the overnight FITS driver uses). Forking a fresh process per solve is deliberate — the process-global PIPELINE_CONSTANTS mutation from --config can never leak between solves.",
+        "cites": [
+          { "path": "tools/api/run.mjs", "lines": "104-123" },
+          { "path": "tools/api/solve_to_receipt.runspec.ts", "lines": "29-31" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/solve_to_receipt.runspec.ts",
+      "to": "src/engine/pipeline/constants/pipeline_config.ts",
+      "type": "data-flow",
+      "cite": "tools/api/solve_to_receipt.runspec.ts:51",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a flat {CONSTANT_NAME: number|string|boolean} override map parsed from the API_RUN_CONFIG env",
+        "transform": "applyConfigOverrides(overrides) Object.assigns KNOWN constants onto the live PIPELINE_CONSTANTS BEFORE the solve (consumers read constants at call-time); unknown/mistyped keys are rejected + warned, never silently created; absent env => strict no-op => byte-identical calibrated solve",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the config-as-argument seam (NEXT_MOVES section 11b): the runspec is the only place run.mjs's --config knob experiment actually reaches the engine constants. Because this vitest process solves exactly once (run.mjs forks per solve), the process-global mutation never leaks; the receipt is then stamped experimental so an experimental run is never mistaken for a calibrated one.",
+        "cites": [
+          { "path": "tools/api/solve_to_receipt.runspec.ts", "lines": "44-53" },
+          { "path": "tools/api/run.mjs", "lines": "22-31" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/solve_to_receipt.runspec.ts",
+      "to": "src/engine/pipeline/stages/receipt_serializer.ts",
+      "type": "data-flow",
+      "cite": "tools/api/solve_to_receipt.runspec.ts:64",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the finished WizardReceipt object from runWizardPipeline",
+        "transform": "serializeReceipt(receipt) produces the CANONICAL receipt bytes (the shared Float32Array-stripping replacer path, byte-identical to the browser download) which are written to API_RUN_RECEIPT_OUT",
+        "lossy": true
+      },
+      "why": {
+        "text": "The runspec's whole contract is 'real solve -> full canonical receipt on disk'; using the shared serializeReceipt (not JSON.stringify) is what makes the dumped bytes identical to what the browser wizard downloads. Typed-array buffers are stripped by the replacer, so the on-disk JSON is a lossy projection of the in-memory receipt by design.",
+        "cites": [
+          { "path": "tools/api/solve_to_receipt.runspec.ts", "lines": "10-14" },
+          { "path": "tools/api/solve_to_receipt.runspec.ts", "lines": "61-69" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/solve_to_receipt.runspec.ts",
+      "to": "src/engine/pipeline/stages/workbench_deposit.ts",
+      "type": "data-flow",
+      "cite": "tools/api/solve_to_receipt.runspec.ts:59",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a Node JSONL storage adapter (makeNodeJsonlStorage(WORKBENCH_DIR)) injected as the workbench store",
+        "transform": "configureWorkbench({storage}) installs it so the always-on post-package deposit hook fired inside exportPacket persists a per-rig workbench row synchronously (completes before the receipt is returned)",
+        "lossy": false
+      },
+      "why": {
+        "text": "Wires the Optical Workbench default-on collection into the headless FITS run: local-only, gitignored dir (overridable via WORKBENCH_DIR for isolated evidence runs). Never-fatal by construction — a storage failure cannot perturb the receipt written just after, so the byte-identical gate holds.",
+        "cites": [
+          { "path": "tools/api/solve_to_receipt.runspec.ts", "lines": "32-34" },
+          { "path": "tools/api/solve_to_receipt.runspec.ts", "lines": "55-61" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/stage_replay.replayspec.ts",
+      "to": "boundary:seam_capsule",
+      "type": "data-flow",
+      "cite": "tools/api/stage_replay.replayspec.ts:116",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: the frozen post-(N-1) input capsule dir = capsule.json sidecar (SOLE layout authority) + per-buffer LE .bin (float32/uint16/uint8, flat row-major, sha256 in the sidecar); out: the replayed capsule dir in the same format",
+        "transform": "loadCapsule sha256-verifies every buffer (throws, refusing partial replay, on any mismatch) and types it per its dtype; after running one real stage it writes changed buffers as bytes + sha-only entries for unchanged, tmp->rename on capsule.json",
+        "lossy": false
+      },
+      "why": {
+        "text": "This fills the boundary:seam_capsule consumer edge that loud_edges_c.json had to skip: the .mjs executor it named is not a base node, but this vitest-hosted replayspec IS the node that actually loads and re-writes capsules. The sha256 verify-on-load is load-bearing — a partial or corrupt capsule is refused loudly rather than silently replayed against stale bytes.",
+        "cites": [
+          { "path": "tools/api/stage_replay.replayspec.ts", "lines": "116-132" },
+          { "path": "tools/api/stage_replay.replayspec.ts", "lines": "381-418" }
+        ]
+      }
+    },
+    {
+      "from": "tools/api/stage_replay.replayspec.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "control",
+      "cite": "tools/api/stage_replay.replayspec.ts:179",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the compiled wasm_compute_bg.wasm module bytes",
+        "transform": "bootRealWasm() initSyncs the module (same specifier family the engine uses => one instance) and runs a post-boot sentinel, so psf_field's refine_stars_lm crossing resolves to the REAL fn instead of undefined",
+        "lossy": false
+      },
+      "why": {
+        "text": "replay.config.ts empties setupFiles to dodge the base suite's wasm MOCK, but that also means nothing boots the real module — so the stages that reach into it (m7_refine -> gnomonic_project; psf_field -> refine_stars_lm, the wasm_typed_array boundary producer) would get undefined fns and SILENTLY degrade. The explicit initSync here is the control precondition that makes the replay run the real numeric path.",
+        "cites": [
+          { "path": "tools/api/stage_replay.replayspec.ts", "lines": "39-46" },
+          { "path": "tools/api/stage_replay.replayspec.ts", "lines": "74-87" },
+          { "path": "tools/api/stage_replay.replayspec.ts", "lines": "252-264" }
+        ]
+      }
+    },
+    {
+      "from": "tools/e2e/lib.mjs",
+      "to": "src/engine/pipeline/orchestrator_session.ts",
+      "type": "data-flow",
+      "cite": "tools/e2e/lib.mjs:267",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a scalar-only snapshot of the live session: status/state/sourceFormat/scaleLock, metadata scalars (camera/focal_length/pixel_scale/ra_hint/gps), signalStars count, computed_jd, and solution scalars (ra_hours/dec_degrees/pixel_scale/rotation/parity/confidence/num_stars/matched/spatial_hash)",
+        "transform": "sessionSnapshot runs page.evaluate over window.__astroSession (the app's dev-exposed OrchestratorSession) and returns ONLY scalars — heavy arrays/buffers (matched_stars is reduced to its length) are never pulled across the wire",
+        "lossy": true
+      },
+      "why": {
+        "text": "This dev-exposed read is how every e2e scenario verifies the solve: the pinned RA/Dec/scale/matched/confidence asserts all read this snapshot, not the DOM. It is an observation of a browser-context global, not a module import — recorded here so the harness->engine verification path is visible in the graph. Scalar-only by design so a screenshot-heavy e2e never serializes a 50MB buffer.",
+        "cites": [
+          { "path": "tools/e2e/lib.mjs", "lines": "266-292" }
+        ]
+      }
+    },
+    {
+      "from": "tools/e2e/run_wizard_seestar.mjs",
+      "to": "stage:solve",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_seestar.mjs:106",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the step-5 solution snapshot (ra_hours/dec_degrees/pixel_scale/rotation/parity/confidence/matched) read straight after the solve confirm becomes actionable",
+        "transform": "assertRange RA in [11.303,11.369]h, Dec in [12.75,13.35] deg, scale in [3.48,3.88] arcsec/px, matched>=5, confidence in [0.6,1.01], parity abs==1 — the sacred SeeStar geometry",
+        "lossy": false
+      },
+      "why": {
+        "text": "The SeeStar M66 FITS pinned reference solve: this scenario is the browser-side twin of solve_seestar.apispec's byte-identical numbers and a break is a revert trigger. The parity assert is deliberately a unit-magnitude check (image-space y-down convention reports +1 for this mirrored-sky frame) rather than a sign assertion, per repo law.",
+        "cites": [
+          { "path": "tools/e2e/run_wizard_seestar.mjs", "lines": "85-124" }
+        ]
+      }
+    },
+    {
+      "from": "tools/e2e/run_wizard_cr2.mjs",
+      "to": "stage:solve",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_cr2.mjs:98",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the step-5 ultra-wide BLIND solve outcome (solved | honest_failure | timeout) + the bundled-sample solution scalars",
+        "transform": "races the solve-confirm actionability against the failure overlay; a dishonest terminal state (neither surfaced) throws; on solve for the bundled sample it asserts scale within 63.35 arcsec/px +-30% and matched>=8; the 420s step ceiling stays above the engine's 360s blind budget so the harness never kills a solve the engine still owns",
+        "lossy": false
+      },
+      "why": {
+        "text": "The bundled Canon CR2 ultra-wide blind solve (Phase B's real work). Contract is honest-outcome-either-way for arbitrary CR2_FILE inputs, but the bundled sample pins the rawler-default acquisition (79-matched, ~63.4 arcsec/px). This is the browser twin of solve_cr2.apispec's blindOutcome=solved pin.",
+        "cites": [
+          { "path": "tools/e2e/run_wizard_cr2.mjs", "lines": "97-124" }
+        ]
+      }
+    },
+    {
+      "from": "tools/e2e/run_wizard_cr2.mjs",
+      "to": "stage:calibrate",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_cr2.mjs:173",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "solution.bc_rematch read off the dev-exposed session after step-6 forensic calibration (recovered_stars array dropped, only its length kept)",
+        "transform": "pins attempted===true, guard==='KEPT_ORIGINAL', applied===false, false_guard_passes===false (wrong-sign control is the holding prong), matched_before===56, matched_after===56, rms_before_arcsec===630.8214, rms_after_arcsec===616.8437 (exact float repr)",
+        "lossy": false
+      },
+      "why": {
+        "text": "Pins the POST-solve measured-Brown-Conrady two-pass rematch OUTCOME (rawler default arm) by ADDITION — the step-5 acquisition pins are untouched. On this frame the wrong-sign guard fails (recovered matches indistinguishable from the negated-coefficient control) so KEPT_ORIGINAL holds and the solve stays byte-identical; the cold libraw path (VITE_DECODER_RAWLER=0) restores different pins. This exercises the calibrate stage's bc_measure->bc_rematch sub-seams which are not separate base nodes.",
+        "cites": [
+          { "path": "tools/e2e/run_wizard_cr2.mjs", "lines": "126-183" }
+        ]
+      }
+    },
+    {
+      "from": "tools/e2e/run_wizard_carina.mjs",
+      "to": "stage:extract.detect",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_carina.mjs:26",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "browser console.error text matched against /get_cfa_input_ptr|bin_bayer_to_luma/ plus the pageErrors list",
+        "transform": "the native-Bayer detection crash is CAUGHT by SignalGraphStep's try/catch so it surfaces as a console.error not an uncaught pageerror; cfaCrash() is true if either channel matched — the harness asserts step-3 native-Bayer detection neither crashes nor mislabels the failure",
+        "lossy": false
+      },
+      "why": {
+        "text": "Repro/verify harness for the 'get_cfa_input_ptr on uninitialized wasm' crash in the native-Bayer detection lane (analyzeBayerNative -> binBayerToLuminance) on a Canon 60Da raw-Bayer FITS. It watches BOTH the caught-console-error and uncaught-pageerror channels because the failure is swallowed by the UI try/catch. (Cited to the header contract + crash-detector that were read this session; the numeric step-3 detection assert itself was not in the read range.)",
+        "cites": [
+          { "path": "tools/e2e/run_wizard_carina.mjs", "lines": "1-9" },
+          { "path": "tools/e2e/run_wizard_carina.mjs", "lines": "22-29" }
+        ]
+      }
+    },
+    {
+      "from": "tools/e2e/run_wizard_cr2_export.mjs",
+      "to": "stage:package",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_cr2_export.mjs:90",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the receipt from window.__astroSession.exportPacket() serialized in-page with save_packet's DROPPED_KEYS filter (scienceBuffer/segmentationMasks/horizonVector/anomaly_grid stripped)",
+        "transform": "captures the packet directly after the step-5 solve confirms (steps 6-7 skipped — exportPacket is a pure builder over session state) and asserts matched_stars>=8 and a numeric WCS block (finite CRVAL1)",
+        "lossy": true
+      },
+      "why": {
+        "text": "A variant of run_wizard_cr2 whose contract REQUIRES a solution (a failed/absent solve is a scenario failure here) because its purpose is to produce a receipt artifact. It exercises the export/package path with the SAME DROPPED_KEYS filtering as the browser save_packet, so typed arrays never cross the wire as index-keyed objects.",
+        "cites": [
+          { "path": "tools/e2e/run_wizard_cr2_export.mjs", "lines": "1-16" },
+          { "path": "tools/e2e/run_wizard_cr2_export.mjs", "lines": "88-106" }
+        ]
+      }
+    }
+  ]
+}

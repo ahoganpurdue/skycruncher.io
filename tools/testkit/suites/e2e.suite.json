@@ -1,0 +1,9 @@
+{
+  "name": "e2e",
+  "description": "Browser e2e gate: wraps tools/e2e/run_wizard_{cr2,seestar}.mjs. The executor owns a FRESH Vite port + curl prewarm + exact-PID cleanup of Vite AND the runner tree on all paths. Reproduces the pinned reference solves byte-identically; deposits a sha-keyed row per scenario.",
+  "manifest": { "source": "none", "comment": "gate lane — scenarios are the input, not the enumerated corpus." },
+  "executor": "e2e_scenario",
+  "scenarios": ["cr2", "seestar"],
+  "lane": "heavy",
+  "default_label": "QUIET-BASELINE"
+}

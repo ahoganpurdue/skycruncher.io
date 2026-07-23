@@ -1,0 +1,414 @@
+{
+  "fragment": "wave2_detect",
+  "derived_by": "opus wave-2 writer (domain: m4_signal_detect — the detection lane)",
+  "notes": [
+    "Domain restricted to nodes whose id starts with src/engine/pipeline/m4_signal_detect/. Every edge FROM is an m4 module; TO endpoints are other m4 modules (both read this session).",
+    "Edge DIRECTION is producer -> consumer (matching the base fragments' convention). Because the base import edges run consumer -> producer (signal_processor.ts imports hot_pixel_map.ts etc.), these semantic edges are the REVERSE arrow and carry the actual payload/control semantics — they are not restatements of an import edge.",
+    "Two detection lanes share the same helpers: the wizard lane (signal_processor.ts analyzeWithMasking) and the auto/solver-reextraction lane (source_extractor.ts detectSources). Edges into both are emitted where the helper feeds both.",
+    "BYTE-IDENTITY CONTRACT recurs across this domain: hot-pixel masking (copy-on-flag), thermal per-blob cuts (inert thresholds), detection-plane flattening (default-OFF flags), and the terrain-evidence gate are all NO-OPs on the clean reference frames (SeeStar M66 FITS + bundled CR2) — verified by both pinned solves. The edges note this in transform, not as a separate claim.",
+    "restorePacketToNative (science 2x2-binned grid -> native sensor grid) is an intra-module COORDINATE conversion, not a node-to-node edge; it is folded into the signal_processor.ts why instead of invented as an edge.",
+    "Did NOT read AtmosphericPhysics is REPORT-ONLY from a threshold audit beyond the module's own header assertion (AtmosphericPhysics.ts:11-15, 33-35) plus the consumer assignments in signal_processor.ts — that is enough to ground the honest-or-absent data-flow edge without asserting the negative across the whole detector.",
+    "TerrestrialEnvironment.ts (BackgroundSurfaceModeler) and CelestialStructures.ts internals were NOT fully read; the edges FROM them are grounded at the signal_processor.ts consumer call sites (payload identity visible there), same mediation convention stage_semantic_a used for spectral_peek -> hardware_profile. No why is asserted for those two nodes (LAW 3: no cite I read of the node itself).",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 1 node-decl referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "src/engine/pipeline/m4_signal_detect/signal_processor.ts": {
+      "why": {
+        "text": "The detection entry point (the pipeline's 'eye'): turns a luminance buffer into categorized SignalPoints — clean stars, anomalies, planet candidates — plus the per-reason culling_tally counted at ASSIGNMENT time (so hard-rejected and planet-routed stars are counted, not just what lands in anomalies[]). It orchestrates every other m4 helper (hot-pixel masking, thermal cuts, density guard, horizon envelope, atmospheric/MW passes) and restores detections from the 2x2-binned science grid to native sensor coordinates. Without it there is no star list to solve against and no measured detection trust surface.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "1-16"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "311-339"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "277-305"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "758-780"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/source_extractor.ts": {
+      "why": {
+        "text": "The second detection lane: shared connected-component blob extraction + centroiding (WASM extract_blobs_shared, with a slice-API and a crude JS fallback) used by the auto path and the solver's re-extraction, plus the sigma-clipped background estimator and the RGBA->luminance converter. It applies the same thermal hot-pixel prepass and per-blob cuts as the wizard lane, then culls satellites/planets/light-pollution. Without it those non-wizard paths would have no source detection.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/source_extractor.ts",
+            "lines": "46-65"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/source_extractor.ts",
+            "lines": "106-263"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/culling_stats.ts": {
+      "why": {
+        "text": "Reconciles the three populations a culled star can land in for the step-3 trust surface: visible (anomalies[] + planet_candidates[], drawable by an overlay toggle) versus dropped (hard-rejected in m4 — only the assignment-time tally knows). It never invents a dropped count: a pre-tally packet or a reason missing from the tally yields dropped=0. Without it the UI per-reason counters would read only anomalies[] and under-report rejected and planet-routed stars to near zero.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/culling_stats.ts",
+            "lines": "1-12"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/culling_stats.ts",
+            "lines": "32-63"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/detection_guard.ts": {
+      "why": {
+        "text": "A pure fast-fail predicate that runs the instant both candidate counts are known, before the O(deep x vanguard) dedup and per-star window passes. On a pathological frame (pure noise, mis-binned mosaic, unsupported sensor) those passes grind for minutes — the ~470s Carina-class silent hang. It trips only when the deep count exceeds an absolute floor AND the per-megapixel density exceeds the pathological threshold, so any real (even dense) frame is double-protected. Without it a bad frame hangs the pipeline silently instead of failing loud and fast.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/detection_guard.ts",
+            "lines": "1-18"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/detection_guard.ts",
+            "lines": "45-70"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts": {
+      "why": {
+        "text": "Derives the terrain silhouette from the negative space of the star field: walking columns left to right, the lowest sky detection that has enough sky SUPPORT above it traces the horizon — working precisely where intensity segmentation is blind (pitch-black foreground). It also emits the evidence gate (coverage + below-region density contrast) that decides whether terrain exists at all; a full-sky tracked frame yields no evidence, so topography culling stays off. Without it there is no evidence-based foreground rejection and the step-3 horizon overlay has nothing to draw.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts",
+            "lines": "1-17"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts",
+            "lines": "51-90"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts",
+            "lines": "145-165"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/detection_cuts.ts": {
+      "why": {
+        "text": "Per-blob thermal-noise discriminators measured TS-side (sharpness = peak/flux, 2nd-moment FWHM and ellipticity on an 11x11 stamp) that stay honest where the WASM fwhm field saturates near ~1.5px for tiny blobs. They cut hot-pixel/dark-current junk from uncooled high-ISO DSLR frames while being calibrated OUTSIDE the clean reference frames' distributions, so they are a no-op there. A null statistic never rejects (honest-or-absent). Without it thermal spikes survive into the star list on warm DSLR frames.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/detection_cuts.ts",
+            "lines": "1-43"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/detection_cuts.ts",
+            "lines": "147-212"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/hot_pixel_map.ts": {
+      "why": {
+        "text": "Pre-extraction single-pixel spike masking on a detection-support COPY (the science buffer that feeds photometry/PSF is never mutated). The discriminator flags a pixel only when it spikes above its 8-neighbour median AND those neighbours sit at background — a real star leaks PSF signal into its ring, a hot pixel does not. Application is gated on measured spike DENSITY (the ~200x separation between a clean DSLR's few real hot pixels and a thermal-dominated frame), and master-dark subtraction is preferred when a dark exists. Without it hot pixels seed false blobs and drag centroids.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/hot_pixel_map.ts",
+            "lines": "1-30"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/hot_pixel_map.ts",
+            "lines": "79-147"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/luminance_reduce.ts": {
+      "why": {
+        "text": "Reduces an interleaved RGB frame to the single-channel luminance the detector reads, under two weightings: REC709 perceptual weights for a genuinely demosaiced frame, and EQUAL (R+G+B)/3 ONLY for a LibRaw CFA-mosaic 'RGB' where each pixel carries one dominant CFA colour. On a CFA mosaic the perceptual weights (0.72 on green sites vs 0.07 on blue) imprint a 2px period-2 checkerboard on the detection buffer; equal weights recover the smooth per-site value. Choosing the wrong weighting for a CFA-mosaic frame corrupts detection with a Nyquist checkerboard.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/luminance_reduce.ts",
+            "lines": "1-25"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/luminance_reduce.ts",
+            "lines": "31-44"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/AtmosphericPhysics.ts": {
+      "why": {
+        "text": "Measures a vertical top-vs-bottom background brightness gradient and a per-star Mie halo ratio. Both are REPORTED ONLY — recorded on each star (rayleigh_index / mie_index) and on the packet (background_level_top/bottom) — and are never wired into any detection threshold. The header is explicit that the vertical slope is UNATTRIBUTED (light pollution, altitude gradient, or vignetting produce the same slope), which is why the packet deliberately omits any scattering_type field. Without it those honest display/receipt gradient fields are absent.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/AtmosphericPhysics.ts",
+            "lines": "10-16"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/AtmosphericPhysics.ts",
+            "lines": "23-55"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m4_signal_detect/detection_flatten.ts": {
+      "why": {
+        "text": "Frame-measured vignette/background flattening for the DETECTION-luminance copy ONLY (fits gain(r)=1+a2 r^2+a4 r^4 against the frame's own sky, and subtracts a deg-2 background surface), returning a NEW buffer and never mutating the input. The owner two-plane law: the corrected buffer reaches detection thresholds and blob extraction only, never photometry/receipts/render — those keep native pixels. It returns null (honest-or-absent) when the frame is too sparse to fit. Both consuming flags are default-OFF, so it is byte-identical today; it exists to make the detection-side vignette lever honest and recordable.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/detection_flatten.ts",
+            "lines": "1-35"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/detection_flatten.ts",
+            "lines": "117-215"
+          }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/hot_pixel_map.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:347",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "HotPixelResult.data — a detection-support luminance buffer (Float32, length w*h, native detection grid) plus flagged count and method ('MASTER_DARK'|'STATISTICAL'|'NONE')",
+        "transform": "removeThermalArtifacts subtracts a geometry-matching master dark (preferred) or replaces statistical single-pixel spikes with their 8-neighbour median into a COPY; signal_processor extracts blobs on hotPix.data while the science buffer lum is untouched. Copy-on-flag: zero flags OR sub-density-gate => data === input lum (byte-identical)",
+        "lossy": true
+      },
+      "why": {
+        "text": "Two-ledger law: the masked buffer is detection-support only; photometry, Mie/Rayleigh, the background model and every receipt measurement keep reading the native lum. A real star elevates its 8-neighbour ring through the PSF so it is kept; a hot pixel does not and is replaced before it can seed a blob or drag a centroid.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "341-357"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/hot_pixel_map.ts",
+            "lines": "79-122"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/hot_pixel_map.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/source_extractor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/source_extractor.ts:130",
+      "how": {
+        "what": "HotPixelResult.data detection-support copy (Float32, length w*h)",
+        "transform": "detectSources calls removeThermalArtifacts(lum,...,null) — masterDark is always null in this lane (no live producer), so only the statistical map can run; extraction reads hotPix.data (detLum). Copy-on-flag => byte-identical when spike density is below the gate",
+        "lossy": true
+      },
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_cuts.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:1024",
+      "how": {
+        "what": "per-blob BlobShapeStats {sharpness = peak/flux, momentFwhmPx = 2.355*sqrt(sigMaj*sigMin) from 11x11-stamp 2nd moments on the detection grid (px), momentEllipticity = 1 - sigMin/sigMaj}, then cullThermalBlobs returns the surviving blob array",
+        "transform": "computeBlobShapeStats measures each centroid TS-side and the fields are attached to every SignalPoint at unpack time; cullThermalBlobs drops FWHM_FLOOR/SHARPNESS/ELLIPTICITY blobs, firing onCut at ASSIGNMENT time so signal_processor's tally() stays measured. Inert thresholds (DETECT_FWHM_FLOOR_PX<=0 etc.) => pass-through, byte-identical",
+        "lossy": true
+      },
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "The cuts run at BOTH the vanguard and deep stride-10 unpack lanes (signal_processor.ts:440 and :559) so no blob escapes measurement; the WASM fwhm field clamps near ~1.5px for tiny blobs, so these moment statistics are the only honest discriminator between a sub-pixel thermal spike and a real undersampled PSF.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "436-444"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "559-563"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_cuts.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/source_extractor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/source_extractor.ts:214",
+      "how": {
+        "what": "BlobShapeStats per DetectedStar + cullThermalBlobs survivor list",
+        "transform": "same measurement + per-blob cut applied in the source_extractor lane (auto path + solver re-extraction); each cut increments a local cutTally (measured, logged). Inert thresholds => pass-through, byte-identical",
+        "lossy": true
+      },
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_guard.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:573",
+      "how": {
+        "what": "DetectionFastFailDiagnostic | null from evaluateDetectionDensity(deepCount, vanguardCount, width, height)",
+        "transform": "trips only when deepCount >= DETECT_MIN_CANDIDATES_FOR_GUARD AND deepDensityPerMP >= DETECT_MAX_CANDIDATE_DENSITY_PER_MP; a non-null result (default DETECT_DENSITY_GUARD_MODE=0) makes signal_processor THROW with the structured diagnostic attached, BEFORE the O(deep x vanguard) dedup pass",
+        "lossy": false
+      },
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "Converts the ~470s Carina-class silent hang into a loud + fast structured failure. The double predicate (absolute floor AND per-MP density) means Carina 60Da (9,613 deep/MP over 4.49MP) trips while any smaller or normal frame cannot.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "566-605"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/detection_guard.ts",
+            "lines": "45-70"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_guard.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "fallback",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:583",
+      "how": {
+        "what": "applyDensityCap(deepCandidates, width, height) -> {kept: top-N-by-flux, dropped, n, m}, where N = densityCapCount (the count that sits exactly at the density-guard boundary)",
+        "transform": "alternate arm when DETECT_DENSITY_GUARD_MODE=1: instead of throwing, keep the brightest N deep candidates and stamp the faint remainder culling_reason='HIGH_DENSITY' (tally()'d), bounding the downstream O(deep x vanguard) work to N. Reads the SAME calibrated density constant the guard trips on; never moves it",
+        "lossy": true
+      },
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/detection_flatten.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:412",
+      "how": {
+        "what": "a flattened DETECTION-luminance COPY (new Float32Array, length w*h) from applyVignetteGainToLum (x (1 + a2 r^2 + a4 r^4)) and/or subtractBackgroundSurface (deg-2 model), plus VignetteFrameFit {a2, a4, fitRms, cornerCenterRatioBefore/After, atGridBound, cells}",
+        "transform": "DETECT_APPLY_VIGNETTE_GAIN and DETECT_APPLY_BG_SURFACE (both default-OFF) correct the detection copy only; signal_processor recomputes mean/sigma on the flattened buffer before thresholding. The science buffer lum stays NATIVE. Flags OFF => detectFlat === detectLum and stats are reused => byte-identical",
+        "lossy": true
+      },
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "Owner two-plane law: the render layer applies its OWN vignette flatten on a separate copy — same physics, independent application, not doubling. fitVignetteFromDetectionLum returns null when the frame is too sparse to fit honestly, so the correction is skipped rather than fabricated (honest-or-absent).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "399-420"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "537-551"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:459",
+      "how": {
+        "what": "HorizonEnvelope {points: [{x, y, measured}] (bins=96, y in image px, y-down = larger-is-lower), coverage, hasTerrainEvidence} from computeHorizonEnvelope(vanguardCandidates, width, height)",
+        "transform": "when terrain evidence is present signal_processor.envelopeToHorizonVector rasterizes the supported nodes into a per-pixel Uint16Array horizonVector (terrain y per column x, linear-interpolated, clamped [0, height-1]); consumed by the foreground-shielding TOPOGRAPHY cull and lifted to native for the step-3 overlay",
+        "lossy": true
+      },
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:460",
+      "how": {
+        "what": "HorizonEnvelope.hasTerrainEvidence boolean (gate: coverage >= 0.4 AND areaBelow > 3% of frame AND densityBelow < 0.25*densityAbove)",
+        "transform": "false (full-sky/tracked frame, no externally supplied horizonVector) => effectiveHorizonVector stays undefined, the background modeler samples the full frame, and every TOPOGRAPHY cull is SKIPPED — byte-identical to today's full-sky behavior; true => horizon derived and topography culling enabled",
+        "lossy": false
+      },
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "The three gate thresholds are engineering judgment (heuristic, owner-design commit f17fa7e) with no measured FP/FN rate yet — the m4_horizon_envelope tests pin behavior snapshots, not a derivation. They move only via the flagged graduation-harness path, so the gate is deliberately conservative: absent evidence, detection behaves exactly as the full-sky path.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/horizon_envelope.ts",
+            "lines": "127-165"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "446-473"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/source_extractor.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:376",
+      "how": {
+        "what": "diffuse Milky-Way sample points [{x, y, brilliance}] from SourceExtractor.detectMilkyWay (64px grid scan, 5x5 average > bg + 3.5*sigma)",
+        "transform": "signal_processor sorts them by brilliance, caps at 50, and feeds them to CelestialStructures.traceMilkyWayCenterline / generateMilkyWayEllipses; results ride out as packet.milky_way / _centerline / _ellipses",
+        "lossy": true
+      },
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/AtmosphericPhysics.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:667",
+      "how": {
+        "what": "detectRayleighGradient -> {top, bottom} (mean luminance of the top/bottom 5% of rows, unitless [0,1]); analyzeMieScattering -> a per-star scalar mie_index (netOuter/netCore halo flux ratio)",
+        "transform": "signal_processor writes s.mie_index and s.rayleigh_index = (top+bottom)/2 on each clean star and returns background_level_top/bottom on the packet. REPORTED ONLY — no detection threshold reads these (honest-or-absent; the packet omits any scattering_type attribution)",
+        "lossy": true
+      },
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "The header is explicit that the top-vs-bottom slope is an UNATTRIBUTED brightness gradient — light pollution, an altitude gradient, or vignetting produce the identical slope — so it must not be presented as measured scattering, and it never adjusts a threshold.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/AtmosphericPhysics.ts",
+            "lines": "11-35"
+          },
+          {
+            "path": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+            "lines": "664-671"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/TerrestrialEnvironment.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:547",
+      "how": {
+        "what": "BackgroundSurfaceModeler: fitSurface(buffer, w, h, horizon, vanguardCandidates) fits a deg-2 sky surface; evaluate(x,y) returns the modeled background at a pixel; coeffs() returns {a,b,c,d,e,f}",
+        "transform": "signal_processor fits the surface (always, line 481) but only the DEEP pass consumes it via subtractBackgroundSurface when DETECT_APPLY_BG_SURFACE is on (default-OFF); flag off => evaluate has no consumer and the fit result is unused, byte-identical",
+        "lossy": false
+      },
+      "verification": "EXTRACTED"
+    },
+    {
+      "from": "src/engine/pipeline/m4_signal_detect/CelestialStructures.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m4_signal_detect/signal_processor.ts:388",
+      "how": {
+        "what": "traceMilkyWayCenterline(points, horizon) -> mwCenterline; generateMilkyWayEllipses(points, horizon) -> mwEllipses (Milky-Way structure products traced against a horizon)",
+        "transform": "signal_processor traces once against a height*0.8 placeholder horizon (before terrain is measured), then RE-traces against the measured silhouette only when DETECT_MW_REAL_HORIZON is on and terrain evidence exists (default-OFF => placeholder trace, byte-identical); results ride out as packet.milky_way_centerline / _ellipses",
+        "lossy": false
+      },
+      "verification": "EXTRACTED"
+    }
+  ]
+}

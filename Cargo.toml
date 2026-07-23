@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "src/engine/wasm_compute",
+    "src-tauri",
+    "src-tauri/native_gpu",
+]
+# `crates/` is its OWN nested cargo workspace (crates/Cargo.toml). Excluding it here
+# is REQUIRED for src-tauri's cross-workspace path-deps (solver-core / solver-contracts):
+# without the exclude, cargo treats those crates as root-workspace members and resolves
+# their `edition.workspace`/`rust-version.workspace` inheritance against THIS manifest
+# (which has no [workspace.package]) → "workspace.package.edition was not defined". The
+# exclude keeps the two workspaces separate so inheritance resolves against crates/. This
+# is a boundary declaration, not a restructure: no members change, crates/ is untouched.
+exclude = [
+    "crates",
+]
+resolver = "2"

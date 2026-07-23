@@ -1,0 +1,545 @@
+{
+  "fragment": "wave2_stages",
+  "derived_by": "opus wave-2 writer (domain: src/engine/pipeline/stages/ + orchestrator_session.ts)",
+  "notes": [
+    "Domain = the shared post-C1 stage chain (module nodes stages/*.ts) plus the single live wizard wrapper orchestrator_session.ts. FROM nodes are file paths (the stage: node space was wave-1 turf); TO nodes are the m-module implementations each stage wraps, boundaries, or in-domain sibling stages.",
+    "The two core-color TO nodes live at src/engine/core/ImageProcessor.ts and src/engine/core/optics_manager.ts (NOT src/core/...) — verified against dag_base.json ids.",
+    "Only one prior edge originates in this domain (stages/package.ts -> boundary:fits_io, unit-conversion); none of the edges below restate it. No module-path why in this domain was set by wave-1, so all whys here are fresh.",
+    "LOUD unit/frame edges prioritized: scale mm x um -> arcsec/px (metrology -> m7_astrometry/metrology), RA HOURS / Dec DEGREES hint convention (solve -> hint_resolver), native-vs-2x2-binned science grid (psf_characterize -> psf_field), field-center airmass sec z (science -> psf_physics).",
+    "Cites are on the FROM stage file's own call site (the module I read this session); the TO m-module internals were NOT read beyond signatures, so verification stays EXTRACTED for an independent reviewer to flip.",
+    "psf_attribution.ts consumes the PsfFieldReport by VALUE passed from the orchestrator (import type only), so no psf_attribution -> psf_field module data-flow edge is emitted here — that hand-off is already expressed at the stage: layer (stage:psf_field -> stage:psf_attribution, wave-1).",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 2 node-decls + 2 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "src/engine/pipeline/orchestrator_session.ts": {
+      "why": {
+        "text": "The single live wizard orchestrator (the auto-path orchestrator.ts was deleted). It holds per-run session state and sequences every shared post-C1 stage in order — decode, detect, metrology, hint+solve, calibrate, SPCC, PSF characterize/attribute, package — feeding each stage's output into the next, and it owns buffer lifetimes (it nulls the raw buffer after ingest, which is why step-1 re-entry is forbidden by design). Without it no wizard solve runs and no receipt is assembled.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "35-62"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "880-1471"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/ingest.ts": {
+      "why": {
+        "text": "Decodes the source bitstream into science buffers (the rawSensor payload plus the interleaved linear RGB frame) — the sole producer of the pixels every later stage measures. It selects the decode arm (rawler default / libraw cold path / browser JPEG / FITS), builds real demosaic params from the decoded header instead of the Canon 14-bit RGGB default, and honestly refuses a phase-wrong color demosaic (grayscale, RGB NOT MEASURED) when the Bayer phase is unknown. Without it there are no pixels to detect, solve, or photometer.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/ingest.ts",
+            "lines": "200-329"
+          },
+          {
+            "path": "src/engine/pipeline/stages/ingest.ts",
+            "lines": "107-153"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/detect.ts": {
+      "why": {
+        "text": "Runs star extraction, culling and curation, producing the SignalPacket (clean_stars / anomalies / culling_tally) that seeds metrology and the solver. It chooses native-Bayer (2x2-binned Uint16) vs luminance detection via the exported isNativeBayer predicate and forwards the curated float-precision detections to the solver on the one existingStars parameter (landmine #3) so the solver does not re-extract from an 8-bit buffer. Without it the solver has no stars to match.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/detect.ts",
+            "lines": "143-196"
+          },
+          {
+            "path": "src/engine/pipeline/stages/detect.ts",
+            "lines": "99-104"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/metrology.ts": {
+      "why": {
+        "text": "Locks the pixel scale (arcsec/px) through the trust ladder FITS-header optics -> EXIF optics + sensor-DB pitch -> blind Tri-Lock, and builds the ephemeris guest list gated on BOTH a trusted clock and a real observer site. The scale it produces seeds the solver's scale prior; a wrong or missing scale poisons the blind solve. On the EXIF rung it mutates metadata.pixel_scale / pixel_pitch_um so downstream stages see a real scale instead of a blind default.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/metrology.ts",
+            "lines": "80-128"
+          },
+          {
+            "path": "src/engine/pipeline/stages/metrology.ts",
+            "lines": "135-147"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/solve.ts": {
+      "why": {
+        "text": "Resolves the wizard's search hints through the shared ladder (CONFIG -> FITS_HEADER -> ZENITH -> BLIND, RA in HOURS / Dec in DEGREES, azimuth sentinel guarded out) and is the single entry point wrapping autoSolvePlate for both pipelines, forwarding curated detections on the one existingStars parameter. It also emits the per-branch flowchart events read back from the solver's own forensics. Without it there is no plate solution (WCS + matched_stars).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/solve.ts",
+            "lines": "80-149"
+          },
+          {
+            "path": "src/engine/pipeline/stages/solve.ts",
+            "lines": "235-244"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/solve_context.ts": {
+      "why": {
+        "text": "Builds the canonical SolveContext consumed by autoSolvePlate — one option contract for both pipelines that can no longer fork — and computes the narrow-field verifyWCS relaxation (field diagonal < 6 deg -> 4 anchor matches @ 0.5 confidence). Callers may not invent extra keys. A drifted or hand-rolled context would silently change solver gates, so centralizing it here keeps the two pipelines' solve behavior identical.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/solve_context.ts",
+            "lines": "57-71"
+          },
+          {
+            "path": "src/engine/pipeline/stages/solve_context.ts",
+            "lines": "134-152"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/calibrate.ts": {
+      "why": {
+        "text": "Post-solve COORDINATE calibration: runs the M7 residual analysis + SIP fit (landed on solution.astrometry, admitted only through an out-of-sample CV gate), the TPS distortion fit (same fire gate then its own CV gate), and the hardware / spectral-forensics profile built from the matched stars' peeked per-channel samples. Non-fatal by contract — any failure warns and returns null, never killing the pipeline. Without it the receipt carries no residual RMS, distortion model, or hardware profile.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "60-127"
+          },
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "150-183"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/science.ts": {
+      "why": {
+        "text": "Runs SPCC spectrophotometric calibration — aperture photometry on the retained linear science RGB regressed against catalog color/magnitude — plus per-star calibrated magnitudes and the honest field-center airmass. It is honest-or-absent throughout: it refuses gray/mono frames (REFUSED_GRAY / UNCALIBRATED_CFA), marks <8-usable-star fits UNCALIBRATED, and records airmass absent rather than the legacy fabricated 1.0. Without it the receipt has no color / zero-point calibration.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/science.ts",
+            "lines": "284-360"
+          },
+          {
+            "path": "src/engine/pipeline/stages/science.ts",
+            "lines": "58-77"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/package.ts": {
+      "why": {
+        "text": "Assembles the wizard receipt (the Toolchest API product) from both ledgers while mutating neither: the FITTED WCS (never a re-synthesized approximation), matched stars with 2D residual vectors, per-star photometry, SPCC / PSF / hardware blocks, pipeline provenance, and the reproducibility envelope. It emits RECEIPT_SCHEMA_VERSION rather than hand-pinning a number, and every block is honest-or-absent. Without it a solved run produces no serialized output.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "137-195"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "443-558"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/psf_characterize.ts": {
+      "why": {
+        "text": "Measures the spatially-varying PSF (per-star 2D-Gaussian Levenberg-Marquardt) at the solved matched-star positions on the science buffer's OWN grid — native, or 2x2-binned when the Bayer-native path produced a binned buffer — never resampling before measurement (PIXEL ledger). It returns null on honest absence (no solve / no buffer / incoherent dims) so the receipt records psf_field:null rather than a fabricated map. Without it the receipt has no measured FWHM/ellipticity field.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/psf_characterize.ts",
+            "lines": "43-78"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/psf_attribution.ts": {
+      "why": {
+        "text": "Decomposes the MEASURED PSF field into physically-explained components (sidereal drift, diffraction, seeing, differential refraction, coma) plus an unexplained residual, labeling each by epistemic tier (CALCULATED / CONFIRMED / FITTED / APPROXIMATE / INFERRED / NOT_MEASURED). Physics informs and guides but never overrides the measurement; the stage never mutates psf_field, matched_stars, the WCS, or the solve, so it is purely additive. Without it the elongation in the PSF field is unattributed.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/psf_attribution.ts",
+            "lines": "1-32"
+          },
+          {
+            "path": "src/engine/pipeline/stages/psf_attribution.ts",
+            "lines": "72-116"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/stages/schema_versions.ts": {
+      "why": {
+        "text": "The single home for RECEIPT_SCHEMA_VERSION — the wizard receipt / Toolchest API contract version consumed as v2.x by downstream shape-discovery. Three product versions circulate in the codebase and are deliberately NOT unified to one number; this file documents that and warns that bumping the receipt version without a real schema change is dishonest versioning. Without this single source, the emitted receipt version could drift across producers.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/schema_versions.ts",
+            "lines": "1-25"
+          }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/pipeline/stages/ingest.ts",
+      "to": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/ingest.ts:243",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "DecodedSensorPayload {data: Uint16Array Bayer CFA (w*h at `stride`) | Float32Array interleaved RGB (w*h*3); width; height; stride; isDemosaiced; cfaMosaicLuma; bayerPattern; blackLevel; whiteLevel; rawler cal record; nanMask 1-bit/pixel}",
+        "transform": "extractRawSensorData decodes the RAW bitstream (rawler default arm / libraw cold path per VITE_DECODER_RAWLER), BayerStorageService cache-backed; ingest is the sole producer of rawSensor",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/ingest.ts",
+      "to": "src/engine/pipeline/m3_gpu_preprocess/demosaic_pipeline.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/ingest.ts:321",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: rawSensor.data (Uint16 Bayer CFA, w*h at `stride`) + DemosaicParams {cfaOffsetX/Y from bayerPattern, blackLevel/whiteLevel from the FITS header, wbR/G/B = 1/1/1 neutral}; out: interleaved linear RGB Float32 (w*h*3)",
+        "transform": "demosaicWebGPU; params come from buildDemosaicParamsForPayload (real header levels, NEVER the Canon 14-bit 2048/16383/RGGB default; WB honest-neutral on CFA FITS)",
+        "lossy": true
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/ingest.ts",
+      "to": "src/engine/core/ImageProcessor.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/stages/ingest.ts:247",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "predicate metadata_reaper.isRawFile(rawBuffer) selecting the decode path",
+        "transform": "isRaw=false (JPEG/TIFF) routes to ImageProcessor.decodeFullResImage (browser full-res decoder) instead of extractRawSensorData; isRaw=true stays on the RAW/FITS arm",
+        "lossy": false
+      },
+      "why": {
+        "text": "decodeScienceFrame forks its whole decode arm on isRawFile: a non-RAW input must use the browser decoder (already-rendered pixels), while RAW/FITS goes through the sensor decode. Sending a JPEG down the RAW arm would fail to decode; sending a RAW down the browser arm would lose the linear sensor data SPCC/photometry need.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/ingest.ts",
+            "lines": "224-248"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/detect.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/detect.ts:143",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: science buffers (native Bayer Uint16 w*h, or luminance Float32 w*h) + focalLength + metadata (frameCtx carried on a copy); out: SignalPacket {clean_stars: SignalPoint[]; anomalies; culling_tally}",
+        "transform": "detectSignal -> SignalProcessor.analyzeBayerNative / analyzeWithMasking: 3-pass masking + morphological extraction + foreground culling",
+        "lossy": true
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/detect.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/signal_processor.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/stages/detect.ts:152",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "isNativeBayer(rawSensor) predicate (not demosaiced AND data instanceof Uint16Array)",
+        "transform": "true -> analyzeBayerNative reads rawSensor.data (Uint16, 2x2 binned), bypassing luminance; false -> analyzeWithMasking reads the luminance Float32 scienceBuffer — selects WHICH upstream buffer detection consumes",
+        "lossy": false
+      },
+      "why": {
+        "text": "The branch predicate is exported so the wizard's status strings use the same condition as the dispatch. It changes which buffer detection reads (native Uint16 vs luminance Float32), not merely a data value — a wrong branch would detect on the wrong buffer type.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/detect.ts",
+            "lines": "99-104"
+          },
+          {
+            "path": "src/engine/pipeline/stages/detect.ts",
+            "lines": "152-176"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/metrology.ts",
+      "to": "src/engine/pipeline/m7_astrometry/metrology.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/metrology.ts:120",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: vanguard = cleanStars.slice(0,10) (brightest SignalPoint[]) + focal length fl.value_mm (mm) + pixel_pitch_um (um); out: scaleLock (arcsec/px)",
+        "transform": "MetrologyService.solveScale — the blind Tri-Lock last-resort rung; combines FL(mm) x sensor pitch(um) geometry with the vanguard star field to fit arcsec/px",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/metrology.ts",
+      "to": "src/engine/pipeline/m2_hardware/optics_resolver.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/metrology.ts:90",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: HardMetadata (EXIF focal length + camera identity); out: {pixel_scale (arcsec/px), pixel_pitch_um (um), hint (labelled FL assumption), userSupplied}",
+        "transform": "resolveOpticsFromExif: EXIF FL (through OpticsManager.getEffectiveFocalLength, which owns the 'Unknown Lens' truthy-trap) x SENSOR_DB most-specific pitch; result mutated back onto metadata.pixel_scale/pixel_pitch_um (trust-ladder rung 2)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/metrology.ts",
+      "to": "src/engine/core/optics_manager.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/metrology.ts:119",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: HardMetadata; out: {value_mm (focal length, mm), hint (labelled assumption or null)}",
+        "transform": "OpticsManager.resolveFocalLengthWithHint seeds the Tri-Lock FL byte-identically while capturing any labelled wide-field assumption for the receipt; owns the 'Unknown Lens' truthy-placeholder handling",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/solve.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/solve.ts:241",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: ImageData (solve buffer) + SolveContext + existingStars (curated DetectedStar[], the landmine #3 forwarding parameter); out: SolveResult {success, solution {wcs, matched_stars, ra_hours, ...}, diagnostics}",
+        "transform": "autoSolvePlate smart facade collapses WASM quad matcher / ultra-wide anchored sweep / deep-verify escalation into one call; absent existingStars means the solver re-extracts",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/solve.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/hint_resolver.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/solve.ts:97",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: configHints {ra_hours: HOURS, dec_degrees: DEGREES} (from CallerTargetHint, catalog/hint convention) + HardMetadata; out: {ra_hours: HOURS, dec_degrees: DEGREES, radius_deg, source}",
+        "transform": "resolveEffectiveHints ladder CONFIG -> FITS_HEADER -> ZENITH -> BLIND; the azimuth-mode sentinel (ra === -1) is guarded OUT so it is never forwarded as a literal RA; no rung firing preserves the blind {radius_deg:180} verbatim",
+        "lossy": false
+      },
+      "why": {
+        "text": "RA is in HOURS and Dec in DEGREES here (the catalog/hint convention), and the ra===-1 azimuth sentinel is NOT a sky coordinate — forwarding it as a literal RA of -1h would poison the search center. This is the loud unit/convention boundary between the upload surface and the solver's search prior.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/solve.ts",
+            "lines": "53-60"
+          },
+          {
+            "path": "src/engine/pipeline/stages/solve.ts",
+            "lines": "86-95"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/solve.ts",
+      "to": "src/engine/events/pipeline_events.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/solve.ts:217",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "stage_started / stage_finished envelopes, one per ATTEMPTED solve branch (solve.quad_wasm | solve.uw_sweep | solve.uw_escalation), each with wall-ms + counts {attempts, matched}",
+        "transform": "emitSolveBranch reads result.diagnostics.forensics + branch_timing (pure READ, solver internals untouched); winner painted PASS, attempted-but-lost FAIL with real accrued ms, never-attempted emits nothing; wrapped in try/catch so instrumentation never breaks the solve",
+        "lossy": true
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/calibrate.ts",
+      "to": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/calibrate.ts:66",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: PlateSolution; out: ResidualAnalysis {rms_arcsec, distortion_pattern_detected, sip_coefficients} landed on solution.astrometry (MUTATES solution — that IS the landing)",
+        "transform": "ResidualAnalyzer.analyze fits residual RMS + a global order-3 SIP; non-fatal (a failure warns and returns null)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/calibrate.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/stages/calibrate.ts:113",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: solution (fire gate = distortion_pattern_detected AND countRefinablePairs > 20); out: {tps, gate}",
+        "transform": "fitTpsGated runs the same fire gate as SIP then an out-of-sample CV gate; solution.astrometry.tps = the model when admitted else null (explicit), and tps_gate is ALWAYS recorded as the honest why",
+        "lossy": false
+      },
+      "why": {
+        "text": "An interpolating TPS spline whose in-sample rms (~3″) does not generalize (measured out-of-sample ~35″) is REFUSED (tps:null) rather than shipped. TPS is a post-solve COORDINATE observation that never touches the SIP block or any asserted solve field, so the pinned SeeStar/CR2 numbers stay byte-identical.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "100-121"
+          },
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "134-140"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/calibrate.ts",
+      "to": "src/engine/pipeline/m2_hardware/hardware_profiler.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/calibrate.ts:177",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: solution + HardMetadata + StarMeasurement[] (per matched star: x/y, flux, fwhm, flux_r/g/b from detected.peak_rgb, measured_bv, catalog bv) + SignalPacket; out: HardwareProfile",
+        "transform": "generateHardwareProfile -> HardwareProfiler.generateReport spectral forensics; buildStarMeasurements drops detections lacking a per-channel peak sample (flux_r undefined filter)",
+        "lossy": true
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/psf_characterize.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/psf_characterize.ts:70",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: {lum: Float32 luminance (native w*h OR 2x2-binned floor(w/2)*floor(h/2)); width bw; height bh; stars: solved matched-star (x,y) positions on that grid, planet sentinels excluded; vignette | null}; out: PsfFieldReport {fwhmMedianMaj/MinPx, ellipticityMedian, orientationMedianDeg, grid: SCIENCE_NATIVE | SCIENCE_BINNED2X, regions}",
+        "transform": "characterizePsfField fits a per-star 2D Gaussian (Levenberg-Marquardt) on the buffer's OWN grid — native or binned, never resampled before measurement (PIXEL ledger)",
+        "lossy": false
+      },
+      "why": {
+        "text": "The native-vs-2x2-binned grid disambiguation is load-bearing: stamps are measured on the buffer's actual grid and the report is tagged with which one, so downstream arcsec<->px conversions (psf_attribution) use the right scale. Incoherent dims return null (honest-absent), never a fabricated map.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/psf_characterize.ts",
+            "lines": "43-77"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/psf_characterize.ts",
+      "to": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/stages/psf_characterize.ts:66",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "flag PIPELINE_CONSTANTS.PSF_FLUX_VIGNETTE_CORRECT gating the vignette input",
+        "transform": "flag ON -> fitVignetteLuma(lum, bw, bh) supplies an achromatic (magnitude) correction map; default OFF -> null -> characterizePsfField records no corrected amplitude (byte-identical)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/science.ts",
+      "to": "src/engine/pipeline/m8_photometry/spcc_calibrator.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/science.ts:382",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: matchedStars + scienceRgb (full-res linear RGB Float32, w*h*3, + optional nanMask) + scales (null in the wizard native path, ScaleManager in the auto preview path) + exposureForFit + FrameContext ctx + vignette + airMass; out: SpccCalibration {zpFit, colorFit, stars[], gains, bandPartition}",
+        "transform": "computeSpccCalibration measures per-channel aperture photometry and fits the color transform + instrumental-mag zero-point (GaiaG-only band partition; Johnson-V refused, never pooled)",
+        "lossy": true
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/science.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_physics.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/science.ts:72",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: field-center ra_hours (HOURS) + dec_degrees (DEGREES) + gps_lat/lon + observation instant; out: airmass (sec z, dimensionless) or null",
+        "transform": "deriveFieldCenterAirmass reuses the canonical alt-az path (targetGeometry -> altitudeDeg, airmassFromAltitude) LAW-4 verbatim; honest-or-absent — null when either trust gate fails or altitude <= ~3 deg (plane-parallel sec z diverges)",
+        "lossy": false
+      },
+      "why": {
+        "text": "SPCC's field-center airmass must equal psf_attribution's for the same field center + instant, so the astronomy math is reused (LAW 4), not re-derived, with identical rounding. A blind DSLR with no trusted clock/GPS yields null (never the legacy fabricated 1.0).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/science.ts",
+            "lines": "39-77"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/science.ts",
+      "to": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/stages/science.ts:378",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "flag PIPELINE_CONSTANTS.PSF_FLUX_VIGNETTE_CORRECT gating the per-band vignette input to the SPCC flux extraction",
+        "transform": "flag ON -> fitVignettePerBand(scienceRgb.data, w, h) yields per-channel r/g/b (a2,a4) maps that feed the flux divide; default OFF -> null -> extraction byte-identical (both extra args inert)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/package.ts",
+      "to": "src/engine/pipeline/stages/schema_versions.ts",
+      "type": "contract",
+      "cite": "src/engine/pipeline/stages/package.ts:61",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "buildReceipt imports RECEIPT_SCHEMA_VERSION from schema_versions.ts and emits it as the receipt `version` field, never hand-pinning a number — schema_versions.ts is the single source of truth for the Toolchest API contract version. If package.ts pinned its own literal, the emitted version could drift from the documented schema lineage.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "8-11"
+          },
+          {
+            "path": "src/engine/pipeline/stages/schema_versions.ts",
+            "lines": "9-14"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/package.ts",
+      "to": "src/engine/contracts/binary_layouts.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/package.ts:586",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: BINARY_LAYOUTS active-atlas boundary goldenVector {md5, manifestPath}; out: pipeline_provenance.atlas_id + reproducibility atlas identity (id/versionSource/manifestPath)",
+        "transform": "activeAtlasGolden selects atlas_gaia_cells (default since the 2026-07-15 cutover) vs atlas_rows (legacy cold path) by the VITE_ATLAS_GAIA state and reads goldenVector.md5 — the LAW-7 build-time manifest fingerprint, never a runtime hash",
+        "lossy": false
+      },
+      "why": {
+        "text": "The receipt reads its atlas content identity from the SINGLE engine-side source of truth (the LAW-7 binary-layout contract for the ACTIVE atlas boundary). Reading the wrong boundary is exactly the wrong-atlas misidentification the external review flagged — a Gaia-default run must not fingerprint itself as the legacy catalog.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "574-621"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/orchestrator_session.ts",
+      "to": "src/engine/pipeline/stages/ingest.ts",
+      "type": "contract",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:880",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "out of ingest: DecodedScienceFrame {rawSensor, fullRGB (Float32 w*h*3), width, height, rgbBuffer?}",
+        "transform": "the session invokes decodeScienceFrame in step2 (extract.decode), retains fullRGB as this.scienceRgb for SPCC, and NULLS the raw ArrayBuffer after step2 — which is why step-1 re-entry is forbidden by design (buffer-ownership contract)",
+        "lossy": false
+      },
+      "why": {
+        "text": "ingest BORROWS rawBuffer and retains no reference; the caller (session) owns the release and nulls it after ingest. That ownership contract is what makes step-1 re-entry forbidden — the raw buffer is gone once extract runs.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/ingest.ts",
+            "lines": "8-16"
+          }
+        ]
+      }
+    }
+  ]
+}

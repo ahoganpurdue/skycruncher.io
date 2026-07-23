@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   #flow tab — edge-semantics map. Tab-local styles (kept in a dedicated file so
+   three parallel surgeons never collide on style.css's tail). Palette tokens
+   (--bg/--panel/--ink/--mono …) come from style.css :root; the --flow-* tokens
+   below are tab-local so they never collide with the reserved --warn/--danger
+   semantics of the shared sheet.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --flow-view: #4cc2ff;      /* zero-copy shared view (sky) */
+  --flow-transfer: #3ddc97;  /* zero-copy ownership transfer (emerald — the lever) */
+  --flow-copy: #e0873a;      /* copy / serialize (copper; distinct from reserved --warn) */
+  --flow-muted: #55607a;     /* NOT MEASURED */
+  --flow-dead: #d76b7a;      /* DEAD PATH — source file deleted (crimson; ≠ grey NOT MEASURED) */
+}
+
+.subhead .src.static {
+  color: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  padding: 1px 8px;
+}
+.subhead .flow-sub-meta { color: var(--muted); font: 10.5px var(--mono); letter-spacing: 0.03em; }
+
+/* ── canvas ── */
+.flow-canvas {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background:
+    radial-gradient(1100px 380px at 30% -10%, rgba(76, 194, 255, 0.05), transparent 60%),
+    var(--panel);
+  padding: 10px 8px;
+  overflow-x: auto;
+}
+.flow-canvas svg { display: block; width: 100%; min-width: 640px; height: auto; }
+
+/* nodes */
+.flow-node rect {
+  fill: var(--panel-2);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.flow-node-t { font: 600 12.5px var(--sans); fill: var(--ink); }
+.flow-node-s { font: 10px var(--mono); fill: var(--muted); letter-spacing: 0.02em; }
+
+/* dead nodes — source file deleted (distinct from live/unmeasured) */
+.flow-node.dead rect {
+  fill: transparent;
+  stroke: var(--flow-dead);
+  stroke-width: 1.2;
+  stroke-dasharray: 5 3;
+  opacity: 0.85;
+}
+.flow-node.dead .flow-node-t { fill: var(--flow-dead); opacity: 0.85; }
+.flow-node.dead .flow-node-s {
+  fill: var(--flow-dead);
+  opacity: 0.75;
+  text-decoration: line-through;
+}
+.flow-node-dead-tag {
+  font: 700 7.5px var(--mono);
+  fill: var(--flow-dead);
+  letter-spacing: 0.12em;
+}
+
+/* edges */
+.flow-edge path { transition: none; }
+.flow-edge.unmeasured path { opacity: 0.82; }
+.flow-edge.dead path { opacity: 0.5; stroke-dasharray: 7 6 !important; }
+.flow-edge.dead polygon { opacity: 0.5; }
+.flow-glyph-bg { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.flow-nm-tag {
+  font: 700 8.5px var(--mono);
+  fill: var(--flow-muted);
+  letter-spacing: 0.1em;
+}
+.flow-dead-tag {
+  font: 700 8.5px var(--mono);
+  fill: var(--flow-dead);
+  letter-spacing: 0.1em;
+}
+.flow-edge:hover path { filter: brightness(1.25); }
+
+/* ── legend ── */
+.flow-legend { margin-top: 8px; }
+.flow-leg-note { color: var(--muted); font-size: 12px; max-width: 760px; line-height: 1.6; margin: 2px 0 12px; }
+.flow-leg-note code, .flow-honesty code, .flow-glyph-meta code {
+  font: 11px var(--mono); color: var(--ink-2); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; word-break: break-all;
+}
+
+.flow-leg-classes { display: grid; gap: 10px; margin-bottom: 8px; }
+.flow-leg-row {
+  display: flex; align-items: center; gap: 18px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+  padding: 10px 16px;
+}
+.flow-leg-sample { flex: 0 0 190px; display: flex; flex-direction: column; gap: 3px; }
+.flow-leg-line { width: 120px; height: auto; }
+.flow-leg-scale { font: 9.5px var(--mono); color: var(--faint); letter-spacing: 0.02em; }
+.flow-leg-text { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; }
+.flow-leg-text b { font: 600 12px var(--mono); letter-spacing: 0.06em; }
+.flow-leg-text span { color: var(--ink-2); line-height: 1.55; }
+
+.flow-glyph-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+  gap: 10px; margin-bottom: 8px;
+}
+.flow-glyph-card {
+  display: flex; align-items: flex-start; gap: 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+  padding: 11px 13px;
+}
+.flow-glyph-card svg { flex: 0 0 34px; width: 34px; height: 34px; margin-top: 2px; }
+.flow-glyph-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.flow-glyph-meta b { color: var(--ink); font: 600 12px var(--sans); }
+.flow-glyph-meta code { align-self: flex-start; }
+.flow-glyph-cite { font: 10px var(--mono); color: var(--accent); letter-spacing: 0.02em; }
+.flow-glyph-note { font-size: 10.5px; color: var(--muted); line-height: 1.5; }
+
+.flow-honesty p { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; margin: 6px 0; }
+.flow-hon-chip {
+  display: inline-block; font: 700 9.5px var(--mono); letter-spacing: 0.1em;
+  border-radius: 3px; padding: 2px 7px; margin-right: 6px; vertical-align: middle;
+}
+.flow-hon-chip.measured { color: var(--flow-view); border: 1px solid var(--accent-line); background: var(--accent-dim); }
+.flow-hon-chip.notmeasured { color: var(--flow-muted); border: 1px solid var(--line-strong); background: var(--panel-2); }
+.flow-hon-chip.dead { color: var(--flow-dead); border: 1px solid var(--flow-dead); background: transparent; text-decoration: line-through; }
+
+@media (max-width: 620px) {
+  .flow-leg-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .flow-leg-sample { flex-basis: auto; }
+}

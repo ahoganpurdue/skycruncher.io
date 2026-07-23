@@ -1,0 +1,68 @@
+{
+  "schema": "cutover_golden.v1",
+  "boundary": "rawler_cfa (binary_layouts.ts:226)",
+  "entries": [
+    {
+      "recorded_at": "2026-07-11T08:04:31.000Z",
+      "frame": "sample_observation.cr2",
+      "arm": "rawler_default",
+      "flag_env": null,
+      "rawler_enabled": true,
+      "decode_handoff": {
+        "dims": "5202x3465",
+        "stride": 5202,
+        "isDemosaiced": true,
+        "dtype": "f32_le",
+        "elems_per_px": 3,
+        "len_bytes": 216299160,
+        "md5": "7e903e66c5303744d4ef9dbb23cc2bd0",
+        "stats": {
+          "min": 0.015304799191653728,
+          "max": 0.23356984555721283,
+          "mean": 0.0331,
+          "scan_step": 14,
+          "scanned": 3862485
+        },
+        "rawler_contract": {
+          "present": true,
+          "pattern": "GBRG",
+          "blacklevel": [
+            2045,
+            2045,
+            2049,
+            2049
+          ],
+          "whitelevel": [
+            15094
+          ]
+        }
+      }
+    },
+    {
+      "recorded_at": "2026-07-11T08:04:31.000Z",
+      "frame": "sample_observation.cr2",
+      "arm": "libraw_cold",
+      "flag_env": "0",
+      "rawler_enabled": false,
+      "decode_handoff": {
+        "dims": "5202x3464",
+        "stride": 5202,
+        "isDemosaiced": true,
+        "dtype": "f32_le",
+        "elems_per_px": 3,
+        "len_bytes": 216236736,
+        "md5": "604b973ce2c507892577156c9acbddef",
+        "stats": {
+          "min": 0,
+          "max": 1,
+          "mean": 0.0386,
+          "scan_step": 14,
+          "scanned": 3861371
+        },
+        "rawler_contract": {
+          "present": false
+        }
+      }
+    }
+  ]
+}

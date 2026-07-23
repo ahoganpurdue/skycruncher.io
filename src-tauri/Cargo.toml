@@ -1,0 +1,76 @@
+[package]
+name = "app"
+version = "1.1.0"
+description = "SkyCruncher Scientific Pre-Processor"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+[features]
+default = []
+ai-terrain = ["ort", "ndarray"]
+ai-distortion = ["ort", "ndarray"]
+ai = ["ai-terrain", "ai-distortion"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.5.6", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+# `devtools` feature intentionally OMITTED — ship-gate hardening (D-srctauri-
+# ship-gate, owner-approved 2026-07-11). Tauri v2 enables the webview inspector
+# (Ctrl+Shift+I) in DEBUG builds by default with no feature; the `devtools`
+# feature would ALSO force it into RELEASE/packaged builds. A shipped instrument
+# must not expose the inspector, so the feature is dropped: debug keeps devtools,
+# release ships without them. (Was `features = ["devtools"]`, added for the
+# v1.0.0 packaged-failure triage — that need is retired for the 1.1.0 release.)
+tauri = { version = "2.10.3", features = [] }
+tauri-plugin-log = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+# Persists dialog-granted fs scopes across restarts (owner ruling 2026-07-10:
+# user-picked input/output folders are the ONLY fs access — the capability file
+# configures no fs scope, so dialog grants + this plugin ARE the scope model).
+tauri-plugin-persisted-scope = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+wgpu = { version = "23.0", features = [] }
+native-gpu = { path = "native_gpu" }
+memmap2 = "0.9.5"
+
+# Greenfield native plate solver (crates/ nested workspace) — driven as a LIBRARY by
+# the flag-gated `solve_greenfield` command (src/greenfield_solve.rs). Cross-workspace
+# path deps: solver-core/solver-contracts belong to crates/Cargo.toml's workspace, so
+# their `.workspace = true` edition/rust-version resolve there; the root workspace
+# consumes them as external path dependencies.
+solver-core = { path = "../crates/solver-core" }
+solver-contracts = { path = "../crates/solver-contracts" }
+
+# Starplates native provider (docs/STARPLATES_SPEC.md).
+# arrow pinned EXACTLY per spec §3.3 — same version the workspace already
+# compiles via native-gpu, so the marginal binary cost is near zero.
+arrow-array = "=54.3.1"
+arrow-schema = "=54.3.1"
+arrow-buffer = "=54.3.1"
+arrow-ipc = "=54.3.1"
+sha2 = "0.10"
+# Download manager (starplates_sync): schannel-backed TLS via native-tls —
+# avoids the rustls/aws-lc-rs NASM toolchain requirement on Windows.
+ureq = { version = "3.2", default-features = false, features = ["native-tls"] }
+
+# Optional: AI/ONNX boundary detection (enable with --features ai)
+ort = { version = "2.0.0-rc.12", features = ["directml"], optional = true }
+ndarray = { version = "0.16", optional = true }
+
+[dev-dependencies]
+tempfile = "3"

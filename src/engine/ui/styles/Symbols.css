@@ -1,0 +1,27 @@
+/* SkyCruncher Symbol System — Encoding-Independent Icons */
+/* NOTE: CSS escapes take Unicode CODE POINTS (\1F4F7), not UTF-16 surrogate
+   pairs (\D83D\DCF7). Lone surrogates render as U+FFFD replacement glyphs. */
+
+.icon-warn::before { content: "\26A0\FE0F"; margin-right: 8px; }
+.icon-camera::before { content: "\1F4F7"; }
+.icon-planet::before { content: "\1FA90"; margin-right: 6px; }
+.icon-star::before { content: "\2B50"; margin-right: 6px; }
+.icon-telescope::before { content: "\1F52D"; margin-right: 8px; }
+.icon-trash::before { content: "\1F5D1"; }
+.icon-check::before { content: "\2705"; }
+.icon-rainbow::before { content: "\1F308"; margin-right: 8px; }
+.icon-shield::before { content: "\1F6E1"; margin-right: 8px; }
+
+/* New UI Icons */
+.icon-location::before { content: "\1F4CD"; margin-right: 6px; }
+.icon-time::before { content: "\1F552"; margin-right: 6px; }
+.icon-target::before { content: "\1F3AF"; margin-right: 6px; }
+.icon-bulb::before { content: "\1F4A1"; margin-right: 6px; }
+.icon-box::before { content: "\1F4E6"; margin-right: 6px; }
+.icon-rocket::before { content: "\1F680"; margin-right: 6px; }
+.icon-search::before { content: "\1F50D"; margin-right: 6px; }
+.icon-file::before { content: "\1F4C4"; margin-right: 6px; }
+.icon-arrow-right::before { content: "\2192"; margin-left: 6px; }
+.icon-degree::after { content: "\00B0"; }
+.icon-dot::before { content: "\2022"; margin: 0 8px; }
+.icon-delta::before { content: "\0394"; margin-right: 4px; }

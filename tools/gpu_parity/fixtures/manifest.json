@@ -1,0 +1,51 @@
+{
+  "generator": "tools/gpu_parity/fixtures/gen_fixtures.mjs",
+  "seed": 1544552161,
+  "seed_hex": "0x5C0FFEE1",
+  "prng": "mulberry32",
+  "width": 256,
+  "height": 256,
+  "stride": 256,
+  "cfa": "RGGB",
+  "dtype": "uint16",
+  "endianness": "little",
+  "layout": "single-channel-mosaic",
+  "black_level": 2048,
+  "white_level": 16383,
+  "generated_utc": "2026-07-21T15:26:40.133Z",
+  "fixtures": [
+    {
+      "name": "gradient",
+      "file": "gradient_256x256_rggb_u16le.bin",
+      "bytes": 131072,
+      "md5": "0f34bf2d07d38bd136875ad968e565ea",
+      "stats": {
+        "min": 1244,
+        "max": 17474,
+        "mean": 9287.18
+      }
+    },
+    {
+      "name": "impulse",
+      "file": "impulse_256x256_rggb_u16le.bin",
+      "bytes": 131072,
+      "md5": "1f55505cd1b5c6d3fdb62bcabaf906e5",
+      "stats": {
+        "min": 2148,
+        "max": 16380,
+        "mean": 2270.92
+      }
+    },
+    {
+      "name": "noise",
+      "file": "noise_256x256_rggb_u16le.bin",
+      "bytes": 131072,
+      "md5": "8c62ef3acf2c949513a749ccd0d4e653",
+      "stats": {
+        "min": 3000,
+        "max": 15000,
+        "mean": 9003.03
+      }
+    }
+  ]
+}

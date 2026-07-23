@@ -1,0 +1,11 @@
+{
+  "name": "population",
+  "description": "On-box science-frame corpus → real headless wizard pipeline, process-per-frame. Generalizes tools/corpus/population_timing_run.mjs. Manifest built by lib/manifest.mjs v2 (correlated-set N=3 sampling + evidence-derived timeouts).",
+  "manifest": {
+    "source": "enumerate",
+    "comment": "Enumerate the samples root resolved by lib/env.mjs (TESTKIT_SAMPLES; Windows heavy-root default resolved inside env.mjs, ROOT/'Sample Files' junction elsewhere). Drive-literal-free here on purpose."
+  },
+  "executor": "solve_to_receipt",
+  "lane": "heavy",
+  "default_label": "QUIET-BASELINE"
+}

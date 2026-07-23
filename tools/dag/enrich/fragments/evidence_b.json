@@ -1,0 +1,333 @@
+{
+  "fragment": "evidence_b",
+  "derived_by": "sonnet batch B (evidence edges + external dependencies)",
+  "notes": [
+    "Evidence edges cite the SPECIFIC assertion/comment lines that exercise the named stage/boundary relationship, not just stage-order adjacency (that is stage_order.json's job).",
+    "Skipped (no direct assertion found, LAW 3 no-cite-no-claim): calibrate.m7_analyze->calibrate.sip_gate, calibrate.hardware_profile->render_apply_sip, render_apply_sip->spcc, psf_field->psf_attribution, boundary:gpu_quad_scoring->stage:solve.quad_wasm (GPU quad-scoring cutover evidence not found in the read apispec/e2e set).",
+    "boundary:arrow_seam (atlas->solver catalog store) and boundary:toolchest_arrow_export (receipt->consumer export) are DISTINCT per src/engine/contracts/binary_layouts.ts:448 — not conflated; only toolchest_arrow_export is exercised by arrow_sink.apispec.ts.",
+    "External node 'astrometry_net_oracle' folds two access paths (local solve-field binary + cloud nova.astrometry.net API) into one conceptual external system per tools/overnight/astrometry_truth.mjs and tools/overnight/nova_truth.mjs's own framing ('sibling of the LOCAL install-gated oracle').",
+    "gaia_cell_source.ts's REMOTE (R2) CellSource is a typed stub that throws notImpl() in phase A (lines 287-298) — deliberately NOT claimed as a live data-flow edge; only the offline ingestion (download_gaia_chunked.mjs) and the release upload (publish_r2.mjs) are live, evidenced paths.",
+    "~18 minutes.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 3 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "external:gaia_catalog": {
+      "why": {
+        "text": "The starplates/atlas build pipeline pulls Gaia DR3 source rows (ra_deg, dec_deg, pm_ra_masyr, pm_dec_masyr, g_mag, bp_rp, source_id) directly from ESA's public Gaia Archive TAP service over HTTPS ADQL async queries, chunked by source_id range to stay under the TAP result cap.",
+        "cites": [
+          {
+            "path": "tools/starplates/download_gaia_chunked.mjs",
+            "lines": "5,18,51,151"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "external_dependency": true
+      }
+    },
+    "external:starplates_r2": {
+      "why": {
+        "text": "Built starplates/Gaia-cell release directories (Arrow cell blobs + manifest.json) are uploaded to a Cloudflare R2 bucket named 'starplates' over the S3-compatible HTTP API, using account id / access key / secret credentials read from env. This is the canonical remote distribution point for the catalog dataplane.",
+        "cites": [
+          {
+            "path": "tools/starplates/publish_r2.mjs",
+            "lines": "20-23,49,137-157"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "external_dependency": true
+      }
+    },
+    "external:astrometry_net_oracle": {
+      "why": {
+        "text": "An independent ground-truth oracle is reached two ways: locally by shelling out to the astrometry.net `solve-field` binary (index files live outside the repo, path fully configurable via env, never hardcoded), and remotely by submitting frames to the public nova.astrometry.net REST API and polling job status. Both paths produce the same canonical TruthLabel record shape, independent of this repo's own solver — breaking self-label circularity for graduation.",
+        "cites": [
+          {
+            "path": "tools/overnight/astrometry_truth.mjs",
+            "lines": "6-21"
+          },
+          {
+            "path": "tools/overnight/nova_truth.mjs",
+            "lines": "6-20"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "external_dependency": true
+      }
+    },
+    "external:prysm_sidecar": {
+      "why": {
+        "text": "A pinned Python subprocess running the `prysm` physical-optics library is spawned over newline-framed JSON-RPC to serve diffraction/Zernike-aberrated PSF predictions. On any spawn error, import failure, protocol error, or per-call timeout the caller degrades to `{available:false}` and the engine falls back cold to its closed-form 1.028*lambda/D diffraction formula — the dependency is never fatal.",
+        "cites": [
+          {
+            "path": "tools/prysm/client.ts",
+            "lines": "1-25,45-47"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "external_dependency": true
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "stage:load",
+      "to": "stage:extract",
+      "type": "evidence",
+      "cite": "tools/api/solve_seestar.apispec.ts:42-45",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "headless smoke reads the raw FITS buffer (fs.readFileSync) and calls runWizardPipeline(ab) — the populated receipt asserted later in the same test proves load's raw buffer reached extract",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.detect",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_seestar.mjs:64",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "assert((count >= 50) || (snap?.signalStars >= 50)) — detection count asserted immediately after the FITS decode step completes",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:metrology",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_seestar.mjs:79",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "assertRange(snap?.scaleLock, 3.70, 3.78) — the metrology stage's scale-lock output is asserted right after the extract/signal step",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:metrology",
+      "to": "stage:solve.quad_wasm",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_seestar.mjs:77",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "assert(elapsed < 15_000, 'scale lock took Xms — Tri-Lock ran? must be instant header lock') — metrology's scale must resolve fast enough to seed the quad solve's search band",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:solve.quad_wasm",
+      "to": "stage:solve",
+      "type": "evidence",
+      "cite": "tools/api/solve_seestar.apispec.ts:136-141",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "byte-identical toBe() assertions on receipt.solution.{ra_hours,dec_degrees,pixel_scale,confidence,stars_matched} prove the wasm quad-solve output threads into the solve stage's receipt unmodified",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "boundary:wasm_typed_array",
+      "to": "stage:solve.quad_wasm",
+      "type": "evidence",
+      "cite": "tools/api/solve_seestar.apispec.ts:93-101",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "receipt.reproducibility.wasm.compute_pkg is asserted to match the pattern 'wasm-compute <digit>...' — a real runtime-measured identity_version() string from the compiled wasm-compute crate, proving the wasm_typed_array crossing is the real module, not a stub",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "boundary:rawler_cfa",
+      "to": "stage:extract.decode",
+      "type": "evidence",
+      "cite": "tools/api/solve_cr2.apispec.ts:118-123",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "expect(receipt.pipeline_provenance.decoder_arm).toBe('rawler') on the bundled CR2 — proves the raw buffer crossed the rawler_cfa decode boundary (default arm) before extract.decode produced pixels",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:calibrate.sip_gate",
+      "to": "stage:bc_rematch",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_cr2.mjs:177",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "assert(bc.false_guard_passes === false, '... wrong-sign control is the holding prong post-sip-gate') — bc_rematch's wrong-sign holding behavior is explicitly gated on the sip_gate verdict (OOS_WORSE_THAN_LINEAR per docs/GATES.md:44)",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:bc_measure",
+      "to": "stage:bc_rematch",
+      "type": "evidence",
+      "cite": "tools/e2e/run_wizard_cr2.mjs:178-181",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "bc.matched_before===56 / matched_after===56 / rms_before_arcsec===630.8214 / rms_after_arcsec===616.8437 pinned exactly — bc_rematch's before-value is bc_measure's initial measured RMS",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:calibrate.tps_gate",
+      "to": "stage:solve",
+      "type": "evidence",
+      "cite": "tools/api/solve_seestar.apispec.ts:131-133",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "expect(receipt.solution.astrometry.tps).toBeNull() + expect(receipt.solution.astrometry.tps_gate?.admitted).toBe(false) — the tps_gate's out-of-sample refusal verdict is written directly into the solve stage's astrometry block",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:spcc",
+      "to": "stage:spcc_render_gains",
+      "type": "evidence",
+      "cite": "tools/api/solve_cr2.apispec.ts:184-196",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "spcc.color_slope/color_intercept/color_r2/zeropoint asserted, then spcc.gains.applied===false asserted (r2<0.55 refusal) — proves spcc_render_gains consumes the spcc color fit's r2 to decide WB gain application",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:forced_confirm",
+      "type": "evidence",
+      "cite": "tools/api/confirm_null_evidence.apispec.ts:44-46,61-73",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "runPostSolveConfirmation is re-invoked directly on solution.wcs (crpix-shifted by known offsets); the set-gate collapses on every wrong WCS — proves forced_confirm consumes the solve stage's fitted WCS as its position-prediction input",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:forced_confirm",
+      "type": "evidence",
+      "cite": "tools/api/confirm_null_evidence.apispec.ts:54-59",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "framePsf is built from s.psfField.{fwhmMedianMajPx,ellipticityMedian,method} and passed into runPostSolveConfirmation — proves forced_confirm consumes psf_field's measured PSF for aperture sizing",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:forced_confirm",
+      "to": "stage:calibrate",
+      "type": "evidence",
+      "cite": "tools/api/solve_seestar.apispec.ts:109-128",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "confirm_status block (verdict_driver/status/setExcessZ/nTargets/confirmed/setGateZ) asserted byte-exact — the DERIVED classification of forced_confirm's deep_confirmed output surfaces on the receipt at stage:calibrate's fold-completion",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:solve",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "evidence",
+      "cite": "tools/api/arrow_sink.apispec.ts:86-98",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "run_summary.arrow row values (ra_hours/dec_degrees/pixel_scale/confidence/stars_matched) asserted toBe the receipt.solution values AND the SACRED anchors — proves the Arrow sink losslessly carries the solve stage's scalar outputs to disk",
+        "transform": "receipt scalar fields -> single-row Arrow record batch",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:forced_confirm",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "evidence",
+      "cite": "tools/api/arrow_sink.apispec.ts:113-116",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "forced.numRows asserted equal to receipt.deep_confirmed.confirmed_stars.length AND receipt.confirm_status.confirmed — forced_confirm's confirmed-star set is carried intact into forced_confirmed.arrow",
+        "transform": "confirmed_stars array -> Arrow table rows",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "evidence",
+      "cite": "tools/api/arrow_sink.apispec.ts:114",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "expect(detections.numRows).toBe((receipt.signal?.clean_stars ?? []).length) — extract.detect's clean-star detection set row count is carried exactly into detections.arrow",
+        "transform": "n/a",
+        "lossy": false
+      }
+    },
+    {
+      "from": "external:gaia_catalog",
+      "to": "tools/starplates/download_gaia_chunked.mjs",
+      "type": "data-flow",
+      "cite": "tools/starplates/download_gaia_chunked.mjs:51,148-190",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "Gaia DR3 rows (source_id, ra_deg, dec_deg, pmra, pmdec, phot_g_mean_mag, bp_rp) as ADQL CSV over ESA TAP async job polling",
+        "transform": "CSV rows parsed and spilled to per-cell buffer files for the downstream Arrow cell builder",
+        "lossy": false
+      }
+    },
+    {
+      "from": "external:starplates_r2",
+      "to": "tools/starplates/publish_r2.mjs",
+      "type": "data-flow",
+      "cite": "tools/starplates/publish_r2.mjs:137-157",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "built release directory objects (manifest.json + Arrow cell blobs) PUT to the R2 bucket over the S3-compatible signed HTTP API",
+        "transform": "raw file bytes uploaded as-is, no re-encoding",
+        "lossy": false
+      }
+    },
+    {
+      "from": "external:astrometry_net_oracle",
+      "to": "tools/overnight/astrometry_truth.mjs",
+      "type": "data-flow",
+      "cite": "tools/overnight/astrometry_truth.mjs:6-16",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a fitted WCS solution (.wcs FITS header, NAXIS=0) produced by the external solve-field binary",
+        "transform": "parsed via readFitsHeaderFd and adapted to a canonical TruthLabel record (fromAstrometryNetWcs)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "external:astrometry_net_oracle",
+      "to": "tools/overnight/nova_truth.mjs",
+      "type": "data-flow",
+      "cite": "tools/overnight/nova_truth.mjs:9-20",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a solved job result (WCS + calibration fields) polled from the nova.astrometry.net cloud API after an xylist/image submission",
+        "transform": "job result adapted to a GOLD TruthLabel written to labels.json, tagged with a nova provenance block distinguishing it from the local oracle",
+        "lossy": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+
+console.log("Step 1: Basic TSX execution works.");
+
+try {
+    const colormath = require('../colormath');
+    console.log("Step 2: Require colormath works.", Object.keys(colormath));
+} catch (e: any) {
+    console.log("Step 2 Failed:", e.message);
+}
+
+// Try ESM import dynamic
+(async () => {
+    try {
+        const adapters = await import('../adapters/index');
+        console.log("Step 3: Import ../adapters/index works.", Object.keys(adapters));
+    } catch (e) {
+        console.log("Step 3 Failed:", e);
+    }
+})();

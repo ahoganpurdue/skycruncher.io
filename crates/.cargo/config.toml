@@ -1,0 +1,5 @@
+# Discovered only when cargo's CWD is at/below crates/ — use build.cmd or cd here first.
+# K: is a thin virtual disk (storage law): target output MUST go to D:.
+[build]
+target-dir = "D:/AstroLogic/cargo_target/solver-core"
+rustflags = ["-C", "target-cpu=native"]

@@ -1,0 +1,14 @@
+[
+  {
+    "date": "2026-07-12",
+    "git": "9fbec68",
+    "blind_rate_all": 44.8,
+    "blind_rate_attempted": 53.1,
+    "rate_by_format": {
+      "CR2": 6.5,
+      "FITS": 82
+    },
+    "wall_median_s": 10.8,
+    "wall_p90_s": 195.9
+  }
+]

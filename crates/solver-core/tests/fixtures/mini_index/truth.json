@@ -1,0 +1,29 @@
+{
+  "release": "mini-synth-g15u-1",
+  "w": 1200,
+  "h": 900,
+  "crval_ra_deg": 61.3,
+  "crval_dec_deg": 6.2,
+  "scale_asec_px": 60,
+  "rot_deg": 25,
+  "parity": 1,
+  "parity_sign": -1,
+  "cd": [
+    [
+      0.015105129783944165,
+      0.007043637695678324
+    ],
+    [
+      0.007043637695678324,
+      -0.015105129783944165
+    ]
+  ],
+  "bits": {
+    "crval_ra": "0x404ea66666666666",
+    "crval_dec": "0x4018cccccccccccd",
+    "cd00": "0x3f8eef70336418f6",
+    "cd01": "0x3f7cd9ca18c3d5ae",
+    "cd10": "0x3f7cd9ca18c3d5ae",
+    "cd11": "0xbf8eef70336418f6"
+  }
+}

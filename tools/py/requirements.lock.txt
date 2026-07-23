@@ -1,0 +1,11 @@
+﻿# SkyCruncher prysm environment lock — v0
+# python: 3.12.13 (cpython, uv-managed)
+# prysm: git+https://github.com/brandondube/prysm.git @ 26a4209a63b7a254c8c1276c4ac0eeff3ef8369a (master, 2026-07-12T22:51:08Z)
+# env path: D:\AstroLogic\envs\prysm
+# install date (UTC): 2026-07-15T02:19:37Z
+# uv: 0.11.28 ; installer: astral standalone, user-scope, D:\AstroLogic\envs\uv-bin
+# UV_PYTHON_INSTALL_DIR=D:\AstroLogic\envs\uv-pythons  UV_CACHE_DIR=D:\AstroLogic\envs\uv-cache
+numpy==2.5.1
+prysm @ git+https://github.com/brandondube/prysm.git@26a4209a63b7a254c8c1276c4ac0eeff3ef8369a
+scipy==1.18.0
+

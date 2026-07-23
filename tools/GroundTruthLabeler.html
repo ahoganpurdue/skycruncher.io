@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SKYCRUNCHER | Ground Truth Labeler</title>
+    <style>
+      :root {
+        --bg: #09090b;
+        --panel: #18181b;
+        --accent: #6366f1;
+        --landscape: #10b981;
+        --skyglow: #f59e0b;
+        --jupiter: #ef4444;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .toolbar {
+        background: var(--panel);
+        border-bottom: 1px solid #27272a;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+      }
+      .title {
+        font-weight: 800;
+        font-size: 18px;
+        letter-spacing: -0.05em;
+        color: var(--accent);
+      }
+      .controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .diag-panel {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        background: #27272a;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .diag-panel select {
+        background: #18181b;
+        color: white;
+        border: 1px solid #3f3f46;
+        font-size: 10px;
+        border-radius: 4px;
+      }
+      .mode-select {
+        display: flex;
+        background: #27272a;
+        border-radius: 6px;
+        padding: 2px;
+      }
+      .mode-btn {
+        padding: 4px 12px;
+        font-size: 11px;
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+      .mode-btn.active {
+        background: var(--accent);
+        color: white;
+      }
+      .mode-btn[data-mode="landscape"].active { background: var(--landscape); }
+      .mode-btn[data-mode="skyglow"].active { background: var(--skyglow); }
+      .mode-btn[data-mode="jupiter"].active { background: var(--jupiter); }
+
+      .main {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: #000;
+        cursor: crosshair;
+      }
+      #viewport {
+        transform-origin: 0 0;
+        position: absolute;
+      }
+      svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      svg * {
+        pointer-events: all;
+      }
+      .node {
+        fill: white;
+        stroke: black;
+        stroke-width: 1;
+        cursor: move;
+      }
+      .poly-landscape { fill: var(--landscape); fill-opacity: 0.2; stroke: var(--landscape); stroke-width: 2; }
+      .poly-skyglow { fill: var(--skyglow); fill-opacity: 0.2; stroke: var(--skyglow); stroke-width: 2; }
+      .marker-jupiter { fill: var(--jupiter); stroke: white; stroke-width: 2; }
+      
+      .hud {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(24, 24, 27, 0.8);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #27272a;
+        font-size: 11px;
+        pointer-events: none;
+      }
+      .hud b { color: var(--accent); }
+
+      .actions {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      button.action-btn {
+        background: #27272a;
+        border: 1px solid #3f3f46;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 11px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      button.action-btn:hover { background: #3f3f46; }
+      button.primary { background: var(--accent); border-color: var(--accent); }
+      
+      input[type="file"] { display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="toolbar">
+      <div class="title">SKYCRUNCHER // GROUND_TRUTH_LABELER</div>
+      <div class="controls">
+        <div class="mode-select">
+          <button class="mode-btn active" data-mode="landscape">LANDSCAPE</button>
+          <button class="mode-btn" data-mode="skyglow">SKYGLOW</button>
+          <button class="mode-btn" data-mode="jupiter">JUPITER</button>
+        </div>
+        <div class="diag-panel">
+          <span>STAR SCALE:</span>
+          X <select id="diag-scale-x">
+            <option value="0.125">0.125</option>
+            <option value="0.25">0.25</option>
+            <option value="0.3333">0.33</option>
+            <option value="0.5">0.5</option>
+            <option value="0.6666">0.66</option>
+            <option value="0.75">0.75</option>
+            <option value="1.0" selected>1.0</option>
+            <option value="1.3333">1.33</option>
+            <option value="1.5">1.5</option>
+          </select>
+          Y <select id="diag-scale-y">
+            <option value="0.25">0.25</option>
+            <option value="0.5">0.5</option>
+            <option value="0.6666">0.66</option>
+            <option value="0.75">0.75</option>
+            <option value="1.0" selected>1.0</option>
+            <option value="1.3333">1.33</option>
+            <option value="1.5">1.5</option>
+            <option value="2.0">2.0</option>
+            <option value="4.0">4.0</option>
+          </select>
+          <label><input type="checkbox" id="diag-flip-y"> FLIP Y</label>
+        </div>
+        <button class="action-btn" onclick="document.getElementById('img-loader').click()">LOAD IMAGE</button>
+        <button class="action-btn" onclick="document.getElementById('data-loader').click()">IMPORT JSON</button>
+        <button class="action-btn" onclick="document.getElementById('star-loader').click()">LOAD SYSTEM STARS</button>
+        <button class="action-btn primary" onclick="exportData()">EXPORT JSON</button>
+      </div>
+    </div>
+
+    <div class="main" id="stage">
+      <div id="viewport">
+        <canvas id="bg-canvas"></canvas>
+        <svg id="svg-layer" width="5184" height="3456" viewBox="0 0 5184 3456">
+          <g id="landscape-group"></g>
+          <g id="skyglow-group"></g>
+          <g id="jupiter-group"></g>
+          <g id="system-stars-group"></g>
+          <g id="temp-group"></g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div><b>COORD:</b> <span id="hint-coord">0, 0</span></div>
+      <div><b>ZOOM:</b> <span id="hint-zoom">100%</span></div>
+      <div><b>SYSTEM STARS:</b> <span id="hint-stars">--</span></div>
+      <div><b>MODE:</b> <span id="hint-mode">LANDSCAPE</span></div>
+      <div style="margin-top:8px; color:var(--muted)">
+        L-Click: Add Node / Set Point<br>
+        R-Click: Close Polygon<br>
+        Shift+Click: Delete Polygon/Star<br>
+        Drag Middle/Alt: Pan<br>
+        Scroll: Zoom
+      </div>
+    </div>
+
+    <input type="file" id="img-loader" accept="image/*">
+    <input type="file" id="data-loader" accept=".json">
+    <input type="file" id="star-loader" accept=".json">
+
+    <script>
+      const stage = document.getElementById('stage');
+      const viewport = document.getElementById('viewport');
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      const svg = document.getElementById('svg-layer');
+      
+      const layers = {
+        landscape: document.getElementById('landscape-group'),
+        skyglow: document.getElementById('skyglow-group'),
+        jupiter: document.getElementById('jupiter-group'),
+        system: document.getElementById('system-stars-group'),
+        temp: document.getElementById('temp-group')
+      };
+
+      let state = {
+        resolution: { w: 5184, h: 3456 },
+        landscape: [], // Array of { points: [{x,y}, ...] }
+        skyglow: [],
+        jupiter: null,  // { x, y }
+        systemStars: [], // Loaded from extracted_stars_native.json
+        diag: {
+          scaleX: 1.0,
+          scaleY: 1.0,
+          flipY: false
+        }
+      };
+
+      let currentMode = 'landscape';
+      let zoom = 0.2;
+      let pan = { x: 100, y: 100 };
+      let isDragging = false;
+      let lastMouse = { x: 0, y: 0 };
+      let activePoly = null; // Current polygon being drawn
+
+      // Initialize
+      canvas.width = state.resolution.w;
+      canvas.height = state.resolution.h;
+      updateTransform();
+
+      // Mode Selection
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentMode = btn.dataset.mode;
+          document.getElementById('hint-mode').innerText = currentMode.toUpperCase();
+          activePoly = null;
+          render();
+        };
+      });
+
+      // Diagnostic Controls
+      document.getElementById('diag-scale-x').onchange = (e) => { state.diag.scaleX = parseFloat(e.target.value); render(); };
+      document.getElementById('diag-scale-y').onchange = (e) => { state.diag.scaleY = parseFloat(e.target.value); render(); };
+      document.getElementById('diag-flip-y').onchange = (e) => { state.diag.flipY = e.target.checked; render(); };
+
+      // Pan & Zoom
+      stage.onmousedown = (e) => {
+        if (e.button === 1 || (e.button === 0 && e.altKey)) {
+           isDragging = true;
+           lastMouse = { x: e.clientX, y: e.clientY };
+           return;
+        }
+        
+        if (e.button === 0) {
+           const pt = getSVGPt(e);
+           handleInteraction(pt.x, pt.y);
+        }
+      };
+
+      stage.oncontextmenu = (e) => {
+        e.preventDefault();
+        if (activePoly) {
+          if (activePoly.points.length > 2) {
+            state[currentMode].push({ points: activePoly.points });
+          }
+          activePoly = null;
+          render();
+        }
+      };
+
+      window.onmousemove = (e) => {
+        const pt = getSVGPt(e);
+        document.getElementById('hint-coord').innerText = `${Math.round(pt.x)}, ${Math.round(pt.y)}`;
+
+        if (isDragging) {
+          pan.x += e.clientX - lastMouse.x;
+          pan.y += e.clientY - lastMouse.y;
+          lastMouse = { x: e.clientX, y: e.clientY };
+          updateTransform();
+        }
+      };
+
+      window.onmouseup = () => isDragging = false;
+
+      stage.onwheel = (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        const pt = getSVGPt(e);
+        
+        // Zoom towards mouse
+        const oldZoom = zoom;
+        zoom *= factor;
+        zoom = Math.max(0.05, Math.min(5, zoom));
+        
+        pan.x = e.clientX - (e.clientX - pan.x) * (zoom / oldZoom);
+        pan.y = e.clientY - (e.clientY - pan.y) * (zoom / oldZoom);
+        
+        updateTransform();
+      };
+
+      function getSVGPt(e) {
+        const rect = viewport.getBoundingClientRect();
+        return {
+          x: (e.clientX - rect.left) / zoom,
+          y: (e.clientY - rect.top) / zoom
+        };
+      }
+
+      function updateTransform() {
+        viewport.style.left = pan.x + 'px';
+        viewport.style.top = pan.y + 'px';
+        viewport.style.transform = `scale(${zoom})`;
+        document.getElementById('hint-zoom').innerText = Math.round(zoom * 100) + '%';
+      }
+
+      function handleInteraction(x, y) {
+        if (currentMode === 'jupiter') {
+          state.jupiter = { x, y };
+          render();
+        } else {
+          if (!activePoly) {
+            activePoly = { points: [] };
+          }
+          activePoly.points.push({ x, y });
+          render();
+        }
+      }
+
+      function render() {
+        layers.landscape.innerHTML = '';
+        layers.skyglow.innerHTML = '';
+        layers.jupiter.innerHTML = '';
+        layers.system.innerHTML = '';
+        layers.temp.innerHTML = '';
+
+        // Render System Stars (underneath manual labels)
+        state.systemStars.forEach(s => {
+          const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          let x = s.x * state.diag.scaleX;
+          let y = s.y * state.diag.scaleY;
+          
+          if (state.diag.flipY) {
+            y = state.resolution.h - y;
+          }
+
+          c.setAttribute("cx", x);
+          c.setAttribute("cy", y);
+          c.setAttribute("r", 4);
+          c.setAttribute("fill", "none");
+          c.setAttribute("stroke", "cyan");
+          c.setAttribute("stroke-width", "1");
+          c.setAttribute("opacity", "0.5");
+          layers.system.appendChild(c);
+        });
+
+        // Render Jupiter
+        if (state.jupiter) {
+          const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          c.setAttribute("cx", state.jupiter.x);
+          c.setAttribute("cy", state.jupiter.y);
+          c.setAttribute("r", 12);
+          c.classList.add('marker-jupiter');
+          layers.jupiter.appendChild(c);
+        }
+
+        // Render Closed Polygons
+        ['landscape', 'skyglow'].forEach(mode => {
+          state[mode].forEach((poly, polyIdx) => {
+            const p = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            p.setAttribute("points", poly.points.map(pt => `${pt.x},${pt.y}`).join(' '));
+            p.classList.add(`poly-${mode}`);
+            
+            p.onclick = (e) => {
+              if (e.shiftKey) {
+                state[mode].splice(polyIdx, 1);
+                render();
+              }
+            };
+            layers[mode].appendChild(p);
+          });
+        });
+
+        // Render Active Polygon
+        if (activePoly) {
+          const p = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+          p.setAttribute("points", activePoly.points.map(pt => `${pt.x},${pt.y}`).join(' '));
+          p.setAttribute("fill", "none");
+          p.setAttribute("stroke", "white");
+          p.setAttribute("stroke-dasharray", "5,5");
+          layers.temp.appendChild(p);
+
+          activePoly.points.forEach(pt => {
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute("cx", pt.x);
+            c.setAttribute("cy", pt.y);
+            c.setAttribute("r", 4);
+            c.setAttribute("fill", "white");
+            layers.temp.appendChild(c);
+          });
+        }
+      }
+
+      // Persistence
+      function exportData() {
+        const data = {
+          version: "1.0",
+          resolution: state.resolution,
+          layers: {
+            landscape: state.landscape,
+            skyglow: state.skyglow,
+            jupiter: state.jupiter
+          }
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ground_truth.json';
+        a.click();
+      }
+
+      document.getElementById('data-loader').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const data = JSON.parse(event.target.result);
+          state.landscape = data.layers.landscape || [];
+          state.skyglow = data.layers.skyglow || [];
+          state.jupiter = data.layers.jupiter || null;
+          render();
+        };
+        reader.readAsText(file);
+      };
+
+      document.getElementById('star-loader').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          state.systemStars = JSON.parse(event.target.result);
+          document.getElementById('hint-stars').innerText = state.systemStars.length;
+          render();
+        };
+        reader.readAsText(file);
+      };
+
+      document.getElementById('img-loader').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      };
+    </script>
+  </body>
+</html>

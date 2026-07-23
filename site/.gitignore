@@ -1,0 +1,4 @@
+# The repo-global *.png ignore (root .gitignore) must not apply to the site
+# bundle: these PNGs are deploy assets — the site ships from a bare clone.
+!*.png
+!**/*.png
