@@ -68,7 +68,7 @@ Tauri desktop shell with a native Rust solver core, React/TypeScript front end, 
 
 Star reference data is derived from ESA's [Gaia](https://www.cosmos.esa.int/gaia) mission (Data Release 3), processed by the Gaia Data Processing and Analysis Consortium (DPAC), with bright-star supplements from the Hipparcos and Tycho-2 catalogs.
 
-Code is MIT licensed. See [LICENSE](LICENSE).
+Code is Apache 2.0 licensed. See [LICENSE](LICENSE).
 
 ## Status
 
