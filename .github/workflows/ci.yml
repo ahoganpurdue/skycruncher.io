@@ -1,0 +1,114 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# SkyCruncher CI — first CI in this repo (skeleton).
+#
+# WHAT A CLEAN CLONE ACTUALLY HAS (and therefore what CI can run):
+#   • node_modules  — NOT committed; restored by `npm ci` (package-lock.json).
+#   • wasm pkgs     — `src/engine/wasm_compute/pkg` + `src/engine/wasm_decode/pkg`
+#                     are gitignored (`**/pkg/`). A clean clone has NO wasm
+#                     artifacts, so `tsc` and `vitest` fail with TS2307
+#                     "Cannot find module '...wasm_compute/pkg...'" until the Rust
+#                     crates are built. Verified locally in a fresh no-pkg worktree:
+#                     `tsc --noEmit` reported 15 such TS2307s. => the wasm-pack
+#                     build step below is MANDATORY, not optional.
+#   • corpus / atlas / Sample Files — gitignored & local-only
+#                     (`public/atlas/sectors/`, `Sample Files/`, its `corpus/`).
+#                     CI cannot fetch them, so the browser e2e (seestar/cr2) and the
+#                     headless api-smoke gate (both read the atlas + bundled frames)
+#                     are NOT run here — they run locally per docs/GATES.md.
+#
+# HONESTY (LAW 3): nothing here is a green that skips silently.
+#   • The unit `vitest run` does NOT include the tools/ *.apispec/*.capspec/…
+#     suites — they don't match vitest's default `*.{test,spec}` glob and run via
+#     tools/api/api_harness.config.ts locally.
+#   • The few unit tests that touch local-only corpus (e.g.
+#     src/engine/tests/denoise.test.ts) guard with
+#     `describe.skipIf(!existsSync(fixture))` and warn — an honest graceful skip in
+#     CI, never a hidden pass.
+#
+# `npm run gates` (tools/gates/check_gates.mjs) is intentionally NOT wired in:
+#   • the regen mode (`gates:update`) rewrites docs/GATES.md — never in CI;
+#   • the enforcing `--check` mode compares live tsc/vitest counts against
+#     docs/GATES.md, whose counts are calibrated to the local dev box (local-only
+#     corpus PRESENT there, so corpus tests run rather than skip). In CI those
+#     fixtures are absent, so the counts legitimately differ. GATES.md is the local
+#     single-source-of-truth, not a CI assertion (per GATES.md: "trust GATES.md,
+#     re-measure on THIS box before judging drift").
+# ─────────────────────────────────────────────────────────────────────────────
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Supersede in-flight runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Fast, Rust-free, fully clean-clone-feasible. Validated locally in a no-pkg
+  # worktree: `node tools/contracts/check_layout_contracts.mjs --json` exits 0 with
+  # failCount 0 (98 PASS · 26 NOT MEASURED · 0 FAIL across 11 boundaries). The tool
+  # is pure Node and needs no wasm and no local-only assets (absent CONFORMANCE
+  # probes report NOT MEASURED, which is neither a pass nor a fail).
+  layout-contracts:
+    name: Layout contracts (LAW 7)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Check binary-layout contracts (0 FAIL required)
+        run: node tools/contracts/check_layout_contracts.mjs --json
+
+  # Requires the wasm crates built first (see header). Builds both crates with
+  # wasm-pack, then runs the TypeScript typecheck and the unit test suite.
+  typecheck-and-test:
+    name: Typecheck + unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+
+      - name: Install Rust toolchain (wasm target)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            src/engine/wasm_compute
+            src/engine/wasm_decode
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      # Both pkgs are required — missing wasm_decode/pkg = CR2 decode failure +
+      # phantom TS2307s (CLAUDE.md worktree trap). `--target web` matches the
+      # import target the app and tests use.
+      - name: Build wasm_compute
+        run: wasm-pack build --target web
+        working-directory: src/engine/wasm_compute
+      - name: Build wasm_decode
+        run: wasm-pack build --target web
+        working-directory: src/engine/wasm_decode
+
+      - name: TypeScript typecheck (0 error TS required)
+        run: npx tsc --noEmit
+
+      # Unit suite only (see header): browser e2e + headless api-smoke need
+      # local-only atlas + Sample Files and are NOT run in CI.
+      - name: Unit tests
+        run: npx vitest run

@@ -1,0 +1,338 @@
+/* ============================================================================
+   SKYCRUNCHER DESIGN FOUNDATION
+   ----------------------------------------------------------------------------
+   Tailwind 4, CSS-first. @theme tokens are the single source of truth for the
+   instrument aesthetic — every component draws from these; no ad-hoc hex in
+   components (legacy hex is being migrated). Design intent: "observatory
+   instrument" — deep space-black with a cold undertone, high-legibility
+   neutrals, one restrained accent, mono + tabular numerals for data readouts.
+   Status colors are semantic and NEVER decorative: solve-green means a
+   verified lock, warn-amber means degraded-but-honest, danger-red means
+   failed. If it isn't true, it doesn't get the color.
+   ========================================================================== */
+
+/* source(none) + explicit @source: this repo carries GIGABYTES of data
+   (atlas sectors, Gaia CSVs, samples, vendored wasm, and the Rust
+   target/ build tree UNDER src/engine/wasm_compute) — Tailwind's
+   auto-scan walks it all and hangs the dev server. Scan EXACTLY the
+   places class names live; add new dirs here when UI code moves. */
+@import "tailwindcss" source(none);
+@import "./fonts.css";   /* self-hosted Inter + JetBrains Mono @font-face (offline, CSP-clean) */
+@source "./engine/ui";
+@source "./engine/ui/kit";     /* component kit — inside ./engine/ui, pinned explicitly per kit mandate */
+@source "./engine/ui/theme";   /* theme switcher + dim overlay (restyle 2026-07-21) — pinned so their utilities compile */
+@source "./engine/web";
+@source "./MainApp.tsx";
+@source "./main.tsx";
+@source "../index.html";
+
+@theme {
+  /* ── Token indirection (RESTYLE 2026-07-21) ─────────────────────────────
+     Every @theme color now resolves through a --sc-* custom property swapped
+     by <html data-theme> (dark / light / night). DARK is the DEFAULT and
+     resolves BYTE-IDENTICAL to the shipped hex values — the swap layer lives
+     in the :root,[data-theme="dark"] block just below, and the mechanical
+     resolved-value proof rides with the restyle handoff. Presentation only
+     (RENDER plane, Law 4): display never touches data or measurement. ── */
+
+  /* ── Surfaces (space ramp, darkest = page) ─────────────────────────── */
+  --color-space-950: var(--sc-page);   /* page background */
+  --color-space-900: var(--sc-shell);  /* app shell / wells */
+  --color-space-850: var(--sc-panel);  /* panels */
+  --color-space-800: var(--sc-card);   /* cards */
+  --color-space-750: var(--sc-elev);   /* elevated / hover */
+  --color-space-700: var(--sc-active); /* active / pressed */
+
+  /* ── Lines & borders ───────────────────────────────────────────────── */
+  --color-line-subtle: var(--sc-line-subtle);
+  --color-line: var(--sc-line);
+  --color-line-strong: var(--sc-line-strong);
+
+  /* ── Text ──────────────────────────────────────────────────────────── */
+  --color-text-primary: var(--sc-text);
+  --color-text-secondary: var(--sc-text-2);
+  --color-text-muted: var(--sc-muted);   /* dark #6a7792 — WCAG AA 4.50:1 on space-950 (C6); value preserved through the swap */
+  --color-text-faint: var(--sc-faint);
+
+  /* ── Accent (instrument cyan — interactive, focus, live data) ─────── */
+  --color-accent-300: var(--sc-accent-hi);
+  --color-accent-400: var(--sc-accent);
+  --color-accent-500: var(--sc-accent-ring);
+  --color-accent-600: var(--sc-accent-fill);
+  --color-accent-glow: var(--sc-accent-glow);
+
+  /* ── Semantic status (earned, never decorative) ────────────────────── */
+  --color-solve: var(--sc-solve);       /* verified lock / success */
+  --color-solve-dim: var(--sc-solve-dim);
+  --color-warn: var(--sc-warn);         /* degraded-but-honest */
+  --color-warn-dim: var(--sc-warn-dim);
+  --color-danger: var(--sc-danger);     /* failure */
+  --color-danger-dim: var(--sc-danger-dim);
+  --color-pending: var(--sc-pending);   /* not yet earned */
+  --color-info: var(--sc-info);         /* neutral informational (indigo — style guide B.2 Palette A;
+                                           reclaims the HUD's stray indigo so cyan isn't overloaded) */
+  --color-info-dim: var(--sc-info-dim);
+
+  /* ── Data readout (coordinates, scales, counts) ────────────────────── */
+  --color-data: var(--sc-data);
+
+  /* ── Type ──────────────────────────────────────────────────────────── */
+  --font-sans: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", "Consolas", ui-monospace, monospace;
+
+  /* ── Motion (restraint: fast, physical, never bouncy) ─────────────── */
+  --ease-instrument: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ── Chart / data-viz (Widget Registry) ─────────────────────────────
+     ADDITIVE, render-layer only. Nothing above this comment is touched.
+     Categorical hues are drawn from the existing instrument palette
+     (accent cyan / warn amber / solve green) + three legible companions,
+     each mid-tone for adequate contrast on the dark instrument surface
+     and still distinguishable if a series is surfaced on a light card.
+     Axis / grid / legend colors REFERENCE the instrument line + text
+     tokens so a future re-theme flows through in exactly one place —
+     chart chrome tracks whatever light/dark context the tokens above set. */
+
+  /* Categorical ramp — series colors (qualitative, order-independent). */
+  --chart-cat-1: #38bdf8;   /* accent cyan  (matches --color-accent-400) */
+  --chart-cat-2: #fbbf24;   /* warn amber   (matches --color-warn) */
+  --chart-cat-3: #34d399;   /* solve green  (matches --color-solve) */
+  --chart-cat-4: #a78bfa;   /* violet */
+  --chart-cat-5: #f472b6;   /* rose */
+  --chart-cat-6: #2dd4bf;   /* teal */
+
+  /* Sequential ramp — low → high, cool→bright, monotone-ish luminance. */
+  --chart-seq-1: #0b2942;
+  --chart-seq-2: #0e4a6e;
+  --chart-seq-3: #0e7fb0;
+  --chart-seq-4: #38bdf8;
+  --chart-seq-5: #bae6fd;
+
+  /* Axes / grid / legend chrome (reference instrument tokens). */
+  --chart-axis: var(--color-line);
+  --chart-axis-strong: var(--color-line-strong);
+  --chart-grid: var(--color-line);
+  --chart-grid-subtle: var(--color-line-subtle);
+  --chart-zero: var(--color-line-strong);
+  --chart-legend-text: var(--color-text-secondary);
+  --chart-tick-text: var(--color-text-muted);
+  --chart-data-text: var(--color-data);
+
+  /* Chart spacing scale (plot margins / gaps, px). */
+  --chart-space-1: 4px;
+  --chart-space-2: 8px;
+  --chart-space-3: 14px;
+  --chart-space-4: 24px;
+
+  /* Chart typography sizes (tick / axis-label / legend / readout, px). */
+  --chart-text-tick: 8.5px;
+  --chart-text-axis: 9px;
+  --chart-text-legend: 10px;
+  --chart-text-readout: 11px;
+}
+
+/* ============================================================================
+   THEME SWAP LAYER (RESTYLE 2026-07-21) — three render-plane themes expressed
+   as a --sc-* property swap on <html data-theme>. Verbatim from the normative
+   token spec docs/local/design_restyle_2026-07-21/skycruncher-tokens.css.
+   DARK is the default; its values are byte-identical to the pre-restyle @theme
+   hex. Display never touches data (Law 4). Status color stays EARNED: solve/
+   warn/danger keep their meaning in every theme; night expresses them by
+   intensity + border pattern + glyph because hue is unavailable.
+   ========================================================================== */
+
+/* ── DARK (default) — the shipped World-1 palette, verbatim ─────────────── */
+:root, [data-theme="dark"] {
+  --sc-page:#05060a; --sc-shell:#0a0c12; --sc-panel:#0e1118; --sc-card:#131722;
+  --sc-elev:#191e2b; --sc-active:#212736;
+  --sc-line-subtle:#1c2230; --sc-line:#2a3245; --sc-line-strong:#3d4763;
+  --sc-text:#e8ecf4; --sc-text-2:#9aa5bd; --sc-muted:#6a7792; --sc-faint:#3d4763;
+  --sc-accent-hi:#7dd3fc; --sc-accent:#38bdf8; --sc-accent-ring:#0ea5e9;
+  --sc-accent-fill:#0284c7; --sc-accent-glow:#0ea5e91f;
+  --sc-solve:#34d399; --sc-solve-dim:#34d3991a;
+  --sc-warn:#fbbf24; --sc-warn-dim:#fbbf241a;
+  --sc-danger:#f87171; --sc-danger-dim:#f871711a;
+  --sc-pending:#5d6880; --sc-info:#818cf8; --sc-info-dim:#818cf81a;
+  --sc-data:#c7d5f0;
+  --sc-btn-fill:#0284c7; --sc-btn-fill-text:#ffffff; --sc-btn-border:transparent;
+  --sc-scrim:rgba(5,6,10,.8);
+  /* status pattern dimension (hue-independent redundancy, all themes):
+     solid = earned truth · dashed = degraded/approximate · dotted = absent */
+  --status-solve-border-style:solid; --status-warn-border-style:solid;
+  --status-pending-border-style:dotted;
+  --danger-chip-bg:var(--sc-danger-dim); --danger-chip-text:var(--sc-danger);
+}
+
+/* ── LIGHT — warm paper/ivory, cold navy data voice ─────────────────────── */
+[data-theme="light"] {
+  --sc-page:#f2eee3; --sc-shell:#eae4d5; --sc-panel:#f8f5ee; --sc-card:#fdfbf6;
+  --sc-elev:#efe9dc; --sc-active:#e5ddca;
+  --sc-line-subtle:#e0d8c5; --sc-line:#cdc2a8; --sc-line-strong:#a29574;
+  --sc-text:#201d12; --sc-text-2:#55503e; --sc-muted:#746d55; --sc-faint:#b0a688;
+  --sc-accent-hi:#075985; --sc-accent:#026e9e; --sc-accent-ring:#0284c7;
+  --sc-accent-fill:#045e88; --sc-accent-glow:rgba(2,132,199,.12);
+  --sc-solve:#056f4c; --sc-solve-dim:rgba(5,111,76,.12);
+  --sc-warn:#8f5b04; --sc-warn-dim:rgba(143,91,4,.12);
+  --sc-danger:#bc3730; --sc-danger-dim:rgba(188,55,48,.10);
+  --sc-pending:#8d8468; --sc-info:#4338ca; --sc-info-dim:rgba(67,56,202,.10);
+  --sc-data:#1d3a5f;
+  --sc-btn-fill:#045e88; --sc-btn-fill-text:#fdfbf6; --sc-btn-border:transparent;
+  --sc-scrim:rgba(60,52,34,.45);
+  --status-solve-border-style:solid; --status-warn-border-style:solid;
+  --status-pending-border-style:dotted;
+  --danger-chip-bg:var(--sc-danger-dim); --danger-chip-text:var(--sc-danger);
+}
+
+/* ── NIGHT (STARGAZING) v2 — R-channel surfaces/lines; the two brightest
+   TEXT tokens carry ≤15% green (#ff2600 data, #f22400 primary): rod cells are
+   barely sensitive at 620nm+ either way, and the legibility gain at 45%
+   brightness is real. Stated here, not smuggled.
+   INTENSITY ORDER (v2, inverted from v1): data > text > danger > solve —
+   danger is hatch + ✕ at sub-data intensity, never the brightest object on a
+   night screen. A failure MAY cut to data-brightness transiently on arrival,
+   then settles; no pulsing, no flash.
+   Legibility floor (stated, not pretended): primary ≈ 5:1 on #0a0000; muted
+   #961700 ≈ 2.2:1 — LABELS ONLY, never values. WCAG AA is intentionally not
+   met at the default 45% brightness; dark adaptation wins. */
+[data-theme="night"] {
+  --sc-page:#0a0000; --sc-shell:#100000; --sc-panel:#150000; --sc-card:#1c0000;
+  --sc-elev:#250000; --sc-active:#2f0000;
+  --sc-line-subtle:#360000; --sc-line:#4a0000; --sc-line-strong:#640000;
+  --sc-text:#f22400; --sc-text-2:#c41d00; --sc-muted:#961700; --sc-faint:#5c0e00;
+  --sc-accent-hi:#ff2600; --sc-accent:#d92000; --sc-accent-ring:#a80000;
+  --sc-accent-fill:#330000; --sc-accent-glow:rgba(255,0,0,.07);
+  --sc-solve:#cf1d00; --sc-solve-dim:rgba(255,38,0,.05);
+  --sc-warn:#e02000; --sc-warn-dim:rgba(255,38,0,.08);
+  --sc-danger:#f02200; --sc-danger-dim:rgba(255,38,0,.10);
+  --sc-pending:#660000; --sc-info:#b00000; --sc-info-dim:rgba(255,0,0,.06);
+  --sc-data:#ff2600;
+  --sc-btn-fill:#330000; --sc-btn-fill-text:#f22400; --sc-btn-border:#a80000;
+  --sc-scrim:rgba(10,0,0,.85);
+  /* Preview-peek red-channel isolation veil (NightPeek). Multiplied over the
+     preview to zero its G/B channels → a dark-adaptation-safe red frame; a
+     press-and-hold removes it to reveal true color. Night-only (the veil never
+     renders in day themes), so it lives in this block. */
+  --sc-peek-red:#c40000;
+  /* hue is gone → status = intensity + pattern + glyph (glyphs ship in all
+     themes so night is a degradation of nothing): ● solve ▲ warn ✕ danger ◌ absent */
+  --status-solve-border-style:solid; --status-warn-border-style:dashed;
+  --status-pending-border-style:dotted;
+  --danger-chip-bg:repeating-linear-gradient(45deg,rgba(255,38,0,.26) 0 3px,rgba(122,16,0,.26) 3px 6px);
+  --danger-chip-text:#ff2600;
+}
+
+/* ── POP-OUT WINDOW SYNC (render prefs only — Law 4) ─────────────────────
+   BroadcastChannel('sc-render-prefs') carries
+     {theme, brightness:{light,dark,night}, density, peek:{saved,duration}}.
+   Child windows apply theme at documentElement[data-theme] and own a
+   PER-WINDOW dim overlay. Handshake: child posts 'hello' on load; host
+   re-broadcasts the snapshot. No polling, no localStorage races, and no
+   measurement state ever crosses this channel. */
+
+/* Night kills motion outright (no pulsing, no flashes — reduce-motion is
+   implied by the mode, not left to the OS preference). */
+[data-theme="night"] *, [data-theme="night"] *::before, [data-theme="night"] *::after {
+  animation: none !important; transition: none !important;
+}
+
+/* ── Status glyph dimension (RESTYLE 2026-07-21) ─────────────────────────────
+   Hue-independent status redundancy that ships in ALL themes, so night (where
+   hue is unavailable) degrades nothing: ● solve · ▲ warn · ✕ danger · ◌ absent.
+   Rendered as ::before generated content on [data-sc-glyph] (set by the kit
+   Chip from its tone) so the glyph NEVER enters the DOM text layer — machine-
+   read status STRINGS stay verbatim and textContent/getByText assertions are
+   unaffected. currentColor keeps the glyph in the chip's earned, theme-aware
+   tone. Additive; presentation only (render plane, Law 4). */
+[data-sc-glyph]::before {
+  margin-inline-end: 0.4em;
+  font-size: 0.85em;
+  line-height: 1;
+  vertical-align: baseline;
+}
+[data-sc-glyph="solve"]::before  { content: "\25CF"; }  /* ● U+25CF BLACK CIRCLE */
+[data-sc-glyph="warn"]::before   { content: "\25B2"; }  /* ▲ U+25B2 BLACK UP-POINTING TRIANGLE */
+[data-sc-glyph="danger"]::before { content: "\2715"; }  /* ✕ U+2715 MULTIPLICATION X */
+[data-sc-glyph="absent"]::before { content: "\25CC"; }  /* ◌ U+25CC DOTTED CIRCLE */
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-space-950);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Data readouts everywhere use tabular numerals — jitter-free live values. */
+.font-mono, code, kbd, samp, pre {
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* Instrument focus ring — accent, visible, never default-blue outline. */
+:focus-visible {
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--color-accent-600);
+  color: var(--color-text-primary);
+}
+
+/* Thin instrument scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Wizard step content columns: a discoverable, always-reserved scroll gutter so
+   the pinned action row below never reads as "the end" of the content. The
+   primary action of every step lives in a shrink-0 row OUTSIDE this scroller —
+   this class only makes the overflow above it obviously scrollable (a live
+   defect was users not realizing content scrolled and thinking the Confirm
+   button was "covered"). Purely presentational; never affects layout height. */
+.wizard-step-scroll {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) rgba(255, 255, 255, 0.04);
+}
+.wizard-step-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.wizard-step-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.wizard-step-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted, #8891a5);
+  background-clip: padding-box;
+}
+.wizard-step-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 5px;
+}
+
+/* ── Reduced motion (C7) ──────────────────────────────────────────────────
+   Honor the OS "reduce motion" preference: neutralize transitions/animations
+   instrument-wide. Safe because no state is conveyed by motion alone — status
+   is always carried by color + text. Additive; layout/sizing unchanged. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,49 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   OVERNIGHT RIG — design tokens (World 1: the token instrument)
+   Mirrors docs/UI_STYLE_GUIDE.md PART A @theme values 1:1. Because this
+   standalone Vite app carries its OWN token layer, the future port into the
+   desktop app is a token REMAP, not a restyle. Dark-only.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Surfaces — elevation = lightening, never shadows */
+  --surface-page: #05060a;
+  --surface-panel: #0e1118;
+  --surface-card: #131722;
+  --surface-raised: #191e2b;
+  --surface-pressed: #212736;
+
+  /* Lines — 1px hairlines */
+  --line-subtle: #1c2230;
+  --line-default: #2a3245;
+  --line-strong: #3d4763;
+
+  /* Text */
+  --text-primary: #e8ecf4;
+  --text-secondary: #9aa5bd;
+  --text-muted: #5d6880;   /* labels / >=14px only */
+  --text-faint: #3d4763;
+
+  /* Accent cyan */
+  --accent: #38bdf8;
+  --accent-fill: #0284c7;
+  --accent-focus: #0ea5e9;
+  --accent-glow: #0ea5e91f;
+
+  /* Status — EARNED, never decorative (solid text on *-dim badge fill) */
+  --ok: #34d399;      --ok-dim: #34d3991a;
+  --warn: #fbbf24;    --warn-dim: #fbbf241a;
+  --danger: #f87171;  --danger-dim: #f871711a;
+  --pending: #5d6880; --pending-dim: #5d68801a;
+
+  /* Data readout — every MEASURED number */
+  --data: #c7d5f0;
+
+  /* Radii */
+  --r-chip: 4px;
+  --r-btn: 8px;
+  --r-card: 8px;
+  --r-panel: 12px;
+
+  --font-sans: 'Inter', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+}

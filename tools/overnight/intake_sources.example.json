@@ -1,0 +1,28 @@
+{
+  "_comment": "Copy this to intake_sources.json (gitignored) and fill in your shared links. identity fields are stamped onto every outbound request (User-Agent / From / X-SkyCruncher-*) so the source owner can see who is pulling and why. Only add links you are authorized to use; 'authorization' asserts that in the audit trail.",
+  "identity": {
+    "operator": "adam@structurize.io",
+    "purpose": "authorized processing test",
+    "authorization": "links shared with explicit permission to use freely"
+  },
+  "dest": "Sample Files/rotating",
+  "sources": [
+    {
+      "label": "seestar_m51_example",
+      "type": "gdrive_file",
+      "id": "PASTE_DRIVE_FILE_ID_OR_SHARE_URL_HERE",
+      "filename": "m51_seestar.fits"
+    },
+    {
+      "label": "dslr_folder_example",
+      "type": "gdrive_folder",
+      "id": "PASTE_DRIVE_FOLDER_ID_OR_URL_HERE",
+      "apiKey": "OPTIONAL_DRIVE_API_V3_KEY_FOR_FOLDER_ENUMERATION"
+    },
+    {
+      "label": "direct_http_example",
+      "type": "http",
+      "url": "https://example.org/path/to/frame.CR2"
+    }
+  ]
+}

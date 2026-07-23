@@ -1,0 +1,168 @@
+{
+  "generated_at": "2026-07-13T01:35:38.147Z",
+  "data": {
+    "modules": [
+      {
+        "error": null,
+        "git_head": "9fbec68",
+        "name": "solve_stats",
+        "present": true,
+        "source_file": "solve_stats.json",
+        "status": "ok",
+        "tool_version": "1.0.0"
+      },
+      {
+        "error": null,
+        "git_head": "9fbec68",
+        "name": "wall_stats",
+        "present": true,
+        "source_file": "wall_stats.json",
+        "status": "ok",
+        "tool_version": "1.0.0"
+      },
+      {
+        "error": null,
+        "git_head": "9fbec68",
+        "name": "residuals",
+        "present": true,
+        "source_file": "residuals.json",
+        "status": "ok",
+        "tool_version": "1.0.0"
+      }
+    ],
+    "corpus": {
+      "basis": "solve_stats.data.overview",
+      "by_key_mode": {
+        "filename": 0,
+        "sha": 96
+      },
+      "by_kind": {
+        "assisted": 11,
+        "no_solve": 42,
+        "solved": 43
+      },
+      "by_outcome": {
+        "honest_timeout": 7,
+        "no_solve": 35,
+        "skipped_correlated_set": 14,
+        "skipped_too_large": 1,
+        "solved": 39
+      },
+      "by_solve_class": {
+        "assisted": 11,
+        "blind": 85
+      },
+      "n_frames": 96,
+      "present": true,
+      "source": "solve_stats.json",
+      "with_dossier": 96,
+      "with_envelope": 11,
+      "with_receipt": 74
+    },
+    "solve": {
+      "assisted": {
+        "n_assisted_frames": 11,
+        "of_which_failed_blind": 11,
+        "run_labels": [
+          "HINTED-COCOON"
+        ]
+      },
+      "by_format": [
+        {
+          "format": "CR2",
+          "n_attempted": 31,
+          "n_frames": 45,
+          "n_skipped": 14,
+          "n_solved": 2,
+          "pct_all_blind": 4.4,
+          "pct_attempted": 6.5
+        },
+        {
+          "format": "FITS",
+          "n_attempted": 50,
+          "n_frames": 51,
+          "n_skipped": 1,
+          "n_solved": 41,
+          "pct_all_blind": 80.4,
+          "pct_attempted": 82
+        }
+      ],
+      "denominators": {
+        "n_attempted": 81,
+        "n_blind_frames": 96,
+        "n_skipped": 15,
+        "n_solved": 43
+      },
+      "lanes_note": "blind and assisted (hinted) solves are NEVER pooled — an assisted rescue never inflates a blind rate.",
+      "present": true,
+      "rate_all_blind": {
+        "d": 96,
+        "n": 43,
+        "pct": 44.8
+      },
+      "rate_attempted": {
+        "d": 81,
+        "n": 43,
+        "pct": 53.1
+      },
+      "source": "solve_stats.json"
+    },
+    "residuals": {
+      "frames_flagged": 15,
+      "frames_measured": 39,
+      "frames_not_measured": 57,
+      "frames_total": 96,
+      "matched_stars_used": 38815,
+      "not_measured_by_reason": {
+        "NOT MEASURED — below min_stars": 4,
+        "NOT MEASURED — no matched_stars (kind=assisted)": 11,
+        "NOT MEASURED — no matched_stars (kind=no_solve)": 42
+      },
+      "present": true,
+      "refit_candidate_count": 25,
+      "source": "residuals.json",
+      "thresholds": {
+        "edge_excess_arcsec": 2,
+        "signature_rule": "slope>=slope_threshold AND edge_excess>=edge_excess_threshold",
+        "slope_arcsec_per_radius": 3
+      },
+      "top_refit": {
+        "edge_excess_arcsec": 1929.0895116561871,
+        "edge_excess_px": 30.5247948348175,
+        "id": "challenge_DSLR_Images_-_All_Canon_T6_Rokinon_14mm_IMG_1410.CR2",
+        "n_stars_used": 54,
+        "rig": "Canon EOS Rebel T6 | Unknown Lens",
+        "slope_arcsec_per_radius": 3008.167518299689
+      }
+    },
+    "wall": {
+      "blind_vs_assisted": {
+        "assisted_median_ms": 9895,
+        "blind_median_ms": 195897.5,
+        "paired_frames": 11,
+        "speedup_mean": 18.97,
+        "speedup_median": 19.8
+      },
+      "corpus_summary": {
+        "frames": 96,
+        "rows_not_run": 15,
+        "rows_ran": 128,
+        "rows_with_stage_decomposition": 40,
+        "timing_rows": 143
+      },
+      "present": true,
+      "savings_projection": {
+        "requested": false
+      },
+      "solve_share": {
+        "frames": 40,
+        "of_pipeline": 0.711,
+        "of_wall": 0.5942,
+        "pipeline_ms": 425664,
+        "solve_ms": 302646,
+        "wall_ms": 509321
+      },
+      "source": "wall_stats.json"
+    }
+  }
+}

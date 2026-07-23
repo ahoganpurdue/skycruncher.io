@@ -1,0 +1,14 @@
+{
+  "dest": "D:/AstroLogic/intake/event_funnel",
+  "citation": {
+    "site": "SkyCruncher community intake folder (event funnel)",
+    "accreditation": { "person": "per-contributor (recorded at ingest)", "organization": null, "page_url": "https://drive.google.com/drive/folders/1eNRzOdBI0Zfc4mNOwt-jXf911OVjT3ia", "domain": "drive.google.com" },
+    "use_case": { "verdict": "MATCH", "evidence": "Owner-operated submission folder; contributors drop photos voluntarily for solving. Per-file contributor credit recorded when known." },
+    "blockers": [],
+    "terms": "Contributor-submitted for solving; results returned with credit; GPS/EXIF privacy tier applied at ingest.",
+    "owner_authorization": "owner created + supplied folder 2026-07-09 late (Astronomy On Tap funnel)"
+  },
+  "sources": [
+    { "label": "event_funnel", "type": "gdrive_folder", "id": "1eNRzOdBI0Zfc4mNOwt-jXf911OVjT3ia" }
+  ]
+}

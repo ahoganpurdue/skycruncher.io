@@ -1,0 +1,191 @@
+# Build & Compiled Outputs
+dist/
+build/
+out/
+.vite/
+target/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/binaries/
+
+# tools/build/ holds a COMMITTED build-prep script (not build output). The
+# generic build/ rule above ignores it; re-include only that one script while
+# keeping any actual build output under tools/build/ ignored.
+!tools/build/
+tools/build/*
+!tools/build/prep_demo_assets.mjs
+
+# Ignore massive Rust artifacts but keep source code visible
+**/target/
+**/pkg/
+**/check_output*.txt
+**/check_errors*.txt
+**/hyperparameter_results.json
+
+# Dependencies & Static Tooling
+node_modules/
+venv/
+vendor/
+deps/
+**/hyg-database/
+.git/
+.vscode/
+.idea/
+.zed/
+
+# Lock Files — package-lock.json + Cargo.lock are now TRACKED for reproducible
+# builds (R0-a restoration). Only the unused yarn/poetry locks stay ignored.
+yarn.lock
+poetry.lock
+
+# Massive Static Data & Catalogs
+public/atlas/sectors/*.json
+public/atlas/sectors/
+data/demo/
+*.onnx
+*.bin
+*.hgt
+
+# Vendored ONNX runtime binaries (recopy from node_modules/onnxruntime-web/dist)
+public/wasm/
+
+# Gaia source CSVs (atlas regeneration inputs — hundreds of MB; see tools/atlas/README.md)
+gaia_*.csv
+
+# One-off debug/scratch leftovers (root)
+build_errors.txt
+build_check.bat
+debug_bg.js
+fix_symbols.ps1
+test_detail*.txt
+test_final_debug.txt
+tsc_errors_reorg*.txt
+tools/atlas.rs.txt
+src/engine/wasm_compute/build_errors.txt
+
+# Media & RAW Image Binaries
+*.cr2
+*.nef
+*.arw
+*.fits
+*.tiff
+*.jpg
+*.png
+*.min.js
+*.min.css
+
+# Vite HMR Cache Files
+vite.config.ts.timestamp-*.mjs
+
+# Test Image Directories
+src/data/Images/
+public/demo/
+Sample Files/
+
+# Desktop test rail v0 — ephemeral webview-served assets (staged by
+# tools/desktop_rail/run_rail.mjs, removed on exit; never commit).
+public/__testrail_tmp/
+
+# Widget Shelf showcase — local heavy report-class artifacts (baked fixed data,
+# NOT registry widgets). Served locally at /showcase/*; the shelf renders an
+# honest "not present" state on a box without them.
+public/showcase/
+
+# Legacy Test & Debug Archives
+OLD TESTS/
+test_results/
+old_tests/
+debug/
+
+# Temporary Debug, Archive & Tooling Reports
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+verification_log.txt
+debug_output.txt
+final_debug.txt
+final_report.txt
+test_output.txt
+tsc_errors.txt
+knip_report.txt
+knip_compact.txt
+knip_report_utf8.txt
+directed_solve_final*.txt
+extracted_stars_native.json
+extracted_stars*.json
+solve_forensics.json
+signal_stats.json
+ground_truth.json
+
+# OS Specific
+.DS_Store
+Thumbs.db
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Installer Binaries
+*.exe
+*.msi
+*.dmg
+*.app
+
+# Deprecated Context — Hidden from AI Agent RAG
+Legacy Resources/
+Future Planning/
+
+# Stale root-level files
+tmp_old_solver.ts
+test_arrow.ts
+
+# Frozen documentation archive — one-shot audits/research kept on disk + in
+# git history, but untracked so they don't clutter the live doc tree.
+# See the docs taxonomy in docs/ROADMAP.md / CLAUDE.md.
+docs/archive/
+
+# LOCAL-only doc tier — strategy / personal / social docs that must NOT ship to
+# a build-in-public GitHub push (grant strategy, event planning, community
+# comparison surveys, brand-naming, competitive positioning, owner's
+# whereabouts/contacts/money/calendar). Litmus + rationale in
+# docs/00-README-STRUCTURE.md. Promotion local->public is a deliberate later
+# step; unpublishing from git history is not, so IN DOUBT -> local.
+docs/local/
+
+# Overnight astrometry.net oracle — LOCAL machine config (points at the EXTERNAL
+# solve-field binary + index dir) + any stray solve products. The wrapper
+# (astrometry_truth.mjs) + the .example config ARE tracked; these are not.
+tools/overnight/astrometry.local.json
+tools/overnight/*.wcs
+tools/overnight/*.solved
+tools/overnight/*.axy
+tools/overnight/*.corr
+tools/overnight/*.rdls
+tools/overnight/_work/
+
+# Intake fetcher — the source links (your shared Drive/HTTP URLs) + the local
+# HMAC signing secret are LOCAL. The fetcher + .example config ARE tracked.
+tools/overnight/intake_sources.json
+tools/overnight/intake_signing.key
+
+# Tauri updater signing keys — the private key lives OUTSIDE the repo (K:/keys);
+# this is defense-in-depth so a stray copy near the tree is never committed.
+*.key
+!*.key.pub
+
+# Overnight Rig dashboard — Vite build output (source is tracked)
+tools/overnight/dashboard/dist/
+
+# Local OTel collector binary (config + scripts ARE tracked; output lands in
+# test_results/otel/ which is already ignored via test_results/)
+tools/telemetry/bin/
+
+# Subagent worktree scratch (ephemeral, auto-managed by the harness)
+.claude/worktrees/
+
+# Obsidian editor state (owner-personal, never tracked)
+.obsidian/
+docs/.obsidian/
+tools/theses/dashboard/ui/reports/

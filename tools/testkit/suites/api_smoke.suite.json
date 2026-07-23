@@ -1,0 +1,11 @@
+{
+  "name": "api_smoke",
+  "description": "Headless Toolchest api-smoke gate: named .apispec.ts run SOLO under tools/api/api_harness.config.ts (canonical CR2-solo). Asserts the SACRED numbers byte-identically; deposits the verdict as a sha-keyed row.",
+  "manifest": { "source": "none", "comment": "gate lane — the apispec is the input, not the enumerated corpus." },
+  "executor": "api_smoke",
+  "specs": [
+    { "id": "solve_cr2", "spec": "tools/api/solve_cr2.apispec.ts" }
+  ],
+  "lane": "heavy",
+  "default_label": "QUIET-BASELINE"
+}

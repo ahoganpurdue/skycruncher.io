@@ -1,0 +1,2272 @@
+{
+  "release": "mini-synth-g15u-1",
+  "format_version": 1,
+  "writer": "build_quad_index.mjs",
+  "coder": "tools/quadindex/coder.mjs (shared judge conventions: A→0 B→(1,0), Cx+Dx≤1 fold, no mirror, codeTol 0.015)",
+  "source": {
+    "catalog": "Gaia DR3 G<15",
+    "release": "mini-synthetic-sky",
+    "epoch": "J2016.0",
+    "units": "ra_deg/dec_deg DEGREES"
+  },
+  "schema": {
+    "stars": "ra_deg:f64, dec_deg:f64, g_mag:f32, source_id:u64 (Arrow IPC file, single batch)",
+    "band": "code0..3:f32(dimensionless), star0..3:u32(row into stars.arrow), diam_deg:f32, code_key:i32 — Arrow IPC file, batched by batchRows, sorted by code_key asc",
+    "ledger": "COORDINATE",
+    "ipc": "Arrow IPC file-format, little-endian, no validity buffers (null_count 0)",
+    "compression": "NONE (apache-arrow JS 21 writer has no in-format buffer compression; documented deviation — NEVER .gz-around per owner ruling)",
+    "nbins": 128,
+    "batchRows": 128
+  },
+  "params": {
+    "N_NEIGH": 12,
+    "K_INT": 8,
+    "Q_PER_PAIR": 6,
+    "QUAD_CAP": 6000,
+    "maxAnchors": 0,
+    "cellQuota": 0,
+    "starReuseCap": 0,
+    "cellOrder": 5
+  },
+  "edges": [
+    0.25,
+    0.3535533905932738,
+    0.5000000000000001,
+    0.7071067811865477,
+    1.0000000000000002,
+    1.4142135623730956,
+    2.000000000000001,
+    2.8284271247461916,
+    4.000000000000002,
+    5.656854249492383,
+    8.000000000000005,
+    11.313708498984768,
+    16.000000000000014,
+    22.62741699796954,
+    32.00000000000003,
+    45.25483399593909
+  ],
+  "depths": [
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20
+  ],
+  "stars": {
+    "file": "stars.arrow",
+    "sha256": "4232d121916d1c52c93251d43781cf1f2422c0d954728af2751737ee8eabe641",
+    "bytes": 9218,
+    "rows": 300
+  },
+  "bands": [
+    {
+      "index": 0,
+      "file": "band_0.arrow",
+      "loDeg": 0.25,
+      "hiDeg": 0.3535533905932738,
+      "magLimit": 20,
+      "nQuads": 0,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "dc567953febe6991e3e30d8d03311005e51935750f942b9e2a31d73034829fa3",
+      "bytes": 1530,
+      "batches": []
+    },
+    {
+      "index": 1,
+      "file": "band_1.arrow",
+      "loDeg": 0.3535533905932738,
+      "hiDeg": 0.5000000000000001,
+      "magLimit": 20,
+      "nQuads": 0,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "8254fe07963777decc155b6fec844ed2a14cbab8fef95a92720eee81b283a1db",
+      "bytes": 1546,
+      "batches": []
+    },
+    {
+      "index": 2,
+      "file": "band_2.arrow",
+      "loDeg": 0.5000000000000001,
+      "hiDeg": 0.7071067811865477,
+      "magLimit": 20,
+      "nQuads": 0,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "6b2d9e7b1903c0a3881966c74ec567d116fd86542b9a719bedeabf07283ea406",
+      "bytes": 1546,
+      "batches": []
+    },
+    {
+      "index": 3,
+      "file": "band_3.arrow",
+      "loDeg": 0.7071067811865477,
+      "hiDeg": 1.0000000000000002,
+      "magLimit": 20,
+      "nQuads": 0,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "d3227e0d350fc1a296daed1fd70f845c640fdad1063a9e8d235b912c2e348a81",
+      "bytes": 1546,
+      "batches": []
+    },
+    {
+      "index": 4,
+      "file": "band_4.arrow",
+      "loDeg": 1.0000000000000002,
+      "hiDeg": 1.4142135623730956,
+      "magLimit": 20,
+      "nQuads": 4,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "5e575d5013e5f53e993cfe656a74cdbf83d95b328cc2abe9d0b4511e569d6166",
+      "bytes": 1730,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 4,
+          "codeKeyMin": 78124174,
+          "codeKeyMax": 111353873
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "file": "band_5.arrow",
+      "loDeg": 1.4142135623730956,
+      "hiDeg": 2.000000000000001,
+      "magLimit": 20,
+      "nQuads": 13,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "841df895351604f1ed66ea5877b78f7814411891aef05cadc25694e41696a164",
+      "bytes": 2122,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 13,
+          "codeKeyMin": 77850417,
+          "codeKeyMax": 111387549
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "file": "band_6.arrow",
+      "loDeg": 2.000000000000001,
+      "hiDeg": 2.8284271247461916,
+      "magLimit": 20,
+      "nQuads": 136,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "916460cc71364a49e7332653ea849a50457f27a0a29690a0bae175bf41bab940",
+      "bytes": 7602,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 69556135,
+          "codeKeyMax": 120070453
+        },
+        {
+          "rowStart": 128,
+          "rows": 8,
+          "codeKeyMin": 123871252,
+          "codeKeyMax": 132767768
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "file": "band_7.arrow",
+      "loDeg": 2.8284271247461916,
+      "hiDeg": 4.000000000000002,
+      "magLimit": 20,
+      "nQuads": 916,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "2409ad3e9b2635a691e9fbbddbbd4da9bd9d5ca9e143091ced085d8d8d8e5039",
+      "bytes": 42402,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 67705917,
+          "codeKeyMax": 76046759
+        },
+        {
+          "rowStart": 128,
+          "rows": 128,
+          "codeKeyMin": 76062394,
+          "codeKeyMax": 82438955
+        },
+        {
+          "rowStart": 256,
+          "rows": 128,
+          "codeKeyMin": 82465972,
+          "codeKeyMax": 90368054
+        },
+        {
+          "rowStart": 384,
+          "rows": 128,
+          "codeKeyMin": 90429364,
+          "codeKeyMax": 98656819
+        },
+        {
+          "rowStart": 512,
+          "rows": 128,
+          "codeKeyMin": 98687931,
+          "codeKeyMax": 105667463
+        },
+        {
+          "rowStart": 640,
+          "rows": 128,
+          "codeKeyMin": 105668411,
+          "codeKeyMax": 114089747
+        },
+        {
+          "rowStart": 768,
+          "rows": 128,
+          "codeKeyMin": 114122920,
+          "codeKeyMax": 126083133
+        },
+        {
+          "rowStart": 896,
+          "rows": 20,
+          "codeKeyMin": 126099204,
+          "codeKeyMax": 132292614
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "file": "band_8.arrow",
+      "loDeg": 4.000000000000002,
+      "hiDeg": 5.656854249492383,
+      "magLimit": 20,
+      "nQuads": 4642,
+      "capped": false,
+      "anchorsUsed": 300,
+      "sha256": "fbf7877adba6f5822eaeedb7fae5904b7e0ded3c791016d284071b2971f5e5bb",
+      "bytes": 208842,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 67509685,
+          "codeKeyMax": 69672965
+        },
+        {
+          "rowStart": 128,
+          "rows": 128,
+          "codeKeyMin": 69673268,
+          "codeKeyMax": 71799322
+        },
+        {
+          "rowStart": 256,
+          "rows": 128,
+          "codeKeyMin": 71801474,
+          "codeKeyMax": 73820304
+        },
+        {
+          "rowStart": 384,
+          "rows": 128,
+          "codeKeyMin": 73832590,
+          "codeKeyMax": 74049192
+        },
+        {
+          "rowStart": 512,
+          "rows": 128,
+          "codeKeyMin": 74049329,
+          "codeKeyMax": 76061493
+        },
+        {
+          "rowStart": 640,
+          "rows": 128,
+          "codeKeyMin": 76061745,
+          "codeKeyMax": 77979313
+        },
+        {
+          "rowStart": 768,
+          "rows": 128,
+          "codeKeyMin": 77980191,
+          "codeKeyMax": 78353693
+        },
+        {
+          "rowStart": 896,
+          "rows": 128,
+          "codeKeyMin": 78354698,
+          "codeKeyMax": 80208287
+        },
+        {
+          "rowStart": 1024,
+          "rows": 128,
+          "codeKeyMin": 80209056,
+          "codeKeyMax": 81994507
+        },
+        {
+          "rowStart": 1152,
+          "rows": 128,
+          "codeKeyMin": 81996579,
+          "codeKeyMax": 82370479
+        },
+        {
+          "rowStart": 1280,
+          "rows": 128,
+          "codeKeyMin": 82385961,
+          "codeKeyMax": 84271504
+        },
+        {
+          "rowStart": 1408,
+          "rows": 128,
+          "codeKeyMin": 84284699,
+          "codeKeyMax": 84729128
+        },
+        {
+          "rowStart": 1536,
+          "rows": 128,
+          "codeKeyMin": 84729363,
+          "codeKeyMax": 86597555
+        },
+        {
+          "rowStart": 1664,
+          "rows": 128,
+          "codeKeyMin": 86597654,
+          "codeKeyMax": 88531848
+        },
+        {
+          "rowStart": 1792,
+          "rows": 128,
+          "codeKeyMin": 88532648,
+          "codeKeyMax": 90429498
+        },
+        {
+          "rowStart": 1920,
+          "rows": 128,
+          "codeKeyMin": 90430371,
+          "codeKeyMax": 90989462
+        },
+        {
+          "rowStart": 2048,
+          "rows": 128,
+          "codeKeyMin": 90989729,
+          "codeKeyMax": 92808986
+        },
+        {
+          "rowStart": 2176,
+          "rows": 128,
+          "codeKeyMin": 92821283,
+          "codeKeyMax": 94544014
+        },
+        {
+          "rowStart": 2304,
+          "rows": 128,
+          "codeKeyMin": 94544276,
+          "codeKeyMax": 95115025
+        },
+        {
+          "rowStart": 2432,
+          "rows": 128,
+          "codeKeyMin": 95116974,
+          "codeKeyMax": 96739993
+        },
+        {
+          "rowStart": 2560,
+          "rows": 128,
+          "codeKeyMin": 96740919,
+          "codeKeyMax": 97408902
+        },
+        {
+          "rowStart": 2688,
+          "rows": 128,
+          "codeKeyMin": 97410208,
+          "codeKeyMax": 99197976
+        },
+        {
+          "rowStart": 2816,
+          "rows": 128,
+          "codeKeyMin": 99214748,
+          "codeKeyMax": 101112610
+        },
+        {
+          "rowStart": 2944,
+          "rows": 128,
+          "codeKeyMin": 101113136,
+          "codeKeyMax": 102866726
+        },
+        {
+          "rowStart": 3072,
+          "rows": 128,
+          "codeKeyMin": 102867379,
+          "codeKeyMax": 103638709
+        },
+        {
+          "rowStart": 3200,
+          "rows": 128,
+          "codeKeyMin": 103651614,
+          "codeKeyMax": 105388340
+        },
+        {
+          "rowStart": 3328,
+          "rows": 128,
+          "codeKeyMin": 105389193,
+          "codeKeyMax": 107160715
+        },
+        {
+          "rowStart": 3456,
+          "rows": 128,
+          "codeKeyMin": 107175314,
+          "codeKeyMax": 107848764
+        },
+        {
+          "rowStart": 3584,
+          "rows": 128,
+          "codeKeyMin": 107863174,
+          "codeKeyMax": 109813637
+        },
+        {
+          "rowStart": 3712,
+          "rows": 128,
+          "codeKeyMin": 109813938,
+          "codeKeyMax": 111893901
+        },
+        {
+          "rowStart": 3840,
+          "rows": 128,
+          "codeKeyMin": 111926924,
+          "codeKeyMax": 113943193
+        },
+        {
+          "rowStart": 3968,
+          "rows": 128,
+          "codeKeyMin": 113943705,
+          "codeKeyMax": 116055960
+        },
+        {
+          "rowStart": 4096,
+          "rows": 128,
+          "codeKeyMin": 116072727,
+          "codeKeyMax": 118317463
+        },
+        {
+          "rowStart": 4224,
+          "rows": 128,
+          "codeKeyMin": 118317716,
+          "codeKeyMax": 121757961
+        },
+        {
+          "rowStart": 4352,
+          "rows": 128,
+          "codeKeyMin": 121773465,
+          "codeKeyMax": 124444578
+        },
+        {
+          "rowStart": 4480,
+          "rows": 128,
+          "codeKeyMin": 124445066,
+          "codeKeyMax": 128950454
+        },
+        {
+          "rowStart": 4608,
+          "rows": 34,
+          "codeKeyMin": 128966543,
+          "codeKeyMax": 133144590
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "file": "band_9.arrow",
+      "loDeg": 5.656854249492383,
+      "hiDeg": 8.000000000000005,
+      "magLimit": 20,
+      "nQuads": 6000,
+      "capped": true,
+      "anchorsUsed": 101,
+      "sha256": "36c4117354b6aa9b61539789a35206bbddfefef2e41f740bfc3afd84233ae94d",
+      "bytes": 269162,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 67540382,
+          "codeKeyMax": 69703323
+        },
+        {
+          "rowStart": 128,
+          "rows": 128,
+          "codeKeyMin": 69703818,
+          "codeKeyMax": 71720198
+        },
+        {
+          "rowStart": 256,
+          "rows": 128,
+          "codeKeyMin": 71720720,
+          "codeKeyMax": 71918978
+        },
+        {
+          "rowStart": 384,
+          "rows": 128,
+          "codeKeyMin": 71919888,
+          "codeKeyMax": 73948938
+        },
+        {
+          "rowStart": 512,
+          "rows": 128,
+          "codeKeyMin": 73949099,
+          "codeKeyMax": 75913009
+        },
+        {
+          "rowStart": 640,
+          "rows": 128,
+          "codeKeyMin": 75913358,
+          "codeKeyMax": 76193695
+        },
+        {
+          "rowStart": 768,
+          "rows": 128,
+          "codeKeyMin": 76194742,
+          "codeKeyMax": 78011921
+        },
+        {
+          "rowStart": 896,
+          "rows": 128,
+          "codeKeyMin": 78012046,
+          "codeKeyMax": 78387357
+        },
+        {
+          "rowStart": 1024,
+          "rows": 128,
+          "codeKeyMin": 78390025,
+          "codeKeyMax": 80191798
+        },
+        {
+          "rowStart": 1152,
+          "rows": 128,
+          "codeKeyMin": 80193436,
+          "codeKeyMax": 82008487
+        },
+        {
+          "rowStart": 1280,
+          "rows": 128,
+          "codeKeyMin": 82009117,
+          "codeKeyMax": 82373159
+        },
+        {
+          "rowStart": 1408,
+          "rows": 128,
+          "codeKeyMin": 82383768,
+          "codeKeyMax": 84059819
+        },
+        {
+          "rowStart": 1536,
+          "rows": 128,
+          "codeKeyMin": 84060965,
+          "codeKeyMax": 84403587
+        },
+        {
+          "rowStart": 1664,
+          "rows": 128,
+          "codeKeyMin": 84403998,
+          "codeKeyMax": 86141106
+        },
+        {
+          "rowStart": 1792,
+          "rows": 128,
+          "codeKeyMin": 86141580,
+          "codeKeyMax": 86419769
+        },
+        {
+          "rowStart": 1920,
+          "rows": 128,
+          "codeKeyMin": 86420251,
+          "codeKeyMax": 86760341
+        },
+        {
+          "rowStart": 2048,
+          "rows": 128,
+          "codeKeyMin": 86763572,
+          "codeKeyMax": 88418732
+        },
+        {
+          "rowStart": 2176,
+          "rows": 128,
+          "codeKeyMin": 88431265,
+          "codeKeyMax": 88825236
+        },
+        {
+          "rowStart": 2304,
+          "rows": 128,
+          "codeKeyMin": 88826792,
+          "codeKeyMax": 90495159
+        },
+        {
+          "rowStart": 2432,
+          "rows": 128,
+          "codeKeyMin": 90496925,
+          "codeKeyMax": 90921624
+        },
+        {
+          "rowStart": 2560,
+          "rows": 128,
+          "codeKeyMin": 90921644,
+          "codeKeyMax": 92462895
+        },
+        {
+          "rowStart": 2688,
+          "rows": 128,
+          "codeKeyMin": 92463159,
+          "codeKeyMax": 92890901
+        },
+        {
+          "rowStart": 2816,
+          "rows": 128,
+          "codeKeyMin": 92891061,
+          "codeKeyMax": 94560424
+        },
+        {
+          "rowStart": 2944,
+          "rows": 128,
+          "codeKeyMin": 94561428,
+          "codeKeyMax": 94953617
+        },
+        {
+          "rowStart": 3072,
+          "rows": 128,
+          "codeKeyMin": 94954125,
+          "codeKeyMax": 95314448
+        },
+        {
+          "rowStart": 3200,
+          "rows": 128,
+          "codeKeyMin": 95314612,
+          "codeKeyMax": 97048479
+        },
+        {
+          "rowStart": 3328,
+          "rows": 128,
+          "codeKeyMin": 97048499,
+          "codeKeyMax": 98672953
+        },
+        {
+          "rowStart": 3456,
+          "rows": 128,
+          "codeKeyMin": 98673418,
+          "codeKeyMax": 98999095
+        },
+        {
+          "rowStart": 3584,
+          "rows": 128,
+          "codeKeyMin": 99000071,
+          "codeKeyMax": 99378828
+        },
+        {
+          "rowStart": 3712,
+          "rows": 128,
+          "codeKeyMin": 99378856,
+          "codeKeyMax": 100869913
+        },
+        {
+          "rowStart": 3840,
+          "rows": 128,
+          "codeKeyMin": 100899720,
+          "codeKeyMax": 101311791
+        },
+        {
+          "rowStart": 3968,
+          "rows": 128,
+          "codeKeyMin": 101312270,
+          "codeKeyMax": 102950552
+        },
+        {
+          "rowStart": 4096,
+          "rows": 128,
+          "codeKeyMin": 102950557,
+          "codeKeyMax": 103488187
+        },
+        {
+          "rowStart": 4224,
+          "rows": 128,
+          "codeKeyMin": 103488266,
+          "codeKeyMax": 105078687
+        },
+        {
+          "rowStart": 4352,
+          "rows": 128,
+          "codeKeyMin": 105079464,
+          "codeKeyMax": 105585300
+        },
+        {
+          "rowStart": 4480,
+          "rows": 128,
+          "codeKeyMin": 105585432,
+          "codeKeyMax": 107341110
+        },
+        {
+          "rowStart": 4608,
+          "rows": 128,
+          "codeKeyMin": 107341228,
+          "codeKeyMax": 107928865
+        },
+        {
+          "rowStart": 4736,
+          "rows": 128,
+          "codeKeyMin": 107928884,
+          "codeKeyMax": 109617708
+        },
+        {
+          "rowStart": 4864,
+          "rows": 128,
+          "codeKeyMin": 109617815,
+          "codeKeyMax": 111321897
+        },
+        {
+          "rowStart": 4992,
+          "rows": 128,
+          "codeKeyMin": 111338294,
+          "codeKeyMax": 111845041
+        },
+        {
+          "rowStart": 5120,
+          "rows": 128,
+          "codeKeyMin": 111845048,
+          "codeKeyMax": 113697330
+        },
+        {
+          "rowStart": 5248,
+          "rows": 128,
+          "codeKeyMin": 113697802,
+          "codeKeyMax": 115500058
+        },
+        {
+          "rowStart": 5376,
+          "rows": 128,
+          "codeKeyMin": 115531406,
+          "codeKeyMax": 117464337
+        },
+        {
+          "rowStart": 5504,
+          "rows": 128,
+          "codeKeyMin": 117496979,
+          "codeKeyMax": 119595697
+        },
+        {
+          "rowStart": 5632,
+          "rows": 128,
+          "codeKeyMin": 119595834,
+          "codeKeyMax": 122069415
+        },
+        {
+          "rowStart": 5760,
+          "rows": 128,
+          "codeKeyMin": 122085911,
+          "codeKeyMax": 125968679
+        },
+        {
+          "rowStart": 5888,
+          "rows": 112,
+          "codeKeyMin": 125984410,
+          "codeKeyMax": 133144493
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "file": "band_10.arrow",
+      "loDeg": 8.000000000000005,
+      "hiDeg": 11.313708498984768,
+      "magLimit": 20,
+      "nQuads": 6000,
+      "capped": true,
+      "anchorsUsed": 84,
+      "sha256": "332de16059eb97e406fc66f4bbbbc999a878f5176d81d9464af35885b71d116b",
+      "bytes": 269162,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 67526430,
+          "codeKeyMax": 69704977
+        },
+        {
+          "rowStart": 128,
+          "rows": 128,
+          "codeKeyMin": 69706667,
+          "codeKeyMax": 71739560
+        },
+        {
+          "rowStart": 256,
+          "rows": 128,
+          "codeKeyMin": 71739686,
+          "codeKeyMax": 73749022
+        },
+        {
+          "rowStart": 384,
+          "rows": 128,
+          "codeKeyMin": 73751956,
+          "codeKeyMax": 73985166
+        },
+        {
+          "rowStart": 512,
+          "rows": 128,
+          "codeKeyMin": 73995828,
+          "codeKeyMax": 75946808
+        },
+        {
+          "rowStart": 640,
+          "rows": 128,
+          "codeKeyMin": 75947567,
+          "codeKeyMax": 76225947
+        },
+        {
+          "rowStart": 768,
+          "rows": 128,
+          "codeKeyMin": 76225967,
+          "codeKeyMax": 78172947
+        },
+        {
+          "rowStart": 896,
+          "rows": 128,
+          "codeKeyMin": 78173619,
+          "codeKeyMax": 80009869
+        },
+        {
+          "rowStart": 1024,
+          "rows": 128,
+          "codeKeyMin": 80010777,
+          "codeKeyMax": 80339258
+        },
+        {
+          "rowStart": 1152,
+          "rows": 128,
+          "codeKeyMin": 80339339,
+          "codeKeyMax": 82189114
+        },
+        {
+          "rowStart": 1280,
+          "rows": 128,
+          "codeKeyMin": 82190374,
+          "codeKeyMax": 82551566
+        },
+        {
+          "rowStart": 1408,
+          "rows": 128,
+          "codeKeyMin": 82552106,
+          "codeKeyMax": 84369202
+        },
+        {
+          "rowStart": 1536,
+          "rows": 128,
+          "codeKeyMin": 84370436,
+          "codeKeyMax": 84762895
+        },
+        {
+          "rowStart": 1664,
+          "rows": 128,
+          "codeKeyMin": 84762915,
+          "codeKeyMax": 86465469
+        },
+        {
+          "rowStart": 1792,
+          "rows": 128,
+          "codeKeyMin": 86465558,
+          "codeKeyMax": 86876843
+        },
+        {
+          "rowStart": 1920,
+          "rows": 128,
+          "codeKeyMin": 86876941,
+          "codeKeyMax": 88614547
+        },
+        {
+          "rowStart": 2048,
+          "rows": 128,
+          "codeKeyMin": 88614678,
+          "codeKeyMax": 88908846
+        },
+        {
+          "rowStart": 2176,
+          "rows": 128,
+          "codeKeyMin": 88921747,
+          "codeKeyMax": 90627731
+        },
+        {
+          "rowStart": 2304,
+          "rows": 128,
+          "codeKeyMin": 90627754,
+          "codeKeyMax": 90922408
+        },
+        {
+          "rowStart": 2432,
+          "rows": 128,
+          "codeKeyMin": 90922653,
+          "codeKeyMax": 92563748
+        },
+        {
+          "rowStart": 2560,
+          "rows": 128,
+          "codeKeyMin": 92576028,
+          "codeKeyMax": 92940055
+        },
+        {
+          "rowStart": 2688,
+          "rows": 128,
+          "codeKeyMin": 92940169,
+          "codeKeyMax": 94591145
+        },
+        {
+          "rowStart": 2816,
+          "rows": 128,
+          "codeKeyMin": 94591892,
+          "codeKeyMax": 94951725
+        },
+        {
+          "rowStart": 2944,
+          "rows": 128,
+          "codeKeyMin": 94952456,
+          "codeKeyMax": 96574768
+        },
+        {
+          "rowStart": 3072,
+          "rows": 128,
+          "codeKeyMin": 96575167,
+          "codeKeyMax": 96886457
+        },
+        {
+          "rowStart": 3200,
+          "rows": 128,
+          "codeKeyMin": 96886574,
+          "codeKeyMax": 97164604
+        },
+        {
+          "rowStart": 3328,
+          "rows": 128,
+          "codeKeyMin": 97165833,
+          "codeKeyMax": 98755384
+        },
+        {
+          "rowStart": 3456,
+          "rows": 128,
+          "codeKeyMin": 98755497,
+          "codeKeyMax": 99197608
+        },
+        {
+          "rowStart": 3584,
+          "rows": 128,
+          "codeKeyMin": 99197877,
+          "codeKeyMax": 100837131
+        },
+        {
+          "rowStart": 3712,
+          "rows": 128,
+          "codeKeyMin": 100849829,
+          "codeKeyMax": 101359647
+        },
+        {
+          "rowStart": 3840,
+          "rows": 128,
+          "codeKeyMin": 101360514,
+          "codeKeyMax": 102965903
+        },
+        {
+          "rowStart": 3968,
+          "rows": 128,
+          "codeKeyMin": 102966064,
+          "codeKeyMax": 103439884
+        },
+        {
+          "rowStart": 4096,
+          "rows": 128,
+          "codeKeyMin": 103439935,
+          "codeKeyMax": 105079971
+        },
+        {
+          "rowStart": 4224,
+          "rows": 128,
+          "codeKeyMin": 105094020,
+          "codeKeyMax": 105504828
+        },
+        {
+          "rowStart": 4352,
+          "rows": 128,
+          "codeKeyMin": 105505299,
+          "codeKeyMax": 107160470
+        },
+        {
+          "rowStart": 4480,
+          "rows": 128,
+          "codeKeyMin": 107174695,
+          "codeKeyMax": 107700631
+        },
+        {
+          "rowStart": 4608,
+          "rows": 128,
+          "codeKeyMin": 107701390,
+          "codeKeyMax": 109435697
+        },
+        {
+          "rowStart": 4736,
+          "rows": 128,
+          "codeKeyMin": 109436937,
+          "codeKeyMax": 110010282
+        },
+        {
+          "rowStart": 4864,
+          "rows": 128,
+          "codeKeyMin": 110011309,
+          "codeKeyMax": 111763720
+        },
+        {
+          "rowStart": 4992,
+          "rows": 128,
+          "codeKeyMin": 111764144,
+          "codeKeyMax": 113647785
+        },
+        {
+          "rowStart": 5120,
+          "rows": 128,
+          "codeKeyMin": 113663374,
+          "codeKeyMax": 114221974
+        },
+        {
+          "rowStart": 5248,
+          "rows": 128,
+          "codeKeyMin": 114222238,
+          "codeKeyMax": 116268311
+        },
+        {
+          "rowStart": 5376,
+          "rows": 128,
+          "codeKeyMin": 116268341,
+          "codeKeyMax": 118447875
+        },
+        {
+          "rowStart": 5504,
+          "rows": 128,
+          "codeKeyMin": 118463790,
+          "codeKeyMax": 121741881
+        },
+        {
+          "rowStart": 5632,
+          "rows": 128,
+          "codeKeyMin": 121757622,
+          "codeKeyMax": 123936939
+        },
+        {
+          "rowStart": 5760,
+          "rows": 128,
+          "codeKeyMin": 123953024,
+          "codeKeyMax": 126705702
+        },
+        {
+          "rowStart": 5888,
+          "rows": 112,
+          "codeKeyMin": 126705944,
+          "codeKeyMax": 133095466
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "file": "band_11.arrow",
+      "loDeg": 11.313708498984768,
+      "hiDeg": 16.000000000000014,
+      "magLimit": 20,
+      "nQuads": 6000,
+      "capped": true,
+      "anchorsUsed": 84,
+      "sha256": "423c263346c2e927db49305f5fa9067538e7779b607be0665c482f5364aeee90",
+      "bytes": 269170,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 67557146,
+          "codeKeyMax": 69690417
+        },
+        {
+          "rowStart": 128,
+          "rows": 128,
+          "codeKeyMin": 69690755,
+          "codeKeyMax": 71736194
+        },
+        {
+          "rowStart": 256,
+          "rows": 128,
+          "codeKeyMin": 71736992,
+          "codeKeyMax": 73752108
+        },
+        {
+          "rowStart": 384,
+          "rows": 128,
+          "codeKeyMin": 73753107,
+          "codeKeyMax": 74015779
+        },
+        {
+          "rowStart": 512,
+          "rows": 128,
+          "codeKeyMin": 74016679,
+          "codeKeyMax": 75866540
+        },
+        {
+          "rowStart": 640,
+          "rows": 128,
+          "codeKeyMin": 75867266,
+          "codeKeyMax": 76260541
+        },
+        {
+          "rowStart": 768,
+          "rows": 128,
+          "codeKeyMin": 76261926,
+          "codeKeyMax": 78142999
+        },
+        {
+          "rowStart": 896,
+          "rows": 128,
+          "codeKeyMin": 78143371,
+          "codeKeyMax": 80045712
+        },
+        {
+          "rowStart": 1024,
+          "rows": 128,
+          "codeKeyMin": 80045713,
+          "codeKeyMax": 80419203
+        },
+        {
+          "rowStart": 1152,
+          "rows": 128,
+          "codeKeyMin": 80419591,
+          "codeKeyMax": 82238767
+        },
+        {
+          "rowStart": 1280,
+          "rows": 128,
+          "codeKeyMin": 82239130,
+          "codeKeyMax": 82617111
+        },
+        {
+          "rowStart": 1408,
+          "rows": 128,
+          "codeKeyMin": 82617762,
+          "codeKeyMax": 84434602
+        },
+        {
+          "rowStart": 1536,
+          "rows": 128,
+          "codeKeyMin": 84435122,
+          "codeKeyMax": 86140192
+        },
+        {
+          "rowStart": 1664,
+          "rows": 128,
+          "codeKeyMin": 86152622,
+          "codeKeyMax": 86449714
+        },
+        {
+          "rowStart": 1792,
+          "rows": 128,
+          "codeKeyMin": 86450206,
+          "codeKeyMax": 86744196
+        },
+        {
+          "rowStart": 1920,
+          "rows": 128,
+          "codeKeyMin": 86746406,
+          "codeKeyMax": 88500662
+        },
+        {
+          "rowStart": 2048,
+          "rows": 128,
+          "codeKeyMin": 88512422,
+          "codeKeyMax": 88892422
+        },
+        {
+          "rowStart": 2176,
+          "rows": 128,
+          "codeKeyMin": 88905225,
+          "codeKeyMax": 90679576
+        },
+        {
+          "rowStart": 2304,
+          "rows": 128,
+          "codeKeyMin": 90691486,
+          "codeKeyMax": 91084696
+        },
+        {
+          "rowStart": 2432,
+          "rows": 128,
+          "codeKeyMin": 91087374,
+          "codeKeyMax": 92725779
+        },
+        {
+          "rowStart": 2560,
+          "rows": 128,
+          "codeKeyMin": 92725912,
+          "codeKeyMax": 92985501
+        },
+        {
+          "rowStart": 2688,
+          "rows": 128,
+          "codeKeyMin": 92986542,
+          "codeKeyMax": 94559637
+        },
+        {
+          "rowStart": 2816,
+          "rows": 128,
+          "codeKeyMin": 94559668,
+          "codeKeyMax": 94857227
+        },
+        {
+          "rowStart": 2944,
+          "rows": 128,
+          "codeKeyMin": 94857238,
+          "codeKeyMax": 95165337
+        },
+        {
+          "rowStart": 3072,
+          "rows": 128,
+          "codeKeyMin": 95168673,
+          "codeKeyMax": 96675361
+        },
+        {
+          "rowStart": 3200,
+          "rows": 128,
+          "codeKeyMin": 96675507,
+          "codeKeyMax": 97149075
+        },
+        {
+          "rowStart": 3328,
+          "rows": 128,
+          "codeKeyMin": 97149090,
+          "codeKeyMax": 98918936
+        },
+        {
+          "rowStart": 3456,
+          "rows": 128,
+          "codeKeyMin": 98920076,
+          "codeKeyMax": 99409084
+        },
+        {
+          "rowStart": 3584,
+          "rows": 128,
+          "codeKeyMin": 99409173,
+          "codeKeyMax": 100967075
+        },
+        {
+          "rowStart": 3712,
+          "rows": 128,
+          "codeKeyMin": 100968326,
+          "codeKeyMax": 101441981
+        },
+        {
+          "rowStart": 3840,
+          "rows": 128,
+          "codeKeyMin": 101443105,
+          "codeKeyMax": 103081478
+        },
+        {
+          "rowStart": 3968,
+          "rows": 128,
+          "codeKeyMin": 103081740,
+          "codeKeyMax": 103700627
+        },
+        {
+          "rowStart": 4096,
+          "rows": 128,
+          "codeKeyMin": 103702197,
+          "codeKeyMax": 105455783
+        },
+        {
+          "rowStart": 4224,
+          "rows": 128,
+          "codeKeyMin": 105456551,
+          "codeKeyMax": 107111059
+        },
+        {
+          "rowStart": 4352,
+          "rows": 128,
+          "codeKeyMin": 107111609,
+          "codeKeyMax": 107635606
+        },
+        {
+          "rowStart": 4480,
+          "rows": 128,
+          "codeKeyMin": 107635610,
+          "codeKeyMax": 109389082
+        },
+        {
+          "rowStart": 4608,
+          "rows": 128,
+          "codeKeyMin": 109402803,
+          "codeKeyMax": 109946284
+        },
+        {
+          "rowStart": 4736,
+          "rows": 128,
+          "codeKeyMin": 109960755,
+          "codeKeyMax": 111567514
+        },
+        {
+          "rowStart": 4864,
+          "rows": 128,
+          "codeKeyMin": 111567645,
+          "codeKeyMax": 113269801
+        },
+        {
+          "rowStart": 4992,
+          "rows": 128,
+          "codeKeyMin": 113286429,
+          "codeKeyMax": 113877256
+        },
+        {
+          "rowStart": 5120,
+          "rows": 128,
+          "codeKeyMin": 113877282,
+          "codeKeyMax": 115825687
+        },
+        {
+          "rowStart": 5248,
+          "rows": 128,
+          "codeKeyMin": 115825799,
+          "codeKeyMax": 117661317
+        },
+        {
+          "rowStart": 5376,
+          "rows": 128,
+          "codeKeyMin": 117678471,
+          "codeKeyMax": 118383111
+        },
+        {
+          "rowStart": 5504,
+          "rows": 128,
+          "codeKeyMin": 118383126,
+          "codeKeyMax": 120380705
+        },
+        {
+          "rowStart": 5632,
+          "rows": 128,
+          "codeKeyMin": 120380850,
+          "codeKeyMax": 122576941
+        },
+        {
+          "rowStart": 5760,
+          "rows": 128,
+          "codeKeyMin": 122592641,
+          "codeKeyMax": 126263612
+        },
+        {
+          "rowStart": 5888,
+          "rows": 112,
+          "codeKeyMin": 126295615,
+          "codeKeyMax": 133128114
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "file": "band_12.arrow",
+      "loDeg": 16.000000000000014,
+      "hiDeg": 22.62741699796954,
+      "magLimit": 20,
+      "nQuads": 6000,
+      "capped": true,
+      "anchorsUsed": 84,
+      "sha256": "305d038892ce8632c269602b1c4f6f888ec003ae8fe77071fc5c4612420324b1",
+      "bytes": 269162,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 67539371,
+          "codeKeyMax": 69707579
+        },
+        {
+          "rowStart": 128,
+          "rows": 128,
+          "codeKeyMin": 69738930,
+          "codeKeyMax": 71803310
+        },
+        {
+          "rowStart": 256,
+          "rows": 128,
+          "codeKeyMin": 71804955,
+          "codeKeyMax": 73686182
+        },
+        {
+          "rowStart": 384,
+          "rows": 128,
+          "codeKeyMin": 73688455,
+          "codeKeyMax": 74062243
+        },
+        {
+          "rowStart": 512,
+          "rows": 128,
+          "codeKeyMin": 74062628,
+          "codeKeyMax": 75951119
+        },
+        {
+          "rowStart": 640,
+          "rows": 128,
+          "codeKeyMin": 75951520,
+          "codeKeyMax": 77897601
+        },
+        {
+          "rowStart": 768,
+          "rows": 128,
+          "codeKeyMin": 77898175,
+          "codeKeyMax": 78222501
+        },
+        {
+          "rowStart": 896,
+          "rows": 128,
+          "codeKeyMin": 78222865,
+          "codeKeyMax": 79994040
+        },
+        {
+          "rowStart": 1024,
+          "rows": 128,
+          "codeKeyMin": 79994637,
+          "codeKeyMax": 80206754
+        },
+        {
+          "rowStart": 1152,
+          "rows": 128,
+          "codeKeyMin": 80206774,
+          "codeKeyMax": 82025502
+        },
+        {
+          "rowStart": 1280,
+          "rows": 128,
+          "codeKeyMin": 82026920,
+          "codeKeyMax": 82403239
+        },
+        {
+          "rowStart": 1408,
+          "rows": 128,
+          "codeKeyMin": 82404658,
+          "codeKeyMax": 84156832
+        },
+        {
+          "rowStart": 1536,
+          "rows": 128,
+          "codeKeyMin": 84157572,
+          "codeKeyMax": 84436115
+        },
+        {
+          "rowStart": 1664,
+          "rows": 128,
+          "codeKeyMin": 84450472,
+          "codeKeyMax": 86205228
+        },
+        {
+          "rowStart": 1792,
+          "rows": 128,
+          "codeKeyMin": 86205357,
+          "codeKeyMax": 86595212
+        },
+        {
+          "rowStart": 1920,
+          "rows": 128,
+          "codeKeyMin": 86595377,
+          "codeKeyMax": 88335138
+        },
+        {
+          "rowStart": 2048,
+          "rows": 128,
+          "codeKeyMin": 88336146,
+          "codeKeyMax": 88597396
+        },
+        {
+          "rowStart": 2176,
+          "rows": 128,
+          "codeKeyMin": 88597767,
+          "codeKeyMax": 90347948
+        },
+        {
+          "rowStart": 2304,
+          "rows": 128,
+          "codeKeyMin": 90348083,
+          "codeKeyMax": 90760078
+        },
+        {
+          "rowStart": 2432,
+          "rows": 128,
+          "codeKeyMin": 90773771,
+          "codeKeyMax": 92530983
+        },
+        {
+          "rowStart": 2560,
+          "rows": 128,
+          "codeKeyMin": 92545080,
+          "codeKeyMax": 93034122
+        },
+        {
+          "rowStart": 2688,
+          "rows": 128,
+          "codeKeyMin": 93034515,
+          "codeKeyMax": 94725929
+        },
+        {
+          "rowStart": 2816,
+          "rows": 128,
+          "codeKeyMin": 94726055,
+          "codeKeyMax": 95199111
+        },
+        {
+          "rowStart": 2944,
+          "rows": 128,
+          "codeKeyMin": 95199805,
+          "codeKeyMax": 96951829
+        },
+        {
+          "rowStart": 3072,
+          "rows": 128,
+          "codeKeyMin": 96953770,
+          "codeKeyMax": 98638252
+        },
+        {
+          "rowStart": 3200,
+          "rows": 128,
+          "codeKeyMin": 98639503,
+          "codeKeyMax": 99083267
+        },
+        {
+          "rowStart": 3328,
+          "rows": 128,
+          "codeKeyMin": 99083313,
+          "codeKeyMax": 100787105
+        },
+        {
+          "rowStart": 3456,
+          "rows": 128,
+          "codeKeyMin": 100801321,
+          "codeKeyMax": 101276466
+        },
+        {
+          "rowStart": 3584,
+          "rows": 128,
+          "codeKeyMin": 101276967,
+          "codeKeyMax": 102915337
+        },
+        {
+          "rowStart": 3712,
+          "rows": 128,
+          "codeKeyMin": 102915367,
+          "codeKeyMax": 103373971
+        },
+        {
+          "rowStart": 3840,
+          "rows": 128,
+          "codeKeyMin": 103374866,
+          "codeKeyMax": 105111606
+        },
+        {
+          "rowStart": 3968,
+          "rows": 128,
+          "codeKeyMin": 105111860,
+          "codeKeyMax": 105734845
+        },
+        {
+          "rowStart": 4096,
+          "rows": 128,
+          "codeKeyMin": 105735073,
+          "codeKeyMax": 107405868
+        },
+        {
+          "rowStart": 4224,
+          "rows": 128,
+          "codeKeyMin": 107406093,
+          "codeKeyMax": 109223559
+        },
+        {
+          "rowStart": 4352,
+          "rows": 128,
+          "codeKeyMin": 109223563,
+          "codeKeyMax": 109780666
+        },
+        {
+          "rowStart": 4480,
+          "rows": 128,
+          "codeKeyMin": 109781686,
+          "codeKeyMax": 111615882
+        },
+        {
+          "rowStart": 4608,
+          "rows": 128,
+          "codeKeyMin": 111616803,
+          "codeKeyMax": 113320595
+        },
+        {
+          "rowStart": 4736,
+          "rows": 128,
+          "codeKeyMin": 113335088,
+          "codeKeyMax": 113943433
+        },
+        {
+          "rowStart": 4864,
+          "rows": 128,
+          "codeKeyMin": 113959949,
+          "codeKeyMax": 115777703
+        },
+        {
+          "rowStart": 4992,
+          "rows": 128,
+          "codeKeyMin": 115794224,
+          "codeKeyMax": 117531145
+        },
+        {
+          "rowStart": 5120,
+          "rows": 128,
+          "codeKeyMin": 117546271,
+          "codeKeyMax": 118349703
+        },
+        {
+          "rowStart": 5248,
+          "rows": 128,
+          "codeKeyMin": 118365839,
+          "codeKeyMax": 120185089
+        },
+        {
+          "rowStart": 5376,
+          "rows": 128,
+          "codeKeyMin": 120185130,
+          "codeKeyMax": 121953921
+        },
+        {
+          "rowStart": 5504,
+          "rows": 128,
+          "codeKeyMin": 121953926,
+          "codeKeyMax": 124050998
+        },
+        {
+          "rowStart": 5632,
+          "rows": 128,
+          "codeKeyMin": 124051376,
+          "codeKeyMax": 126164791
+        },
+        {
+          "rowStart": 5760,
+          "rows": 128,
+          "codeKeyMin": 126180876,
+          "codeKeyMax": 128573458
+        },
+        {
+          "rowStart": 5888,
+          "rows": 112,
+          "codeKeyMin": 128573494,
+          "codeKeyMax": 133144492
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "file": "band_13.arrow",
+      "loDeg": 22.62741699796954,
+      "hiDeg": 32.00000000000003,
+      "magLimit": 20,
+      "nQuads": 6000,
+      "capped": true,
+      "anchorsUsed": 84,
+      "sha256": "662894df275821cd74be3469276b67080c4a233928eac94036d008a692461410",
+      "bytes": 269162,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 67526657,
+          "codeKeyMax": 69608765
+        },
+        {
+          "rowStart": 128,
+          "rows": 128,
+          "codeKeyMin": 69608765,
+          "codeKeyMax": 69770153
+        },
+        {
+          "rowStart": 256,
+          "rows": 128,
+          "codeKeyMin": 69770261,
+          "codeKeyMax": 71721222
+        },
+        {
+          "rowStart": 384,
+          "rows": 128,
+          "codeKeyMin": 71721235,
+          "codeKeyMax": 73703556
+        },
+        {
+          "rowStart": 512,
+          "rows": 128,
+          "codeKeyMin": 73704742,
+          "codeKeyMax": 74012435
+        },
+        {
+          "rowStart": 640,
+          "rows": 128,
+          "codeKeyMin": 74013218,
+          "codeKeyMax": 75850639
+        },
+        {
+          "rowStart": 768,
+          "rows": 128,
+          "codeKeyMin": 75850801,
+          "codeKeyMax": 76113681
+        },
+        {
+          "rowStart": 896,
+          "rows": 128,
+          "codeKeyMin": 76113707,
+          "codeKeyMax": 77996292
+        },
+        {
+          "rowStart": 1024,
+          "rows": 128,
+          "codeKeyMin": 77996939,
+          "codeKeyMax": 78273799
+        },
+        {
+          "rowStart": 1152,
+          "rows": 128,
+          "codeKeyMin": 78274352,
+          "codeKeyMax": 80040867
+        },
+        {
+          "rowStart": 1280,
+          "rows": 128,
+          "codeKeyMin": 80040867,
+          "codeKeyMax": 80288026
+        },
+        {
+          "rowStart": 1408,
+          "rows": 128,
+          "codeKeyMin": 80288156,
+          "codeKeyMax": 82077606
+        },
+        {
+          "rowStart": 1536,
+          "rows": 128,
+          "codeKeyMin": 82091939,
+          "codeKeyMax": 82437123
+        },
+        {
+          "rowStart": 1664,
+          "rows": 128,
+          "codeKeyMin": 82450443,
+          "codeKeyMax": 84139535
+        },
+        {
+          "rowStart": 1792,
+          "rows": 128,
+          "codeKeyMin": 84139945,
+          "codeKeyMax": 84386099
+        },
+        {
+          "rowStart": 1920,
+          "rows": 128,
+          "codeKeyMin": 84386578,
+          "codeKeyMax": 86153892
+        },
+        {
+          "rowStart": 2048,
+          "rows": 128,
+          "codeKeyMin": 86155533,
+          "codeKeyMax": 86530062
+        },
+        {
+          "rowStart": 2176,
+          "rows": 128,
+          "codeKeyMin": 86531243,
+          "codeKeyMax": 86843428
+        },
+        {
+          "rowStart": 2304,
+          "rows": 128,
+          "codeKeyMin": 86845877,
+          "codeKeyMax": 88562440
+        },
+        {
+          "rowStart": 2432,
+          "rows": 128,
+          "codeKeyMin": 88562441,
+          "codeKeyMax": 88940585
+        },
+        {
+          "rowStart": 2560,
+          "rows": 128,
+          "codeKeyMin": 88940586,
+          "codeKeyMax": 90579368
+        },
+        {
+          "rowStart": 2688,
+          "rows": 128,
+          "codeKeyMin": 90579478,
+          "codeKeyMax": 90989868
+        },
+        {
+          "rowStart": 2816,
+          "rows": 128,
+          "codeKeyMin": 90990137,
+          "codeKeyMax": 92578084
+        },
+        {
+          "rowStart": 2944,
+          "rows": 128,
+          "codeKeyMin": 92580277,
+          "codeKeyMax": 93117993
+        },
+        {
+          "rowStart": 3072,
+          "rows": 128,
+          "codeKeyMin": 93118123,
+          "codeKeyMax": 94724153
+        },
+        {
+          "rowStart": 3200,
+          "rows": 128,
+          "codeKeyMin": 94724356,
+          "codeKeyMax": 95168172
+        },
+        {
+          "rowStart": 3328,
+          "rows": 128,
+          "codeKeyMin": 95168821,
+          "codeKeyMax": 96952125
+        },
+        {
+          "rowStart": 3456,
+          "rows": 128,
+          "codeKeyMin": 96952324,
+          "codeKeyMax": 97378834
+        },
+        {
+          "rowStart": 3584,
+          "rows": 128,
+          "codeKeyMin": 97378864,
+          "codeKeyMax": 98950795
+        },
+        {
+          "rowStart": 3712,
+          "rows": 128,
+          "codeKeyMin": 98950917,
+          "codeKeyMax": 100754354
+        },
+        {
+          "rowStart": 3840,
+          "rows": 128,
+          "codeKeyMin": 100754732,
+          "codeKeyMax": 101196436
+        },
+        {
+          "rowStart": 3968,
+          "rows": 128,
+          "codeKeyMin": 101243531,
+          "codeKeyMax": 102948495
+        },
+        {
+          "rowStart": 4096,
+          "rows": 128,
+          "codeKeyMin": 102949250,
+          "codeKeyMax": 103507505
+        },
+        {
+          "rowStart": 4224,
+          "rows": 128,
+          "codeKeyMin": 103523889,
+          "codeKeyMax": 105126172
+        },
+        {
+          "rowStart": 4352,
+          "rows": 128,
+          "codeKeyMin": 105126926,
+          "codeKeyMax": 105750843
+        },
+        {
+          "rowStart": 4480,
+          "rows": 128,
+          "codeKeyMin": 105752204,
+          "codeKeyMax": 107275438
+        },
+        {
+          "rowStart": 4608,
+          "rows": 128,
+          "codeKeyMin": 107289147,
+          "codeKeyMax": 107830582
+        },
+        {
+          "rowStart": 4736,
+          "rows": 128,
+          "codeKeyMin": 107832335,
+          "codeKeyMax": 109749287
+        },
+        {
+          "rowStart": 4864,
+          "rows": 128,
+          "codeKeyMin": 109749307,
+          "codeKeyMax": 111484062
+        },
+        {
+          "rowStart": 4992,
+          "rows": 128,
+          "codeKeyMin": 111484827,
+          "codeKeyMax": 113400578
+        },
+        {
+          "rowStart": 5120,
+          "rows": 128,
+          "codeKeyMin": 113401402,
+          "codeKeyMax": 114171674
+        },
+        {
+          "rowStart": 5248,
+          "rows": 128,
+          "codeKeyMin": 114171703,
+          "codeKeyMax": 116204455
+        },
+        {
+          "rowStart": 5376,
+          "rows": 128,
+          "codeKeyMin": 116236032,
+          "codeKeyMax": 118219687
+        },
+        {
+          "rowStart": 5504,
+          "rows": 128,
+          "codeKeyMin": 118234902,
+          "codeKeyMax": 120446747
+        },
+        {
+          "rowStart": 5632,
+          "rows": 128,
+          "codeKeyMin": 120446906,
+          "codeKeyMax": 124150277
+        },
+        {
+          "rowStart": 5760,
+          "rows": 128,
+          "codeKeyMin": 124182204,
+          "codeKeyMax": 126640393
+        },
+        {
+          "rowStart": 5888,
+          "rows": 112,
+          "codeKeyMin": 126673300,
+          "codeKeyMax": 132931585
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "file": "band_14.arrow",
+      "loDeg": 32.00000000000003,
+      "hiDeg": 45.25483399593909,
+      "magLimit": 20,
+      "nQuads": 6000,
+      "capped": true,
+      "anchorsUsed": 109,
+      "sha256": "9b5d437752e3cacf4160347d1a52badf81fbc02d86d0d2df3b66f971aa1d1320",
+      "bytes": 269162,
+      "batches": [
+        {
+          "rowStart": 0,
+          "rows": 128,
+          "codeKeyMin": 67529229,
+          "codeKeyMax": 69642652
+        },
+        {
+          "rowStart": 128,
+          "rows": 128,
+          "codeKeyMin": 69642670,
+          "codeKeyMax": 69772558
+        },
+        {
+          "rowStart": 256,
+          "rows": 128,
+          "codeKeyMin": 69772706,
+          "codeKeyMax": 71672971
+        },
+        {
+          "rowStart": 384,
+          "rows": 128,
+          "codeKeyMin": 71672993,
+          "codeKeyMax": 71788195
+        },
+        {
+          "rowStart": 512,
+          "rows": 128,
+          "codeKeyMin": 71788558,
+          "codeKeyMax": 71998245
+        },
+        {
+          "rowStart": 640,
+          "rows": 128,
+          "codeKeyMin": 71998245,
+          "codeKeyMax": 73864115
+        },
+        {
+          "rowStart": 768,
+          "rows": 128,
+          "codeKeyMin": 73864600,
+          "codeKeyMax": 74046256
+        },
+        {
+          "rowStart": 896,
+          "rows": 128,
+          "codeKeyMin": 74046256,
+          "codeKeyMax": 75783970
+        },
+        {
+          "rowStart": 1024,
+          "rows": 128,
+          "codeKeyMin": 75783993,
+          "codeKeyMax": 76061080
+        },
+        {
+          "rowStart": 1152,
+          "rows": 128,
+          "codeKeyMin": 76061082,
+          "codeKeyMax": 76213158
+        },
+        {
+          "rowStart": 1280,
+          "rows": 128,
+          "codeKeyMin": 76226703,
+          "codeKeyMax": 78061967
+        },
+        {
+          "rowStart": 1408,
+          "rows": 128,
+          "codeKeyMin": 78063152,
+          "codeKeyMax": 78208812
+        },
+        {
+          "rowStart": 1536,
+          "rows": 128,
+          "codeKeyMin": 78208898,
+          "codeKeyMax": 79928115
+        },
+        {
+          "rowStart": 1664,
+          "rows": 128,
+          "codeKeyMin": 79928756,
+          "codeKeyMax": 80258728
+        },
+        {
+          "rowStart": 1792,
+          "rows": 128,
+          "codeKeyMin": 80259593,
+          "codeKeyMax": 80450828
+        },
+        {
+          "rowStart": 1920,
+          "rows": 128,
+          "codeKeyMin": 80450853,
+          "codeKeyMax": 82221836
+        },
+        {
+          "rowStart": 2048,
+          "rows": 128,
+          "codeKeyMin": 82221836,
+          "codeKeyMax": 82536101
+        },
+        {
+          "rowStart": 2176,
+          "rows": 128,
+          "codeKeyMin": 82547749,
+          "codeKeyMax": 84207019
+        },
+        {
+          "rowStart": 2304,
+          "rows": 128,
+          "codeKeyMin": 84208396,
+          "codeKeyMax": 84518713
+        },
+        {
+          "rowStart": 2432,
+          "rows": 128,
+          "codeKeyMin": 84519223,
+          "codeKeyMax": 86187157
+        },
+        {
+          "rowStart": 2560,
+          "rows": 128,
+          "codeKeyMin": 86189186,
+          "codeKeyMax": 86628765
+        },
+        {
+          "rowStart": 2688,
+          "rows": 128,
+          "codeKeyMin": 86628874,
+          "codeKeyMax": 88333214
+        },
+        {
+          "rowStart": 2816,
+          "rows": 128,
+          "codeKeyMin": 88333964,
+          "codeKeyMax": 88808484
+        },
+        {
+          "rowStart": 2944,
+          "rows": 128,
+          "codeKeyMin": 88808598,
+          "codeKeyMax": 90496562
+        },
+        {
+          "rowStart": 3072,
+          "rows": 128,
+          "codeKeyMin": 90496702,
+          "codeKeyMax": 91020835
+        },
+        {
+          "rowStart": 3200,
+          "rows": 128,
+          "codeKeyMin": 91021061,
+          "codeKeyMax": 92853814
+        },
+        {
+          "rowStart": 3328,
+          "rows": 128,
+          "codeKeyMin": 92853942,
+          "codeKeyMax": 93182222
+        },
+        {
+          "rowStart": 3456,
+          "rows": 128,
+          "codeKeyMin": 93182617,
+          "codeKeyMax": 94968339
+        },
+        {
+          "rowStart": 3584,
+          "rows": 128,
+          "codeKeyMin": 94971658,
+          "codeKeyMax": 95232906
+        },
+        {
+          "rowStart": 3712,
+          "rows": 128,
+          "codeKeyMin": 95233305,
+          "codeKeyMax": 96774182
+        },
+        {
+          "rowStart": 3840,
+          "rows": 128,
+          "codeKeyMin": 96788355,
+          "codeKeyMax": 97246880
+        },
+        {
+          "rowStart": 3968,
+          "rows": 128,
+          "codeKeyMin": 97246979,
+          "codeKeyMax": 98688539
+        },
+        {
+          "rowStart": 4096,
+          "rows": 128,
+          "codeKeyMin": 98688570,
+          "codeKeyMax": 99244046
+        },
+        {
+          "rowStart": 4224,
+          "rows": 128,
+          "codeKeyMin": 99247163,
+          "codeKeyMax": 100787749
+        },
+        {
+          "rowStart": 4352,
+          "rows": 128,
+          "codeKeyMin": 100801084,
+          "codeKeyMax": 101377842
+        },
+        {
+          "rowStart": 4480,
+          "rows": 128,
+          "codeKeyMin": 101391002,
+          "codeKeyMax": 102947508
+        },
+        {
+          "rowStart": 4608,
+          "rows": 128,
+          "codeKeyMin": 102948127,
+          "codeKeyMax": 103654803
+        },
+        {
+          "rowStart": 4736,
+          "rows": 128,
+          "codeKeyMin": 103667996,
+          "codeKeyMax": 105504531
+        },
+        {
+          "rowStart": 4864,
+          "rows": 128,
+          "codeKeyMin": 105506058,
+          "codeKeyMax": 107355053
+        },
+        {
+          "rowStart": 4992,
+          "rows": 128,
+          "codeKeyMin": 107357066,
+          "codeKeyMax": 107832761
+        },
+        {
+          "rowStart": 5120,
+          "rows": 128,
+          "codeKeyMin": 107832874,
+          "codeKeyMax": 109746876
+        },
+        {
+          "rowStart": 5248,
+          "rows": 128,
+          "codeKeyMin": 109746876,
+          "codeKeyMax": 111748265
+        },
+        {
+          "rowStart": 5376,
+          "rows": 128,
+          "codeKeyMin": 111748355,
+          "codeKeyMax": 113614602
+        },
+        {
+          "rowStart": 5504,
+          "rows": 128,
+          "codeKeyMin": 113615803,
+          "codeKeyMax": 115695122
+        },
+        {
+          "rowStart": 5632,
+          "rows": 128,
+          "codeKeyMin": 115712044,
+          "codeKeyMax": 118185101
+        },
+        {
+          "rowStart": 5760,
+          "rows": 128,
+          "codeKeyMin": 118185101,
+          "codeKeyMax": 123805996
+        },
+        {
+          "rowStart": 5888,
+          "rows": 112,
+          "codeKeyMin": 123821485,
+          "codeKeyMax": 132358203
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "quads": 41711,
+    "stars": 300,
+    "bytes": 1893064
+  },
+  "aggregate_md5": "0c0231d11eca7880b04a669b4c4d650e"
+}

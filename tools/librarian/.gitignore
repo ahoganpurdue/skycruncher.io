@@ -1,0 +1,4 @@
+# Derived artifacts — never committed. Rebuild with `node index_docs.mjs`.
+.lancedb/
+# Lane-local install (root .gitignore also ignores node_modules/, kept here for clarity).
+node_modules/

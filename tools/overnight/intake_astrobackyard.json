@@ -1,0 +1,43 @@
+{
+  "dest": "D:/AstroLogic/intake/astrobackyard",
+  "citation": {
+    "site": "AstroBackyard — Practice Your Astrophoto Processing Skills",
+    "accreditation": {
+      "person": "Trevor Jones",
+      "organization": "AstroBackyard",
+      "page_url": "https://astrobackyard.com/your-astrophoto-skills/",
+      "domain": "astrobackyard.com"
+    },
+    "use_case": {
+      "verdict": "MATCH",
+      "evidence": "Freely shared practice data; 'Do not indicate images were captured by yourself' + 'please link to the website when sharing' — attribution + no-misrepresentation, compatible with open-source solo-dev solver testing."
+    },
+    "blockers": [],
+    "terms": "Attribution required; do not present images as captured by yourself; link to astrobackyard.com when sharing.",
+    "owner_authorization": "owner directed pull + cite, 2026-07-09; scraper protocol docs/INTAKE_SCRAPER_SPEC.md"
+  },
+  "sources": [
+    { "label": "astrobackyard_orion_t7_300mm", "type": "gdrive_file", "id": "1tXVlPAIHN1oBPvPujwIaOsLZWjm1hgIi", "filename": "astrobackyard_orion_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Orion Nebula (M42)"}, {"type":"camera","value":"Canon EOS Rebel T7"}, {"type":"focal_length_mm","value":300}, {"type":"exposure","value":"26x90s ISO800"} ] } },
+    { "label": "astrobackyard_pleiades_t7_300mm", "type": "gdrive_file", "id": "1mBj3BEr5H6-EaW4cUW7xr1ctB6qdDSCN", "filename": "astrobackyard_pleiades_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Pleiades (M45)"}, {"type":"camera","value":"Canon EOS Rebel T7"}, {"type":"focal_length_mm","value":300}, {"type":"exposure","value":"30x90s ISO800"} ] } },
+    { "label": "astrobackyard_rosette_t7_300mm", "type": "gdrive_file", "id": "1O8Ox6otopsUMKN1Ew8Ou_1FzJ3GdNCDX", "filename": "astrobackyard_rosette_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Rosette Nebula"}, {"type":"camera","value":"Canon EOS Rebel T7"}, {"type":"focal_length_mm","value":300}, {"type":"exposure","value":"25x90s ISO800"} ] } },
+    { "label": "astrobackyard_tulip_sqa55_asi2600", "type": "gdrive_file", "id": "1XqC2TAEf2y4X62rttovX5gMvljLRiKvF", "filename": "astrobackyard_tulip_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Tulip Nebula (Sh2-101)"}, {"type":"telescope","value":"Askar SQA55"}, {"type":"camera","value":"ZWO ASI2600MC Air"}, {"type":"date","value":"2025-04-30"} ] } },
+    { "label": "astrobackyard_witchhead_wo68_asi2400", "type": "gdrive_file", "id": "1LrzKJflM3kJXQuzQC5AEH6DT2hgjrt-c", "filename": "astrobackyard_witchhead_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Witch Head Nebula (IC 2118)"}, {"type":"telescope","value":"William Optics Pleiades 68"}, {"type":"camera","value":"ZWO ASI2400MC Pro"}, {"type":"location","value":"Florida Keys (Winter Star Party 2024)"} ] } },
+    { "label": "astrobackyard_ic1396_raptor61_eosra", "type": "gdrive_file", "id": "1xu357tXTCgh1CxxDJqc5tBgzmJ7mfkLd", "filename": "astrobackyard_ic1396_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Elephant's Trunk (IC 1396), Cepheus"}, {"type":"telescope","value":"Radian Raptor 61"}, {"type":"camera","value":"Canon EOS Ra"}, {"type":"filter","value":"Radian Triad Ultra"}, {"type":"date","value":"2020-10"} ] } },
+    { "label": "astrobackyard_cocoon_60da_z73", "type": "gdrive_file", "id": "1V5yXmFEEZ1mlA4jQ27Fjf0nxR1SetAvR", "filename": "astrobackyard_cocoon_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Cocoon Nebula (IC 5146)"}, {"type":"telescope","value":"William Optics Zenithstar 73"}, {"type":"camera","value":"Canon EOS 60Da"}, {"type":"filter","value":"SkyTech CLS-CCD"}, {"type":"date","value":"2019-06"} ] } },
+    { "label": "astrobackyard_lagoon_xsi_ed80", "type": "gdrive_file", "id": "1lQq3QpzBCLiLuFy9Gdk-UxCMG7Qx_c32", "filename": "astrobackyard_lagoon_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Lagoon Nebula (M8)"}, {"type":"telescope","value":"Explore Scientific ED80"}, {"type":"camera","value":"Canon EOS Rebel Xsi"}, {"type":"filter","value":"IDAS LPS"}, {"type":"date","value":"2013-06"} ] } },
+    { "label": "astrobackyard_soul_t3i_meade70", "type": "gdrive_file", "id": "1nzPIe1buwYfvPHR_R7wIoktgien3P46J", "filename": "astrobackyard_soul_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Soul Nebula"}, {"type":"telescope","value":"Meade 70mm Quadruplet APO"}, {"type":"camera","value":"Canon EOS Rebel T3i (modified)"}, {"type":"filter","value":"SkyTech CLS-CCD"}, {"type":"date","value":"2017-11"} ] } },
+    { "label": "astrobackyard_andromeda_60da", "type": "gdrive_file", "id": "1E0YqTdZIbVKGY7yzcXltnk6-NRRem-2H", "filename": "astrobackyard_andromeda_stack.tif",
+      "citation": { "hints": [ {"type":"target","value":"Andromeda Galaxy (M31)"}, {"type":"telescope","value":"74mm refractor"}, {"type":"camera","value":"Canon EOS 60Da"}, {"type":"location","value":"Southern Ontario dark sky site, Bortle 4/5"}, {"type":"date","value":"2019"} ] } },
+    { "label": "astrobackyard_cocoon_60da_singles", "type": "gdrive_folder", "id": "1PZC1bplNYbhudyy4lghq_OOuUTKWXkje",
+      "citation": { "hints": [ {"type":"target","value":"Cocoon Nebula (IC 5146)"}, {"type":"telescope","value":"William Optics Zenithstar 73"}, {"type":"camera","value":"Canon EOS 60Da"}, {"type":"format","value":"raw CR2 singles, ISO800"} ] } }
+  ]
+}

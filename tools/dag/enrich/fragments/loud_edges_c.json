@@ -1,0 +1,439 @@
+{
+  "fragment": "loud_edges_c",
+  "derived_by": "opus batch C (loud-edge set: boundaries, units, solver/WCS)",
+  "notes": [
+    "DRIFT (item 3, MAJOR): of the 11 fine-grained stage ids the task named, only 3 exist as base nodes (stage:metrology, stage:solve, stage:calibrate). The other 8 (stage:solve.quad_wasm, stage:calibrate.m7_analyze, stage:calibrate.sip_gate, stage:calibrate.tps_gate, stage:m7_refine, stage:bc_measure, stage:bc_rematch, stage:render_apply_sip) are NOT base nodes. In the code they are withStage(...) SEAM sub-stages nested INSIDE stage:solve/stage:calibrate (orchestrator_session.ts: analysis@1713, bc_measure@1744, bc_rematch@1786, render_apply_sip@1856) — the base graph collapses them into their coarse parents. Consequence: the quad->solve handoff, the sip_gate/tps_gate CONTROL-of-m7_refine edges, bc_measure->bc_rematch, and the render_apply_sip RENDER-plane ledger crossing CANNOT be expressed as node-to-node edges (both endpoints missing). Emitted only coarse-stage edges (detect/metrology/solve/calibrate). If the base is regenerated with sub-stage granularity these internal edges become expressible.",
+    "DRIFT: bc_rematch never-worse guard (KEPT_ORIGINAL => byte-identical solution, orchestrator_session.ts:340,1807) is a real FALLBACK but stage:bc_rematch is not a base node, so the fallback edge is not emittable — noted only.",
+    "boundary:libraw_mem_image producer = external dep libraw-wasm (not a repo node); no producer edge emitted. Consumers metadata_reaper.ts / tools/psf/decode_cr2.mjs / tools/color/rgb_to_xyz.mjs ARE nodes.",
+    "boundary:wasm_typed_array producer = src/engine/wasm_compute/src/lib.rs::refine_stars_lm (Rust file, NOT a base node); producer edge skipped. Consumer psf_field.ts emitted.",
+    "boundary:rawler_cfa producer = src/engine/wasm_decode (Rust dir, NOT a base node); producer edge skipped. TS consumer rawler_decoder.ts emitted.",
+    "boundary:tauri_native_ipc producer = src-tauri/src/lib.rs (Rust, NOT a base node); producer edge skipped. Consumer NativeGpuBridge.ts emitted.",
+    "boundary:toolchest_arrow_export producer = packages/toolchest/src/tables.ts (NOT a base node) — NO edge emitted for this boundary (the receipt-side modules headless_driver.ts/package.ts are nodes but are not the Arrow serializer; emitting them would mis-attribute the crossing). Whole boundary skipped, noted.",
+    "boundary:starplates_blobs consumer = tools/solverkit (NOT a base node); consumer edge skipped. Producer build_release.mjs emitted (layout itself UNVERIFIED-heavy in the schema).",
+    "boundary:seam_capsule consumer = tools/testkit stage_replay.mjs (NOT a base node); consumer edge skipped. Producer seam_capture.ts emitted.",
+    "TRAP-TABLE GAP (item 2d, parity / y-down sign across a seam): could NOT ground an edge — every relevant schema entry (libraw_mem_image, rawler_cfa, wgsl_structs, gpu_quad_scoring) explicitly states 'parity/sky-mirror sign NOT asserted' and CLAUDE.md says 'Do not assert sign'. There is no code line that flips a parity sign across a boundary, so no honest unit-conversion edge exists for (d). Reported as a gap, not invented.",
+    "sip_convention.ts lives at src/engine/pipeline/export/sip_convention.ts (NOT src/export/sip_convention.ts as the task hint suggested) — located and used.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 12 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {},
+  "edges": [
+    {
+      "from": "boundary:libraw_mem_image",
+      "to": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:118",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "uint16 interleaved RGB16, length w*h*3, pixel (x,y) ch c at (y*w+x)*3+c; ADU per-channel 16-bit linear; image-space y-down; dominant-channel with ~4-7% cross-leak (NOT one-hot, NOT CFA)",
+        "transform": "convertMemImageToRgb detects dominant-channel-vs-demosaiced (multi-channel-lit + median 2nd/max ratio) and routes; consumers do not branch on format",
+        "lossy": true
+      }
+    },
+    {
+      "from": "boundary:libraw_mem_image",
+      "to": "tools/psf/decode_cr2.mjs",
+      "type": "unit-conversion",
+      "cite": "tools/psf/decode_cr2.mjs:91",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: interleaved dominant-channel RGB16 mem_image whose w*h can factor TWO ways; out: three linear Float32 planes [0,1]",
+        "transform": "candidateDims enumerates near-meta factorizations, strideCoherence tie-break (mean |v(y)-v(y+2)|, period-2 Bayer parity) picks the true stride so a 5196x3468 near-miss cannot beat exact 5202x3464; then demosaicBilinear",
+        "lossy": true
+      },
+      "why": {
+        "text": "Without the strideCoherence tie-break a near-tied dims factorization SHEARS the frame diagonally (the 60Da 413.3-vs-411.1 case picked 3468x5196 over the exact 3464x5202). Proximity to meta.width alone cannot disambiguate because 5196 is nearer meta's 5184 than the true 5202.",
+        "cites": [
+          {
+            "path": "tools/psf/decode_cr2.mjs",
+            "lines": "113-134"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "130-132"
+          }
+        ]
+      }
+    },
+    {
+      "from": "boundary:libraw_mem_image",
+      "to": "tools/color/rgb_to_xyz.mjs",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:139",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "same interleaved dominant-channel RGB16 mem_image",
+        "transform": "secondary EXACT-meta-match dims recovery / tie-break (schema notes this lane currently hosts the tie-break rule, not the shared psf lane)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "tools/atlas/merge_hyg_sectors.mjs",
+      "to": "boundary:atlas_rows",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:181",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "36 sectors/level_3_sector_0..35.json MINIFIED one-object-per-line, exact bytes = open-bracket + rows comma-plus-LF-joined + close-bracket; a Gaia block then a CONTIGUOUS HYG block, no interleave; regenerable BYTE-EXACT 38/38",
+        "transform": "final HYG-merge writer (STRICT mag>6.8 HYG faint end to ~mag 21); sector id = decIndex*6 + raIndex",
+        "lossy": false
+      }
+    },
+    {
+      "from": "boundary:atlas_rows",
+      "to": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+      "type": "unit-conversion",
+      "cite": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts:719",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "HYBRID rows: Gaia rows carry ra in DEGREES, legacy HYG rows carry ra in HOURS (stored AS-IS, never normalized on disk)",
+        "transform": "isGaiaFormat = (source_id||mag_g defined); ra_hours = ra_deg!==undefined ? ra_deg/15 : (isGaiaFormat ? ra/15 : ra) -> everything normalized to internal HOURS",
+        "lossy": false
+      },
+      "why": {
+        "text": "A per-row discrimination, not a per-file one: the same sector file mixes Gaia-degrees and HYG-hours rows. Reading a Gaia row's ra as hours (or an HYG row's ra as degrees) mislocates the star by a 15x factor and poisons the match/solve. isGaiaFormat is the load-bearing discriminator.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+            "lines": "719-730"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "161-165"
+          }
+        ]
+      }
+    },
+    {
+      "from": "tools/starplates/build_release.mjs",
+      "to": "boundary:starplates_blobs",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:190",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "t0/t1 blobs + 4-band lost-in-space index (~40.6MB, 4 bands); EXACT blob stride + band-index layout UNVERIFIED in the schema (deliberately UNVERIFIED-heavy)",
+        "transform": "release builder; byte layout must be transcribed from the builder BEFORE any consumer rewire (LAW 7)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "tools/atlas/atlas_to_arrow.mjs",
+      "to": "boundary:arrow_seam",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:208",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "Apache Arrow IPC columnar (bitmap validity buffer + typed data buffer, null-count in field node), little-endian",
+        "transform": "atlas rows -> Arrow RecordBatch column buffers (exact column schema UNVERIFIED in schema)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "boundary:arrow_seam",
+      "to": "src/engine/pipeline/m6_plate_solve/atlas_arrow_codec.ts",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:213",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "Arrow column buffers per spec; RA-unit hybridity inherited from atlas_rows",
+        "transform": "atlas_arrow_codec decodes the columnar seam between catalog store and solver",
+        "lossy": false
+      }
+    },
+    {
+      "from": "boundary:arrow_seam",
+      "to": "src/engine/core/ArrowMemory.ts",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:214",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "little-endian Arrow IPC buffers (equatorial RA/Dec per column, COORDINATE ledger)",
+        "transform": "in-memory Arrow view over the seam",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m3_gpu_preprocess/demosaic_pipeline.ts",
+      "to": "boundary:wgsl_structs",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:227",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "WGSL struct members, std140/std430-style alignment (vec3 aligns to 16 bytes; struct size rounded to largest member alignment); little-endian; PIXEL ledger, image y-down",
+        "transform": "GPU preprocess path defines the struct layout crossing JS->WebGPU (exact field order/padding UNVERIFIED)",
+        "lossy": false
+      },
+      "why": {
+        "text": "SHARED-WGSL HAZARD: one shader consumed by multiple bind layouts, so a struct-member change ripples across every bind group using it. This is why a WGSL struct edit is an enumerated LAW-7 boundary.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "233-234"
+          }
+        ]
+      }
+    },
+    {
+      "from": "boundary:wasm_typed_array",
+      "to": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:250",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "refine_stars_lm OUTPUT = 13 f64/star [A,cx,cy,sx,sy,theta, sigmaA,sigmaCx,sigmaCy,sigmaSx,sigmaSy,sigmaTheta, covStatus]; A=luma ADU, cx..sy=pixels, theta=radians; native pixel grid y-down; little-endian wasm linear memory",
+        "transform": "psf_field consumes with stride AUTO-DETECT (6-vs-13); sigmas ADDITIVE (all NaN when covStatus!=0); values COPIED (a zero-copy view is invalidated by any wasm realloc)",
+        "lossy": false
+      },
+      "why": {
+        "text": "The output stride graduated 6->13/star (JTJ covariance surgery). A consumer that assumed the old 6-wide stride would read sigmas as refined params and shear the whole per-star product. The auto-detect is the compatibility seam (psf_field.ts:393 `stride = out.length >= N*13 ? 13 : 6`, :394 `hasCov = stride === 13`); the first 6 stay BIT-IDENTICAL to the pre-covariance output.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "253-261"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_field.ts",
+            "lines": "393-394"
+          }
+        ]
+      }
+    },
+    {
+      "from": "boundary:fits_io",
+      "to": "src/engine/pipeline/m1_ingestion/fits_decoder.ts",
+      "type": "unit-conversion",
+      "cite": "src/engine/pipeline/m1_ingestion/fits_decoder.ts:1127",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: FITS header RA in DEGREES (big-endian file, CRPIX 1-indexed); out: internal hard.ra_hint in HOURS",
+        "transform": "hard.ra_hint = ra / 15 (engine ingest site; one of THREE non-chokepoint conversion sites)",
+        "lossy": false
+      },
+      "why": {
+        "text": "crval[0]/catalog RA is HOURS internally; degrees only at the FITS boundary. A rewire that trusts a 'single chokepoint' would miss fits_decoder.ts:1127 (and stack + package.ts) — exactly the units bug LAW 7 exists to prevent.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "297-317"
+          }
+        ]
+      }
+    },
+    {
+      "from": "tools/stack/fits_io.mjs",
+      "to": "boundary:fits_io",
+      "type": "unit-conversion",
+      "cite": "tools/stack/fits_io.mjs:216",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: engine-internal WCS crval[0] in HOURS, crpix 0-based; out: FITS CRVAL1 in DEGREES, CRPIX1 1-based",
+        "transform": "CRVAL1 = wcs.crval[0] * 15; CRPIX1 = wcs.crpix[0] + 1 (stacker writer path — eats HOURS)",
+        "lossy": false
+      },
+      "why": {
+        "text": "There are TWO WCS->FITS paths and each converts at a DIFFERENT boundary so no value is double-converted: the stacker (here) eats HOURS and multiplies by 15; the receipt/export writer eats DEGREES and must NEVER re-multiply. Feeding a receipt.wcs to wcsCards would x15 an already-degrees CRVAL.",
+        "cites": [
+          {
+            "path": "tools/stack/fits_io.mjs",
+            "lines": "195-208"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/stages/package.ts",
+      "to": "boundary:fits_io",
+      "type": "unit-conversion",
+      "cite": "src/engine/pipeline/stages/package.ts:161",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: engine solution crval[0]/ra_hours in HOURS; out: receipt.wcs CRVAL1 in DEGREES",
+        "transform": "CRVAL1 = fitted.crval[0] * 15 (fitted branch, :161) and sol.ra_hours * 15 (synthesized branch, :185) — receipt WCS is ALREADY degrees downstream",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/export/fits_writer.ts",
+      "to": "boundary:fits_io",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:303",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "consumes receipt.wcs whose CRVAL1 is ALREADY in DEGREES; writes big-endian FITS image + 80-byte header cards",
+        "transform": "emits CRVAL verbatim, adds only CRPIX+1; must NOT re-multiply by 15",
+        "lossy": false
+      }
+    },
+    {
+      "from": "boundary:rawler_cfa",
+      "to": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:325",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "uint16 single-channel Bayer CFA mosaic (cpp=1), FULL sensor frame incl. optical-black borders, length width*height, photosite (x,y) at y*width+x; color = 2x2 CFA tile at phase (y&1)*2+(x&1); raw ADU with per-frame black pedestal (NOT subtracted); LE wasm boundary; y-down full-frame coords",
+        "transform": "decodeCfaContract / decodeRawlerForPipeline (integer-bilinear demosaic of ACTIVE area, phase-correct via absolute coords, OB clamped out of science pixels; blacklevel/white/WB ride the contract, blacklevel varies PER FRAME)",
+        "lossy": false
+      },
+      "why": {
+        "text": "The OB borders are the per-frame dark anchor (DARK_CALIBRATION_POLICY) so consumers must NOT pre-trim before measurement; and blacklevel is per-frame (2046 vs 2045 same camera), so a hardcoded pedestal biases photometry. This is the DEFAULT RAW arm since the 2026-07-11 cutover.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "328-342"
+          }
+        ]
+      }
+    },
+    {
+      "from": "boundary:tauri_native_ipc",
+      "to": "src/engine/core/NativeGpuBridge.ts",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:372",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "INPUT Bayer CFA uint16 (length w*h, y*w+x); OUTPUT interleaved RGBA float32 (length w*h*4, (y*w+x)*4+c); raw little-endian bytes BOTH directions; PIXEL ledger y-down; CFA phase RGGB/Canon-hardcoded in the native shader",
+        "transform": "NativeGpuBridge.demosaic consumes Uint8Array body + width/height headers -> ArrayBuffer; TRANSPORT-only binary IPC (retired the 300-700MB Array.from JSON round-trip); data layout identical to prior JSON path",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/seam_capture.ts",
+      "to": "boundary:seam_capsule",
+      "type": "data-flow",
+      "cite": "src/engine/contracts/binary_layouts.ts:457",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "per-buffer float32|uint16|uint8 raw LE .bin (flat row-major, luminance w*h / interleaved RGB w*h*3, NO header) + JSON sidecar (capsule.json, SOLE layout authority); sha256-verified on load; y-down native grid",
+        "transform": "captureSeam (env-gated CAPTURE_SEAMS=1, default OFF) snapshots buffers synchronously at the seam, sidecar stable-stringify-sorted + tmp->rename",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+      "to": "src/engine/pipeline/export/sip_convention.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/export/sip_convention.ts:11",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "internal SIP coefficients A_internal(u,v)=dx=OBSERVED-IDEAL (performSIPFit; u=detected.x-CRPIX), stored on receipt.solution.astrometry.sip.a/.b",
+        "transform": "engine fit -> receipt -> the export-boundary negation bridge",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/pipeline/export/sip_convention.ts",
+      "to": "src/engine/pipeline/export/fits_writer.ts",
+      "type": "unit-conversion",
+      "cite": "src/engine/pipeline/export/sip_convention.ts:85",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: internal SIP (A_internal = OBSERVED-IDEAL); out: FITS-standard forward SIP (A_FITS = IDEAL-OBSERVED)",
+        "transform": "toFitsSip negates A and B (A_FITS = -A_internal, orders unchanged); pure coefficient negation, returns a NEW block",
+        "lossy": false
+      },
+      "why": {
+        "text": "Emitting the internal coefficients verbatim as FITS A_i_j (the pre-fix M7 bug) makes astropy apply the distortion in the WRONG direction — it WORSENS catalog residuals instead of improving them. In-app consumers use convention (1) end to end and must NOT be touched; the wrong sign only ever existed at the FITS/ASDF serialization boundary.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/export/sip_convention.ts",
+            "lines": "27-54"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/export/sip_convention.ts",
+      "to": "src/engine/pipeline/export/asdf_writer.ts",
+      "type": "unit-conversion",
+      "cite": "src/engine/pipeline/export/asdf_writer.ts:346",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: internal SIP; out: FITS-standard forward SIP for BOTH the asdf wcs_fits keyword fallback AND the native gwcs polynomial node",
+        "transform": "toFitsSip negation (same bridge) so the two exports are byte-consistent and both FITS-conventional; called at asdf_writer.ts:346 (wcs_fits keyword) and :495 (gwcs polynomial node)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:metrology",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1233",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "signal.clean_stars (detected star list) from detectSignal",
+        "transform": "metrology consumes clean_stars to solve the true pixel scale (resolveScaleLock)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:solve",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1452",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "signal.clean_stars -> curated star set",
+        "transform": "selectCuratedStars(scienceBuffer, w, h, signal) feeds the blind/quad solver; solve guards 'Extract signal before Metrology'",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:metrology",
+      "to": "stage:solve",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1329",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "scaleLock (arcsecPerPx) from the shared metrology stage",
+        "transform": "nativeScale = this.scaleLock || metadata.pixel_scale || 2.0 seeds the solver's scale prior (metrology sets scale_locked @1243)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:calibrate",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/calibrate.ts:66",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "solution.matched_stars + solution.wcs (COORDINATE ledger: WCS + matched star correspondences)",
+        "transform": "step5 calibrate reads matched_stars + wcs for m7 analysis / SIP-TPS gating / bc measure+rematch / SPCC / forced-confirm; the sub-stages (m7_analyze, sip_gate, tps_gate, m7_refine, bc_measure, bc_rematch, render_apply_sip) are withStage seams INSIDE calibrate, not separate base nodes",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the COORDINATE-ledger handoff: solve owns the WCS + matched_stars; calibrate reads them but its post-solve products (SPCC per-star, forced-confirm, psf_field, render_apply_sip) must never mutate WCS/matched_stars/the solve numbers. render_apply_sip inside calibrate is the RENDER plane (default-off, byte-identical off) — it consumes both ledgers and feeds neither (LAW 1).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1735-1736"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1848-1856"
+          }
+        ]
+      }
+    },
+    {
+      "from": "boundary:rawler_cfa",
+      "to": "boundary:libraw_mem_image",
+      "type": "fallback",
+      "cite": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts:64",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "primary = rawler_cfa (isRawlerDecoderEnabled default TRUE); fallback = libraw_mem_image COLD PATH",
+        "transform": "VITE_DECODER_RAWLER=0 (or 'false') selects the retained libraw cold path (byte-identical pre-cutover pins); unset/truthy => rawler default arm",
+        "lossy": false
+      },
+      "why": {
+        "text": "Decoder cutover #14 made rawler the default RAW arm but the owner ruling KEPT libraw as a never-delete cold path; the two boundaries carry DIFFERENT contracts (rawler = full single-channel CFA + OB borders; libraw = interleaved dominant-channel RGB16), so the switch is a real fork, not a drop-in.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "320-324"
+          }
+        ]
+      }
+    }
+  ]
+}

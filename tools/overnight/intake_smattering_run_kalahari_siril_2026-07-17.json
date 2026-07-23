@@ -1,0 +1,336 @@
+{
+  "dest": "D:/AstroLogic/intake/smattering_2026-07-17",
+  "identity": {
+    "operator": "adam@structurize.io",
+    "purpose": "authorized processing test - practice datasets (SkyCruncher solver/calibration), internal use",
+    "authorization": "OWNER-APPROVED 2026-07-17 (both sources by name): PhotographingSpace/Kalahari + Siril M8/M20 tutorial data. License terms UNCLEAR (no explicit grant); owner ruled internal use. Raws kept internal; processed results carry required credit + link-back."
+  },
+  "sources": [
+    {
+      "label": "photographingspace_kalahari_5d3_single",
+      "type": "http",
+      "url": "https://www.photographingspace.com/downloads/CSM30803.CR2",
+      "filename": "CSM30803.CR2",
+      "citation": {
+        "site": "PhotographingSpace.com — Cory Schmitz Kalahari Milky Way (Homework Data)",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 by name",
+          "evidence": "No formal license or usage terms stated on the page. Author openly offers the raw files as a public 'homework' processing exercise and only asks participants to \"Share your results\" and email processed output to info@photographingspace.com. No grant of redistribution/derivative rights and no prohibition either — silent on our internal-testing/receipt-embedding use. Per protocol, UNCLEAR ⇒ owner decides before pulling."
+        },
+        "blockers": [
+          "none-explicit — no stated license; author requests processed results be shared/emailed to info@photographingspace.com (courtesy, not a condition)"
+        ],
+        "accreditation": {
+          "person": "Cory Schmitz",
+          "organization": "PhotographingSpace.com",
+          "page_url": "https://www.photographingspace.com/homework-download-stack-data/",
+          "domain": "photographingspace.com"
+        },
+        "hints": [
+          {
+            "type": "camera",
+            "value": "Canon EOS 5D Mark III"
+          },
+          {
+            "type": "lens",
+            "value": "Canon EF 24-70mm f/2.8L II at 24mm"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 24
+          },
+          {
+            "type": "target",
+            "value": "Milky Way (galactic core, wide field)"
+          },
+          {
+            "type": "location",
+            "value": "Kalahari Basin, South Africa/Namibia border (SOUTHERN HEMISPHERE)"
+          },
+          {
+            "type": "settings",
+            "value": "f/2.8, 15s, ISO 6400"
+          }
+        ],
+        "notes": "Value = SOUTHERN-HEMISPHERE sky (a hemisphere the corpus lacks) + direct single .CR2 URL (no Drive indirection). Body Canon 5D3; diversity is in sky/lens/FL, not sensor. Single 5D3 CR2 light frame (33.3MB), also present inside the 11x stack zip (fetcher sha-dedups). APPROVAL: UNCLEAR license; OWNER-APPROVED by name 2026-07-17 for internal use — raws kept internal, results carry credit + link-back."
+      }
+    },
+    {
+      "label": "photographingspace_kalahari_5d3_11x_stack",
+      "type": "http",
+      "url": "https://www.photographingspace.com/downloads/11x_ISO6400_f2.8_15s_5DMkIII_raw.zip",
+      "filename": "11x_ISO6400_f2.8_15s_5DMkIII_raw.zip",
+      "citation": {
+        "site": "PhotographingSpace.com — Cory Schmitz Kalahari Milky Way (Homework Data)",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 by name",
+          "evidence": "No formal license or usage terms stated on the page. Author openly offers the raw files as a public 'homework' processing exercise and only asks participants to \"Share your results\" and email processed output to info@photographingspace.com. No grant of redistribution/derivative rights and no prohibition either — silent on our internal-testing/receipt-embedding use. Per protocol, UNCLEAR ⇒ owner decides before pulling."
+        },
+        "blockers": [
+          "none-explicit — no stated license; author requests processed results be shared/emailed to info@photographingspace.com (courtesy, not a condition)"
+        ],
+        "accreditation": {
+          "person": "Cory Schmitz",
+          "organization": "PhotographingSpace.com",
+          "page_url": "https://www.photographingspace.com/homework-download-stack-data/",
+          "domain": "photographingspace.com"
+        },
+        "hints": [
+          {
+            "type": "camera",
+            "value": "Canon EOS 5D Mark III"
+          },
+          {
+            "type": "lens",
+            "value": "Canon EF 24-70mm f/2.8L II at 24mm"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 24
+          },
+          {
+            "type": "target",
+            "value": "Milky Way (galactic core, wide field)"
+          },
+          {
+            "type": "location",
+            "value": "Kalahari Basin, South Africa/Namibia border (SOUTHERN HEMISPHERE)"
+          },
+          {
+            "type": "settings",
+            "value": "f/2.8, 15s, ISO 6400"
+          }
+        ],
+        "notes": "Value = SOUTHERN-HEMISPHERE sky (a hemisphere the corpus lacks) + direct single .CR2 URL (no Drive indirection). Body Canon 5D3; diversity is in sky/lens/FL, not sensor. 11 individual 5D3 Milky Way light frames for stacking (zip 360.8MB → 11 CR2 members ~33MB each). APPROVAL: UNCLEAR license; OWNER-APPROVED by name 2026-07-17 for internal use — raws kept internal, results carry credit + link-back."
+      }
+    },
+    {
+      "label": "siril_m8m20_asi2600mc_lights_rvb",
+      "type": "http",
+      "url": "http://colmic.astrosurf.com/Traitement_SiriL/brutes/Brutes_180s.zip",
+      "filename": "Brutes_180s.zip",
+      "citation": {
+        "site": "Siril official tutorial dataset (M8/M20, ASI2600MC) — hosted by Colmic / astrosurf.com",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 for internal use",
+          "evidence": "NO explicit licensing or attribution terms are stated on the Siril tutorial page or on the reachable archive host. It is the Siril project's official learning dataset (M8/M20, ZWO ASI2600MC on a 106mm refractor), openly linked for tutorial use and widely redistributed, but with no written license grant. Per protocol UNCLEAR ⇒ record and STOP; owner decides before any pull."
+        },
+        "blockers": [
+          "none-explicit — no written license grant on the Siril tutorial page or the archive host"
+        ],
+        "accreditation": {
+          "person": "Michel (astrosurf.com/colmic)",
+          "organization": "Siril project (free-astro.org) — dataset hosted on astrosurf.com/colmic",
+          "page_url": "https://siril.org/tutorials/tuto-scripts/",
+          "domain": "siril.org"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M8 Lagoon Nebula"
+          },
+          {
+            "type": "target",
+            "value": "M20 Trifid Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "ZWO ASI 2600MC (color CMOS, gain 100)"
+          },
+          {
+            "type": "telescope",
+            "value": "106mm refractor (Takahashi FSQ-106 Red073x), f/3.7, 388mm focal length"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 388
+          },
+          {
+            "type": "filter",
+            "value": "Optolong L-Pro"
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2
+          },
+          {
+            "type": "calibration",
+            "value": "FULL set: 15 lights (180s) + 15 darks (180s) + 15 flats (3s) + 15 bias/offsets (3s)"
+          }
+        ],
+        "notes": "RVB LIGHT frames: 15 x 180s FITS (zip 553MB → 15 members ~52MB). Directory index enumerated 2026-07-17 (dossier gave only the parent dir URL): www.astrosurf.com/colmic/Traitement_SiriL/brutes/ 301-redirects to colmic.astrosurf.com/Traitement_SiriL/brutes/ (HTTP/legacy-TLS). Raw calibration = 4 RVB zips; the *_resultat.fit/hoo.fit/rvb.fit files on the index are already-PROCESSED tutorial outputs, NOT raw frames. HOO-narrowband variants (Brutes_HOO_180s.zip, Flats_HOO_3s.zip) exist but are SKIPPED (beyond the described full set; ~3GB extra). CALIBRATION GOLD: dedicated color CMOS on a fast refractor WITH a complete calibration stack. APPROVAL: UNCLEAR license; OWNER-APPROVED 2026-07-17 for internal use — raws kept internal, results credit the Siril project."
+      }
+    },
+    {
+      "label": "siril_m8m20_asi2600mc_darks",
+      "type": "http",
+      "url": "http://colmic.astrosurf.com/Traitement_SiriL/brutes/Darks_180s.zip",
+      "filename": "Darks_180s.zip",
+      "citation": {
+        "site": "Siril official tutorial dataset (M8/M20, ASI2600MC) — hosted by Colmic / astrosurf.com",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 for internal use",
+          "evidence": "NO explicit licensing or attribution terms are stated on the Siril tutorial page or on the reachable archive host. It is the Siril project's official learning dataset (M8/M20, ZWO ASI2600MC on a 106mm refractor), openly linked for tutorial use and widely redistributed, but with no written license grant. Per protocol UNCLEAR ⇒ record and STOP; owner decides before any pull."
+        },
+        "blockers": [
+          "none-explicit — no written license grant on the Siril tutorial page or the archive host"
+        ],
+        "accreditation": {
+          "person": "Michel (astrosurf.com/colmic)",
+          "organization": "Siril project (free-astro.org) — dataset hosted on astrosurf.com/colmic",
+          "page_url": "https://siril.org/tutorials/tuto-scripts/",
+          "domain": "siril.org"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M8 Lagoon Nebula"
+          },
+          {
+            "type": "target",
+            "value": "M20 Trifid Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "ZWO ASI 2600MC (color CMOS, gain 100)"
+          },
+          {
+            "type": "telescope",
+            "value": "106mm refractor (Takahashi FSQ-106 Red073x), f/3.7, 388mm focal length"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 388
+          },
+          {
+            "type": "filter",
+            "value": "Optolong L-Pro"
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2
+          },
+          {
+            "type": "calibration",
+            "value": "FULL set: 15 lights (180s) + 15 darks (180s) + 15 flats (3s) + 15 bias/offsets (3s)"
+          }
+        ],
+        "notes": "DARK calibration frames: 15 x 180s FITS (zip 289MB → 15 members ~52MB). Directory index enumerated 2026-07-17 (dossier gave only the parent dir URL): www.astrosurf.com/colmic/Traitement_SiriL/brutes/ 301-redirects to colmic.astrosurf.com/Traitement_SiriL/brutes/ (HTTP/legacy-TLS). Raw calibration = 4 RVB zips; the *_resultat.fit/hoo.fit/rvb.fit files on the index are already-PROCESSED tutorial outputs, NOT raw frames. HOO-narrowband variants (Brutes_HOO_180s.zip, Flats_HOO_3s.zip) exist but are SKIPPED (beyond the described full set; ~3GB extra). CALIBRATION GOLD: dedicated color CMOS on a fast refractor WITH a complete calibration stack. APPROVAL: UNCLEAR license; OWNER-APPROVED 2026-07-17 for internal use — raws kept internal, results credit the Siril project."
+      }
+    },
+    {
+      "label": "siril_m8m20_asi2600mc_flats_rvb",
+      "type": "http",
+      "url": "http://colmic.astrosurf.com/Traitement_SiriL/brutes/Flats_3s.zip",
+      "filename": "Flats_3s.zip",
+      "citation": {
+        "site": "Siril official tutorial dataset (M8/M20, ASI2600MC) — hosted by Colmic / astrosurf.com",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 for internal use",
+          "evidence": "NO explicit licensing or attribution terms are stated on the Siril tutorial page or on the reachable archive host. It is the Siril project's official learning dataset (M8/M20, ZWO ASI2600MC on a 106mm refractor), openly linked for tutorial use and widely redistributed, but with no written license grant. Per protocol UNCLEAR ⇒ record and STOP; owner decides before any pull."
+        },
+        "blockers": [
+          "none-explicit — no written license grant on the Siril tutorial page or the archive host"
+        ],
+        "accreditation": {
+          "person": "Michel (astrosurf.com/colmic)",
+          "organization": "Siril project (free-astro.org) — dataset hosted on astrosurf.com/colmic",
+          "page_url": "https://siril.org/tutorials/tuto-scripts/",
+          "domain": "siril.org"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M8 Lagoon Nebula"
+          },
+          {
+            "type": "target",
+            "value": "M20 Trifid Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "ZWO ASI 2600MC (color CMOS, gain 100)"
+          },
+          {
+            "type": "telescope",
+            "value": "106mm refractor (Takahashi FSQ-106 Red073x), f/3.7, 388mm focal length"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 388
+          },
+          {
+            "type": "filter",
+            "value": "Optolong L-Pro"
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2
+          },
+          {
+            "type": "calibration",
+            "value": "FULL set: 15 lights (180s) + 15 darks (180s) + 15 flats (3s) + 15 bias/offsets (3s)"
+          }
+        ],
+        "notes": "RVB FLAT calibration frames: 15 x 3s FITS (zip 683MB → 15 members ~52MB). Directory index enumerated 2026-07-17 (dossier gave only the parent dir URL): www.astrosurf.com/colmic/Traitement_SiriL/brutes/ 301-redirects to colmic.astrosurf.com/Traitement_SiriL/brutes/ (HTTP/legacy-TLS). Raw calibration = 4 RVB zips; the *_resultat.fit/hoo.fit/rvb.fit files on the index are already-PROCESSED tutorial outputs, NOT raw frames. HOO-narrowband variants (Brutes_HOO_180s.zip, Flats_HOO_3s.zip) exist but are SKIPPED (beyond the described full set; ~3GB extra). CALIBRATION GOLD: dedicated color CMOS on a fast refractor WITH a complete calibration stack. APPROVAL: UNCLEAR license; OWNER-APPROVED 2026-07-17 for internal use — raws kept internal, results credit the Siril project."
+      }
+    },
+    {
+      "label": "siril_m8m20_asi2600mc_bias_offsets",
+      "type": "http",
+      "url": "http://colmic.astrosurf.com/Traitement_SiriL/brutes/Offsets_3s.zip",
+      "filename": "Offsets_3s.zip",
+      "citation": {
+        "site": "Siril official tutorial dataset (M8/M20, ASI2600MC) — hosted by Colmic / astrosurf.com",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 for internal use",
+          "evidence": "NO explicit licensing or attribution terms are stated on the Siril tutorial page or on the reachable archive host. It is the Siril project's official learning dataset (M8/M20, ZWO ASI2600MC on a 106mm refractor), openly linked for tutorial use and widely redistributed, but with no written license grant. Per protocol UNCLEAR ⇒ record and STOP; owner decides before any pull."
+        },
+        "blockers": [
+          "none-explicit — no written license grant on the Siril tutorial page or the archive host"
+        ],
+        "accreditation": {
+          "person": "Michel (astrosurf.com/colmic)",
+          "organization": "Siril project (free-astro.org) — dataset hosted on astrosurf.com/colmic",
+          "page_url": "https://siril.org/tutorials/tuto-scripts/",
+          "domain": "siril.org"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M8 Lagoon Nebula"
+          },
+          {
+            "type": "target",
+            "value": "M20 Trifid Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "ZWO ASI 2600MC (color CMOS, gain 100)"
+          },
+          {
+            "type": "telescope",
+            "value": "106mm refractor (Takahashi FSQ-106 Red073x), f/3.7, 388mm focal length"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 388
+          },
+          {
+            "type": "filter",
+            "value": "Optolong L-Pro"
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2
+          },
+          {
+            "type": "calibration",
+            "value": "FULL set: 15 lights (180s) + 15 darks (180s) + 15 flats (3s) + 15 bias/offsets (3s)"
+          }
+        ],
+        "notes": "BIAS/OFFSET calibration frames: 15 x 3s FITS (zip 286MB → 15 members ~52MB). Directory index enumerated 2026-07-17 (dossier gave only the parent dir URL): www.astrosurf.com/colmic/Traitement_SiriL/brutes/ 301-redirects to colmic.astrosurf.com/Traitement_SiriL/brutes/ (HTTP/legacy-TLS). Raw calibration = 4 RVB zips; the *_resultat.fit/hoo.fit/rvb.fit files on the index are already-PROCESSED tutorial outputs, NOT raw frames. HOO-narrowband variants (Brutes_HOO_180s.zip, Flats_HOO_3s.zip) exist but are SKIPPED (beyond the described full set; ~3GB extra). CALIBRATION GOLD: dedicated color CMOS on a fast refractor WITH a complete calibration stack. APPROVAL: UNCLEAR license; OWNER-APPROVED 2026-07-17 for internal use — raws kept internal, results credit the Siril project."
+      }
+    }
+  ]
+}

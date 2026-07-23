@@ -1,0 +1,146 @@
+{
+  "fragment": "review_g",
+  "derived_by": "wave-2 assembler — review overlay applying the wave-1 REVIEW CLOSEOUT (test_results/wave2_reviews/closeout.json)",
+  "notes": [
+    "Applies SET A of the wave-1 closeout: 20 previously-unreviewed EXTRACTED edges (the ones review_e did not reach inside its time-box), each opened by the independent adversarial reviewer against the cited code/test file and confirmed. Result: 20 VERIFIED / 0 REFUTED. Each row flips verification EXTRACTED->VERIFIED and attaches the reviewer note; the underlying data-fragment edge already carries the cite, so no cite is injected here.",
+    "No wave-2 DOMAIN review rows are included: the per-domain adversarial reviewer stage was cancelled and domain reviews are WAIVED by owner ruling 2026-07-16 (Opus-mapped work skips independent verification). Every wave-2 edge therefore stays EXTRACTED (renders dashed per the ratified legend). Only the wave-1 closeout content flows through this overlay.",
+    "Wave-1 closeout SET B (45 node whys: 35 OK / 10 CORRECT) was applied directly to fragments/why_d.json (factual corrections, sanctioned for the closeout step); it is not a review-overlay concern (reviews flip edges, not whys).",
+    "Note-text hygiene: one reviewer note quoted a regex literal /^wasm-compute (digit)/ using a backslash-d; rendered here as [0-9] to keep the public-later artifact backslash-free (the enrichment serializer refuses backslashes). Meaning preserved.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 1 review-row referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "edges": [
+    {
+      "from": "boundary:rawler_cfa",
+      "to": "stage:extract.decode",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "solve_cr2.apispec.ts:122 expect(receipt.pipeline_provenance.decoder_arm).toBe('rawler') on bundled CR2 — proves the raw buffer crossed the rawler default-arm decode. Opened, exact."
+    },
+    {
+      "from": "boundary:tauri_native_ipc",
+      "to": "src/engine/core/NativeGpuBridge.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:366-389 tauri_native_ipc entry (Bayer u16 in / RGBA f32 out, raw LE both directions, RGGB native shader, transport-only) + NativeGpuBridge.ts:50-54 demosaic() builds a Uint8Array body over the Uint16Array, invoke('demosaic_native', bytes, {width/height headers}) -> ArrayBuffer->Float32Array. Both ends confirmed."
+    },
+    {
+      "from": "boundary:wasm_typed_array",
+      "to": "stage:solve.quad_wasm",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "solve_seestar.apispec.ts:100 expect(receipt.reproducibility.wasm.compute_pkg).toMatch(/^wasm-compute [0-9]/) — real runtime identity_version() of the compiled wasm-compute crate (the quad solver's module). Confirmed; indirect but valid evidence the crossing is the real module."
+    },
+    {
+      "from": "external:astrometry_net_oracle",
+      "to": "tools/overnight/nova_truth.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "nova_truth.mjs:6-21 pushes no-GOLD frames to nova.astrometry.net (xylist default, image fallback), emits the SAME TruthLabel record shape as the local oracle + a nova provenance block, writes GOLD to labels.json on success, no-op without key. Confirmed."
+    },
+    {
+      "from": "external:gaia_catalog",
+      "to": "tools/starplates/download_gaia_chunked.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "download_gaia_chunked.mjs:51-53 TAP_BASE gea.esac.esa.int/tap-server/tap + gaiadr3.gaia_source + 7 REQUIRED_COLUMNS (source_id/ra_deg/dec_deg/pm/g_mag/bp_rp). Confirmed. MINOR: transform 'spilled to per-cell buffer files' is loose — this tool spills to raw CHUNK CSVs (:56); the per-cell spill is build_gaia_cells.mjs. Edge direction is correct."
+    },
+    {
+      "from": "external:starplates_r2",
+      "to": "tools/starplates/publish_r2.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "publish_r2.mjs:49 const BUCKET = ...||'starplates'; :136-157 s3Env reads R2_ACCOUNT_ID/R2_ACCESS_KEY_ID/R2_SECRET_ACCESS_KEY, s3Request SigV4-signs and fetch-PUTs to <account>.r2.cloudflarestorage.com/<bucket>/<key>, body as-is. Confirmed."
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:calibrate.hardware_profile",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1831-1834 generateHardwareProfile(this.solution!, this.metadata!, this.signal!); calibrate.ts:177-182 forwards `signal` straight into HardwareProfiler.generateReport. Confirmed."
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:metrology",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "run_wizard_seestar.mjs:79 assertRange(snap?.scaleLock, 3.70, 3.78) at the scale-lock step — metrology's scaleLock output is asserted. Confirmed."
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.detect",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "run_wizard_seestar.mjs:64 assert((count>=50)||(snap?.signalStars>=50)) — detection produced >=50 stars from the decoded frame. Confirmed (assertion is at the detection step, not literally 'immediately after decode' — framing slightly loose but the quoted text and edge are correct)."
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.luminance",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:995-998 computeluminance(fullRGB, rawSensor?.cfaMosaicLuma) — decode's fullRGB + cfaMosaicLuma are exactly computeluminance's two inputs; extract.luminance has no other producer. Confirmed."
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "arrow_sink.apispec.ts:114 expect(detections.numRows).toBe((receipt.signal?.clean_stars ?? []).length). Confirmed exact."
+    },
+    {
+      "from": "stage:extract.spectral_peek",
+      "to": "stage:calibrate.hardware_profile",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1662-1665 spectral_peek writes p.peak_rgb=[r,g,b] + p.measured_bv; calibrate.ts:159-168 buildStarMeasurements reads d.peak_rgb?.[0..2] (flux_r/g/b) + d.measured_bv and .filter(s=>s.flux_r!==undefined). Confirmed incl. the drop-on-no-sample."
+    },
+    {
+      "from": "stage:forced_confirm",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "arrow_sink.apispec.ts:115-116 forced.numRows toBe (receipt.deep_confirmed?.confirmed_stars ?? []).length AND toBe receipt.confirm_status.confirmed. Confirmed."
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:calibrate.hardware_profile",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1831-1834 generateHardwareProfile(solution, this.metadata!, signal); calibrate.ts:177-182 forwards `metadata` straight into HardwareProfiler.generateReport. Confirmed."
+    },
+    {
+      "from": "stage:metrology",
+      "to": "stage:solve.quad_wasm",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "run_wizard_seestar.mjs:77 assert(elapsed < 15_000, 'scale lock ... must be instant header lock') — metrology scale resolves fast enough to seed the quad search. Quoted text exact; timing-based evidence (interpretation reasonable for an evidence badge)."
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:forced_confirm",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "confirm_null_evidence.apispec.ts:54-59 framePsf built from s.psfField.{fwhmMedianMajPx,ellipticityMedian,method}; :70-72 passed into runPostSolveConfirmation. Confirmed forced_confirm consumes psf_field's measured PSF."
+    },
+    {
+      "from": "stage:solve",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "arrow_sink.apispec.ts:89-94 run_summary ra_hours/dec_degrees/pixel_scale/confidence/stars_matched toBe receipt.solution.* AND SACRED anchors. Confirmed lossless carry."
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:forced_confirm",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "confirm_null_evidence.apispec.ts:61-73 wcs=solution.wcs, crpix+off sweep [18,30,45,70,120], runPostSolveConfirmation on each wrong WCS; the set-gate must collapse on all. Confirmed forced_confirm consumes solve's fitted WCS as position prediction."
+    },
+    {
+      "from": "stage:spcc",
+      "to": "stage:spcc_render_gains",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "solve_cr2.apispec.ts:189-196 spcc.color_slope/color_intercept/color_r2/zeropoint asserted, then spcc.gains.applied===false (r2<0.55 refusal, :182/:195 comment). Confirmed gains consume the color fit's r2 to decide WB application."
+    }
+  ]
+}

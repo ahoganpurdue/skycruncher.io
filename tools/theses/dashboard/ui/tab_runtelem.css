@@ -1,0 +1,94 @@
+/* #runtelem tab — live headless-run telemetry. Palette from style.css :root. */
+
+.rt-nm { font: 10.5px var(--mono); color: var(--faint); letter-spacing: 0.04em; }
+
+.rt-lede {
+  color: var(--ink-2); font-size: 12.5px; line-height: 1.6;
+  margin: 0 0 16px; max-width: 900px;
+}
+.rt-lede code { font: 11px var(--mono); color: var(--ink); }
+
+/* ── run header ─────────────────────────────────────────────────────────── */
+.rt-runhead {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 16px 26px;
+  padding: 14px 18px; margin-bottom: 18px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); border-radius: 8px;
+}
+.rt-rh-main { display: flex; flex-direction: column; gap: 3px; }
+.rt-rh-label { font: 700 9.5px var(--mono); letter-spacing: 0.18em; color: var(--muted); }
+.rt-rh-arm { font: 800 26px var(--sans); color: var(--accent); line-height: 1; }
+.rt-rh-facts { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 12px; color: var(--ink-2); }
+.rt-rh-facts code { font: 11px var(--mono); color: var(--ink); }
+
+/* ── arm cards ──────────────────────────────────────────────────────────── */
+.rt-arms { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+.rt-arm {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 13px 15px; display: flex; flex-direction: column; gap: 9px;
+}
+.rt-arm-running { border-color: var(--accent-line); box-shadow: 0 0 0 1px var(--accent-dim) inset; }
+.rt-arm-done { opacity: 0.92; }
+.rt-arm-pending { opacity: 0.62; }
+
+.rt-arm-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.rt-arm-id { font: 700 14px var(--sans); color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.rt-arm-count { font: 700 16px var(--mono); color: var(--ink); white-space: nowrap; }
+.rt-arm-count .rt-of { color: var(--muted); font-weight: 500; }
+.rt-arm-count .rt-pct { font-size: 11px; color: var(--accent); margin-left: 4px; }
+.rt-arm-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* state badges */
+.rt-b { font: 700 9px var(--mono); letter-spacing: 0.12em; padding: 2px 6px; border-radius: 4px; border: 1px solid transparent; }
+.rt-b-running { color: var(--accent); background: var(--accent-dim); border-color: var(--accent-line); }
+.rt-b-done { color: var(--pass); background: var(--pass-dim); border-color: var(--pass-line); }
+.rt-b-pending { color: var(--muted); background: var(--panel-3); border-color: var(--line); }
+.rt-b-incomplete { color: var(--danger); background: var(--danger-bg); border-color: var(--danger-line); margin-left: 6px; }
+
+/* progress bar */
+.rt-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--panel-3); border: 1px solid var(--line); }
+.rt-bar-unknown { align-items: center; justify-content: center; height: auto; padding: 4px 8px; }
+.rt-bar-unknown span { font: 10.5px var(--mono); color: var(--muted); }
+.rt-seg { height: 100%; display: block; }
+.rt-seg-solved { background: var(--pass); }
+.rt-seg-nosolve { background: var(--warn); }
+.rt-seg-crashed { background: var(--danger); }
+.rt-seg-pending-v { background: var(--steel-line); }
+.rt-seg-pending { background: var(--faint); opacity: 0.5; }
+
+/* tallies */
+.rt-tally { display: flex; flex-wrap: wrap; gap: 5px 12px; font: 11px var(--mono); }
+.rt-t-solved { color: var(--pass); }
+.rt-t-nosolve { color: var(--warn); }
+.rt-t-crashed { color: var(--danger); }
+.rt-t-pv { color: var(--steel); }
+
+.rt-arm-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 11px; color: var(--ink-2); }
+.rt-meta { color: var(--ink-2); }
+.rt-meta code { font: 10.5px var(--mono); color: var(--ink); }
+.rt-est { color: var(--muted); font-size: 10px; }
+.rt-note { font: 10.5px var(--mono); color: var(--danger); line-height: 1.5; }
+
+/* verdict chips */
+.rt-vchip { font: 700 9.5px var(--mono); padding: 1px 5px; border-radius: 3px; }
+.rt-v-solved { color: var(--pass); background: var(--pass-dim); }
+.rt-v-nosolve { color: var(--warn); background: var(--warn-dim); }
+.rt-v-error { color: var(--danger); background: var(--danger-bg); }
+.rt-v-done { color: var(--ink-2); background: var(--panel-3); }
+.rt-v-other { color: var(--muted); background: var(--panel-3); }
+
+/* recent frames + history */
+.rt-h3 { font: 700 12px var(--sans); color: var(--ink); letter-spacing: 0.02em; margin: 22px 0 10px; }
+.rt-h3 .rt-sub { font-weight: 400; color: var(--muted); font-size: 11px; }
+.rt-recent { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rt-recent th { text-align: left; font: 700 9.5px var(--mono); letter-spacing: 0.1em; color: var(--muted); padding: 5px 10px; border-bottom: 1px solid var(--line); }
+.rt-recent td { padding: 5px 10px; border-bottom: 1px solid var(--line); color: var(--ink-2); }
+.rt-recent td.rt-rc-arm { font: 700 11px var(--mono); color: var(--ink); }
+.rt-recent td.rt-rc-frame code { font: 10.5px var(--mono); color: var(--ink-2); }
+.rt-recent td.rt-rc-ms { font: 11px var(--mono); color: var(--muted); text-align: right; }
+
+.rt-history { list-style: none; margin: 0; padding: 0; }
+.rt-history li { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 12px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+.rt-history li code { font: 11px var(--mono); color: var(--ink); }
+.rt-history li.rt-h-current { }
+.rt-empty { font: 11px var(--mono); color: var(--muted); padding: 8px 0; }

@@ -1,0 +1,244 @@
+{
+  "fragment": "wave2_contracts",
+  "derived_by": "opus wave-2 writer, domain=contracts (src/engine/contracts/* + boundary:* FROM edges); EDGES ONLY (boundary whys already landed wave-1)",
+  "notes": [
+    "DOMAIN: the only base node under src/engine/contracts/ is binary_layouts.ts (the LAW-7 declaration seed). Base had 0 outbound edges from it and only 3 inbound import edges (seam_capture.ts, stages/package.ts, tools/contracts/check_layout_contracts.mjs) — so in the raw graph the single-source-of-truth for all 15 enumerated binary boundaries is a near-orphan. The 15 `contract` declaration edges below express its real role: binary_layouts.ts is the LAW-7 authority that DECLARES each boundary's dtype/stride/units/version/golden pointer (any stride/index/unit change on a boundary needs a same-commit edit to its entry, CLAUDE.md LAW 7). Direction is deliberately binary_layouts.ts -> boundary; the BASE already carries the reverse boundary:X -> consumer [contract] edges cited to binary_layouts.ts#X, so no key collides.",
+    "The file header states binary_layouts.ts is DECLARATION-ONLY (no consumer is rewired by its existence yet; the codegen + golden battery is the decoder-cutover-#14 opener). So these are contract/authority edges, NOT data-flow — no payload moves, hence `why` (the boundary-specific load-bearing fact) rather than `how`.",
+    "Did NOT restate any existing (from,to,type). Cross-checked against base + all fragments (loud_edges_c/c2, evidence_b, stage_semantic_a, stage_order, why_d, review_e). loud_edges_c already carried the boundary->consumer DATA-FLOW/unit-conversion edges; this fragment adds the declaration layer plus 5 loud/fallback/evidence/consumer edges it skipped.",
+    "NEW LOUD FALLBACK: boundary:atlas_gaia_cells -> boundary:atlas_rows — the VITE_ATLAS_GAIA cutover cold-path FLIPS the RA-unit contract (default arm = uniform DEGREES @ J2016.0; cold path = per-row Gaia-deg/HYG-hours hybrid). Parallel to the wave-1 rawler_cfa -> libraw_mem_image fallback.",
+    "NEW FALLBACK: boundary:gpu_quad_scoring -> stage:solve.quad_wasm — flag-OFF (default) the GPU boundary is never crossed and the canonical wasm solve_planar_local runs byte-identically (endpoint stage:solve.quad_wasm is enrichment-declared in stage_order.json). evidence_b explicitly skipped the gpu->solve.quad_wasm EVIDENCE edge (no apispec found); this is the CONTROL/FALLBACK arm, grounded in quad_scoring_backend.ts, not an evidence claim.",
+    "NEW EVIDENCE (golden-vector gates): boundary:atlas_rows -> verify_atlas_repro.mjs (38/38 byte-exact regen, aggregate md5 fc2c4482) and boundary:atlas_gaia_cells -> verify_gaia_cells.mjs (round-trip + cell==sid>>49 + g_mag-sorted + catalog_source in {0,1,2} + prefix-read). Both verifier files read this session.",
+    "NEW CONSUMER data-flow: boundary:arrow_seam -> star_catalog_adapter.ts (tryLoadArrowSector, flag VITE_ATLAS_BINARY, per-sector JSON fallback) — a third arrow_seam consumer distinct from wave-1's ArrowMemory / atlas_arrow_codec edges.",
+    "Skipped (no in-domain base endpoint, LAW 3): seam_capsule consumer (tools/testkit, not a base node) and starplates_blobs band-index consumer (tools/solverkit, not a base node) — same gaps wave-1 recorded. Parity/sky-mirror sign still unassertable (every relevant entry states the sign is NOT asserted).",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 7 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {},
+  "edges": [
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:libraw_mem_image",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:118",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the libraw decode boundary: interleaved uint16 RGB16 (w*h*3), BAYER mode = dominant-channel with ~4-7% cross-leak (NOT one-hot, NOT CFA), dims factor TWO ways so a near-tied stride-coherence must prefer exact-meta dims (the 60Da shear). This is the retained COLD PATH since decoder cutover #14. Without a same-commit edit here, a stride/dims/units change on this boundary drifts silently past the compile gate.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "117-143"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:atlas_rows",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:145",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the shipped catalog rows: canonical on-disk form is JSON TEXT (not Arrow), rows are a PER-ROW hybrid (Gaia rows RA in DEGREES, HYG rows RA in HOURS, never normalized on disk), sector id = decIndex*6+raIndex. Golden fc2c4482 is byte-exact but pinned to the legacy shard bucketing (byte-order-load-bearing). The per-row RA-unit hybridity is the repeat 15x trap this entry exists to pin.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "145-188"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:starplates_blobs",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:190",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the starplates dataplane (t0/t1 blobs + 4-band lost-in-space index, ~40.6MB). Deliberately UNVERIFIED-heavy: dtype/stride/endianness/RA-unit are all marked UNVERIFIED, so the byte layout MUST be transcribed from tools/starplates/build_release.mjs before any consumer rewire. The entry is the standing reminder that this boundary is not yet safe to rewire.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "190-206"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:arrow_seam",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:208",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the atlas->solver Arrow seam: Apache Arrow IPC columnar (validity bitmap + typed data buffer), little-endian (Arrow mandates LE). RA-unit hybridity is INHERITED from atlas_rows, so the same Gaia-deg/HYG-hours per-row discrimination applies through the columnar seam. Distinct from toolchest_arrow_export (the receipt->consumer export).",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "208-225"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:wgsl_structs",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:227",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the JS->WebGPU struct crossing: WGSL std140/std430-style member alignment (vec3 aligns to 16 bytes, struct size rounded to the largest member alignment), little-endian, PIXEL ledger. SHARED-WGSL HAZARD: one shader consumed by multiple bind layouts, so a struct-member change ripples across every bind group — the reason this crossing is an enumerated boundary.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "227-244"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:250",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the JS<->wasm(Rust) typed-array crossing. refine_stars_lm OUTPUT graduated 6->13 f64/star (JtJ covariance surgery): the first 6 refined params stay BIT-IDENTICAL to the pre-covariance output, sigmas[6..11] are all-NaN when covStatus!=0, values are COPIED (a zero-copy view dies on any wasm realloc). Golden 8ed7ac19. Any Rust signature change requires wasm-pack build + owner sign-off (LAW 5), and pkg/ is gitignored.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "250-291"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:fits_io",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:293",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the FITS file boundary and THE canonical hours-cost trap: CRVAL RA/Dec are DEGREES at the file but crval[0]/catalog RA is HOURS internally, CRPIX is 1-indexed at the file (crpix[0]/crpix[1] internal, never CRPIX1). There is NO single chokepoint — three live conversion sites (stack fits_io, engine fits_decoder, receipt package.ts). A rewire that trusts a single chokepoint reintroduces exactly the units bug LAW 7 guards.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "293-318"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:rawler_cfa",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:325",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the DEFAULT RAW arm since the 2026-07-11 cutover: single-channel Bayer CFA mosaic (cpp=1), FULL sensor frame INCLUDING optical-black borders (the per-frame dark anchor — do NOT pre-trim before measurement), CFA phase = (y&1)*2+(x&1). Black level varies PER FRAME (2046 vs 2045 same camera), so a hardcoded pedestal biases photometry. Golden 968381f8 (measured). Supersedes libraw_mem_image, which is the cold path.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "325-364"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:tauri_native_ipc",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:372",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the JS<->Tauri-native (Rust/wgpu) demosaic_native crossing: Bayer uint16 in (length w*h), interleaved RGBA float32 out (length w*h*4), raw little-endian bytes both directions. TRANSPORT-ONLY change (retired the 300-700MB Array.from JSON round-trip) — dtype/stride/units are identical to the prior JSON path, so the surface version was NOT bumped. Golden NOT MEASURED (needs a packaged Tauri+wgpu runtime).",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "372-410"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:toolchest_arrow_export",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:417",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the receipt->external Arrow export (Feather v2, per-column typed buffers; non-nullable columns carry no validity bitmap). THE units trap: run_summary.ra_hours is HOURS while matched_stars.ra_deg is DEGREES — both carried, both labelled in per-Field Arrow metadata. Distinct from arrow_seam (the atlas->solver catalog store). Golden null here because the committed .arrow fixtures are the de-facto goldens pinned by interop tests.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "417-450"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/contracts/binary_layouts.ts",
+      "to": "boundary:seam_capsule",
+      "type": "contract",
+      "cite": "src/engine/contracts/binary_layouts.ts:457",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "LAW-7 declaration for the on-disk per-stage session-state capsule (raw LE .bin per typed array + capsule.json sidecar as the SOLE layout authority; NO header in the .bin), sha256-verified on load, y-down PIXEL ledger. Env-gated (CAPTURE_SEAMS=1, default OFF). The sidecar re-embeds RECEIPT_SCHEMA_VERSION and BINARY_LAYOUTS_VERSION (generative, never mirrored). Golden NOT MEASURED until the first frozen capsule bank.",
+        "cites": [
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "457-482"
+          }
+        ]
+      }
+    },
+    {
+      "from": "boundary:atlas_rows",
+      "to": "tools/atlas/verify_atlas_repro.mjs",
+      "type": "evidence",
+      "cite": "tools/atlas/verify_atlas_repro.mjs:46",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the 38 shipped atlas files (2 anchors + 36 sectors) regenerated byte-for-byte from gaia_vanguard_dr3.csv + the named HYG cells",
+        "transform": "an INDEPENDENT reference reimplementation of generate_star_atlas + rebucket (pinned to ATLAS_LEGACY_BUCKETING) reproduces the frozen bytes; exit 0 iff 38/38 byte-EQUAL; per-file SHA-256 + aggregate md5 fc2c4482 recorded in atlas_repro_manifest.json",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is atlas_rows' golden-vector gate. The frozen ~338MB catalog is gitignored and irreplaceable, so byte-exact regenerability from committed inputs is the only standing evidence the layout reproduces. It also pins the load-bearing byte-order finding: the rebucketer's first-seen order makes the generator's legacy (buggy) shard bucketing byte-order-load-bearing, so the verifier MUST replicate it to hit the frozen bytes.",
+        "cites": [
+          {
+            "path": "tools/atlas/verify_atlas_repro.mjs",
+            "lines": "25-47"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "169-178"
+          }
+        ]
+      }
+    },
+    {
+      "from": "boundary:arrow_seam",
+      "to": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts:590-601",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "per-sector Apache Arrow IPC blob /atlas/sectors/level_3_sector_<N>.arrow (little-endian columnar), the value-equivalent binary TWIN of the canonical JSON sector rows",
+        "transform": "tryLoadArrowSector fetches the .arrow via atlasLoader and decodeArrowSector (atlas_arrow_codec) -> StandardStar[]; flag-gated by VITE_ATLAS_BINARY (default ON), with a PER-SECTOR fallback to the JSON path when the .arrow is absent or fails to decode",
+        "lossy": false
+      },
+      "why": {
+        "text": "The flag-gated binary read arm of the atlas — a third arrow_seam consumer distinct from wave-1's ArrowMemory / atlas_arrow_codec edges. The .arrow sector twins carry the SAME hybrid rows as the JSON sectors (RA-unit hybridity inherited from atlas_rows), so the downstream match/solve is unchanged; the per-sector JSON fallback keeps machines without shipped twins byte-identical.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+            "lines": "185-195"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "154-160"
+          }
+        ]
+      }
+    }
+  ]
+}

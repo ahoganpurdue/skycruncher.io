@@ -1,0 +1,86 @@
+{
+  "release": "mini-synth-g15u-1",
+  "manifest_sha256": "e2fd5c3746400a3c89458b3e7c90ee73c75fa29ddac706275e34fb64a6ff34d7",
+  "files": [
+    {
+      "name": "stars.arrow",
+      "bytes": 9218,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_0.arrow",
+      "bytes": 1530,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_1.arrow",
+      "bytes": 1546,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_2.arrow",
+      "bytes": 1546,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_3.arrow",
+      "bytes": 1546,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_4.arrow",
+      "bytes": 1730,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_5.arrow",
+      "bytes": 2122,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_6.arrow",
+      "bytes": 7602,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_7.arrow",
+      "bytes": 42402,
+      "mtime_ms": 1784587704946
+    },
+    {
+      "name": "band_8.arrow",
+      "bytes": 208842,
+      "mtime_ms": 1784587704966
+    },
+    {
+      "name": "band_9.arrow",
+      "bytes": 269162,
+      "mtime_ms": 1784587704973
+    },
+    {
+      "name": "band_10.arrow",
+      "bytes": 269162,
+      "mtime_ms": 1784587704982
+    },
+    {
+      "name": "band_11.arrow",
+      "bytes": 269170,
+      "mtime_ms": 1784587704988
+    },
+    {
+      "name": "band_12.arrow",
+      "bytes": 269162,
+      "mtime_ms": 1784587704992
+    },
+    {
+      "name": "band_13.arrow",
+      "bytes": 269162,
+      "mtime_ms": 1784587705000
+    },
+    {
+      "name": "band_14.arrow",
+      "bytes": 269162,
+      "mtime_ms": 1784587705004
+    }
+  ]
+}

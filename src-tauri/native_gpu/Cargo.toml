@@ -1,0 +1,18 @@
+﻿[package]
+name = "native-gpu"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wgpu = "23.0"
+pollster = "0.4.0"
+bytemuck = { version = "1.21", features = ["derive"] }
+memmap2 = "0.9.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# Pinned exactly so the whole workspace resolves ONE arrow version — the
+# starplates cell/response byte contract (docs/STARPLATES_SPEC.md §3.3)
+# requires an exact arrow-rs pin, and Cargo.lock is gitignored here.
+arrow = "=54.3.1"
+log = "0.4"
+env_logger = "0.11"

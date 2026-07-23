@@ -1,0 +1,14 @@
+{
+  "dest": "D:/AstroLogic/intake/dsw_freesets",
+  "citation": {
+    "site": "Deep Sky West Remote Observatory — Free Image Data Sets (calibrated masters)",
+    "accreditation": { "person": "DSW staff", "organization": "Deep Sky West Remote Observatory", "page_url": "https://www.deepskywest.com", "domain": "deepskywest.com" },
+    "use_case": { "verdict": "MATCH", "evidence": "Free data sets offered for download; published-image credit requirement stated explicitly (owner-relayed 2026-07-09): 'Image Acquisition by the staff at Deep Sky West Remote Observatory (www.DeepSkyWest.com)'." },
+    "blockers": ["Attribution REQUIRED verbatim on any published image using this data"],
+    "terms": "Credit DSW verbatim when data appears in published images; raw+calibration frames are subscriber-only (masters are the free tier).",
+    "owner_authorization": "owner supplied link + terms 2026-07-09 late"
+  },
+  "sources": [
+    { "label": "dsw_freesets_PENDING_RESOLVER", "type": "http", "url": "https://1drv.ms/f/s!AlAL46Fj3rIex1XmkMLPhNx_0AyJ", "note": "OneDrive folder migrated to SharePoint (migratedtospo) — keyless API dead, page 403s non-browser clients. BLOCKED pending: owner manual download, browser-session pull, or an SPO anonymous-share resolver in fetch_intake." }
+  ]
+}

@@ -1,0 +1,667 @@
+{
+  "dest": "D:/AstroLogic/intake/smattering_2026-07-17",
+  "identity": {
+    "operator": "adam@structurize.io",
+    "purpose": "authorized processing test - public practice datasets (SkyCruncher solver/calibration)",
+    "authorization": "owner-directed intake per docs/INTAKE_SCRAPER_SPEC.md; sources are publicly published practice datasets whose terms MATCH (attribution-only). Raws kept internal; processed results carry required credit + link-back."
+  },
+  "sources": [
+    {
+      "label": "astropix_M42_orion_700d",
+      "type": "gdrive_file",
+      "id": "19Mnc0XFz9PZdXPVbCzQShYjpmvlzGXp3",
+      "filename": "astropix_M42_lights.zip",
+      "citation": {
+        "site": "AstroPix / Catching the Light — Free Practice Files (Jerry Lodriguss)",
+        "use_case": {
+          "verdict": "MATCH",
+          "evidence": "Verbatim page terms: \"Please feel free to download the raw files and practice with them even if you have not bought the book. Also, please feel free to post your processing results with my data on your own web page or to various astrophotography web sites and discussion forums. Please include a link back to this page and credit when you do.\" Download + practice is explicitly granted; our internal testing/calibration IS the granted 'practice' use, and receipts embed the required credit + link-back. NUANCE: the grant explicitly covers posting processed RESULTS with attribution; it does NOT explicitly authorize redistributing the RAW files themselves, so keep raws internal / results-only downstream."
+        },
+        "blockers": [
+          "none-explicit — attribution REQUIRED as a condition (link back to the page + credit Jerry Lodriguss); not a prohibition, but must propagate into receipts/accreditation"
+        ],
+        "accreditation": {
+          "person": "Jerry Lodriguss",
+          "organization": "AstroPix / Catching the Light",
+          "page_url": "https://www.astropix.com/html/processing/practice_files.html",
+          "domain": "astropix.com"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M42 Orion Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "Canon EOS 700D (T5i) DSLR, unmodified, ISO 800"
+          },
+          {
+            "type": "telescope",
+            "value": "Astro-Tech AT65Q quadruplet refractor, f/6.5"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 420
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2.1
+          },
+          {
+            "type": "calibration",
+            "value": "lights + darks (8-min exposures) + bias (1/4000s); NO flats"
+          },
+          {
+            "type": "frame_type",
+            "value": "DSLR-on-telescope deep-sky long-exposure light frames (8 x 8-min subs)"
+          }
+        ],
+        "notes": "DSLR CR2 light frames; AT65Q 420mm f/6.5; ~2.1 arcsec/px. Each ZIP is a set of individual light frames; a single extracted .CR2 is a valid single-light test frame. New regime: DSLR-through-telescope long-exposure deep-sky singles."
+      }
+    },
+    {
+      "label": "astropix_M31_andromeda_700d",
+      "type": "gdrive_file",
+      "id": "19MZpu3mdGXuPvOXg_SIX-Ff57My3Wx8n",
+      "filename": "astropix_M31_lights.zip",
+      "citation": {
+        "site": "AstroPix / Catching the Light — Free Practice Files (Jerry Lodriguss)",
+        "use_case": {
+          "verdict": "MATCH",
+          "evidence": "Verbatim page terms: \"Please feel free to download the raw files and practice with them even if you have not bought the book. Also, please feel free to post your processing results with my data on your own web page or to various astrophotography web sites and discussion forums. Please include a link back to this page and credit when you do.\" Download + practice explicitly granted; internal testing IS the granted 'practice' use; receipts embed required credit + link-back. NUANCE: grant covers posting processed RESULTS with attribution, NOT redistributing RAW files — keep raws internal."
+        },
+        "blockers": [
+          "none-explicit — attribution REQUIRED (link back + credit Jerry Lodriguss)"
+        ],
+        "accreditation": {
+          "person": "Jerry Lodriguss",
+          "organization": "AstroPix / Catching the Light",
+          "page_url": "https://www.astropix.com/html/processing/practice_files.html",
+          "domain": "astropix.com"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M31 Andromeda Galaxy"
+          },
+          {
+            "type": "camera",
+            "value": "Canon EOS 700D (T5i) DSLR, unmodified, ISO 800"
+          },
+          {
+            "type": "telescope",
+            "value": "Astro-Tech AT65Q quadruplet refractor, f/6.5"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 420
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2.1
+          },
+          {
+            "type": "frame_type",
+            "value": "DSLR-on-telescope deep-sky galaxy light frames (8 x 8-min subs)"
+          }
+        ],
+        "notes": "DSLR CR2 galaxy light frames; AT65Q 420mm f/6.5; ~2.1 arcsec/px."
+      }
+    },
+    {
+      "label": "astropix_M13_globular_700d",
+      "type": "gdrive_file",
+      "id": "19K8NdgnF-w1Ma35lXM9_NmyoXgfBpS1o",
+      "filename": "astropix_M13_lights.zip",
+      "citation": {
+        "site": "AstroPix / Catching the Light — Free Practice Files (Jerry Lodriguss)",
+        "use_case": {
+          "verdict": "MATCH",
+          "evidence": "Verbatim page terms: \"Please feel free to download the raw files and practice with them even if you have not bought the book. Also, please feel free to post your processing results with my data on your own web page or to various astrophotography web sites and discussion forums. Please include a link back to this page and credit when you do.\" Download + practice explicitly granted; internal testing IS the granted 'practice' use; receipts embed required credit + link-back. NUANCE: grant covers posting processed RESULTS with attribution, NOT redistributing RAW files — keep raws internal."
+        },
+        "blockers": [
+          "none-explicit — attribution REQUIRED (link back + credit Jerry Lodriguss)"
+        ],
+        "accreditation": {
+          "person": "Jerry Lodriguss",
+          "organization": "AstroPix / Catching the Light",
+          "page_url": "https://www.astropix.com/html/processing/practice_files.html",
+          "domain": "astropix.com"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M13 Hercules Globular Cluster"
+          },
+          {
+            "type": "camera",
+            "value": "Canon EOS 700D (T5i) DSLR, unmodified, ISO 800"
+          },
+          {
+            "type": "telescope",
+            "value": "Astro-Tech AT65Q quadruplet refractor, f/6.5"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 420
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2.1
+          },
+          {
+            "type": "frame_type",
+            "value": "DSLR-on-telescope dense-star-field light frames (6 x 5-min subs)"
+          }
+        ],
+        "notes": "DSLR CR2 dense-star-field light frames; AT65Q 420mm f/6.5; ~2.1 arcsec/px."
+      }
+    },
+    {
+      "label": "astropix_darks_8min_700d",
+      "type": "gdrive_file",
+      "id": "19JWwV0kTBJVV7VyaNAH64UK7VfvO-5hF",
+      "filename": "astropix_darks.zip",
+      "citation": {
+        "site": "AstroPix / Catching the Light — Free Practice Files (Jerry Lodriguss)",
+        "use_case": {
+          "verdict": "MATCH",
+          "evidence": "Verbatim page terms: \"Please feel free to download the raw files and practice with them even if you have not bought the book.\" Download + practice explicitly granted; internal calibration IS the granted 'practice' use; receipts embed required credit + link-back. NUANCE: grant covers posting processed RESULTS with attribution, NOT redistributing RAW files — keep raws internal."
+        },
+        "blockers": [
+          "none-explicit — attribution REQUIRED (link back + credit Jerry Lodriguss)"
+        ],
+        "accreditation": {
+          "person": "Jerry Lodriguss",
+          "organization": "AstroPix / Catching the Light",
+          "page_url": "https://www.astropix.com/html/processing/practice_files.html",
+          "domain": "astropix.com"
+        },
+        "hints": [
+          {
+            "type": "camera",
+            "value": "Canon EOS 700D (T5i) DSLR"
+          },
+          {
+            "type": "frame_type",
+            "value": "DSLR calibration DARK frames (5 x 8-min) — corpus lacks any DSLR calibration frames"
+          },
+          {
+            "type": "exposure_s",
+            "value": 480
+          }
+        ],
+        "notes": "DSLR calibration DARK frames (5 x 8-min). Corpus lacks any DSLR calibration frames; 700D-body calibration."
+      }
+    },
+    {
+      "label": "astropix_bias_700d",
+      "type": "gdrive_file",
+      "id": "19J-r7ryltnrRfqKAMOoL4148uRo_E0RO",
+      "filename": "astropix_bias.zip",
+      "citation": {
+        "site": "AstroPix / Catching the Light — Free Practice Files (Jerry Lodriguss)",
+        "use_case": {
+          "verdict": "MATCH",
+          "evidence": "Verbatim page terms: \"Please feel free to download the raw files and practice with them even if you have not bought the book.\" Download + practice explicitly granted; internal calibration IS the granted 'practice' use; receipts embed required credit + link-back. NUANCE: grant covers posting processed RESULTS with attribution, NOT redistributing RAW files — keep raws internal."
+        },
+        "blockers": [
+          "none-explicit — attribution REQUIRED (link back + credit Jerry Lodriguss)"
+        ],
+        "accreditation": {
+          "person": "Jerry Lodriguss",
+          "organization": "AstroPix / Catching the Light",
+          "page_url": "https://www.astropix.com/html/processing/practice_files.html",
+          "domain": "astropix.com"
+        },
+        "hints": [
+          {
+            "type": "camera",
+            "value": "Canon EOS 700D (T5i) DSLR"
+          },
+          {
+            "type": "frame_type",
+            "value": "DSLR calibration BIAS frames (9 x 1/4000s)"
+          },
+          {
+            "type": "exposure_s",
+            "value": 0.00025
+          }
+        ],
+        "notes": "DSLR calibration BIAS frames (9 x 1/4000s)."
+      }
+    },
+    {
+      "label": "erellaz_moana_calibration_asi1600mm",
+      "type": "http",
+      "url": "https://erellaz.com/wp-content/uploads/2023/10/2023-10-01_Calibration.zip",
+      "filename": "erellaz_moana_2023-10-01_Calibration.zip",
+      "citation": {
+        "site": "Erellaz — Moana Project Open Datasets",
+        "use_case": {
+          "verdict": "MATCH",
+          "evidence": "Parent page states: \"The data distributed here is under Creative Commons license, attribution: 'Moana Project'.\" — the license link resolves to creativecommons.org/licenses/by/4.0/ (CC BY 4.0, attribution-only). Attribution-only clearly permits an open-source solo-dev project using files for internal testing/calibration with accreditation embedded in receipts."
+        },
+        "blockers": [
+          "none-explicit — CC BY 4.0 imposes only an attribution condition ('Moana Project'), no NC/ND/redistribution prohibition"
+        ],
+        "accreditation": {
+          "person": "BlackRig",
+          "organization": "Moana Project",
+          "page_url": "https://erellaz.com/moana/open-datasets/",
+          "domain": "erellaz.com"
+        },
+        "hints": [
+          {
+            "type": "instrument",
+            "value": "ZWO ASI1600MM (mono CMOS)"
+          },
+          {
+            "type": "telescope",
+            "value": "254mm (10-inch) Newtonian ATM, f/5.3, 1325mm FL"
+          },
+          {
+            "type": "plate_scale_arcsec_per_px",
+            "value": 0.591
+          },
+          {
+            "type": "filters",
+            "value": "Baader CMOS-optimized RGB + 6.5nm narrowband Ha/OIII/SII"
+          },
+          {
+            "type": "location",
+            "value": "Dark Sky Observatory (DSO), near Fort Davis, TX, USA"
+          },
+          {
+            "type": "guiding",
+            "value": "Off-Axis QHY 5L2M"
+          },
+          {
+            "type": "frame_type",
+            "value": "Shared calibration frames (darks/flats/bias) for M45 and Horse Head sets"
+          }
+        ],
+        "notes": "Mono calibration FITS — a regime the corpus entirely lacks. CC BY 4.0 attribution 'Moana Project'. Land on D:\\AstroLogic per K:-drive storage law."
+      }
+    },
+    {
+      "label": "erellaz_moana_horsehead_narrowband_p1",
+      "type": "http",
+      "url": "https://erellaz.com/wp-content/uploads/2024/01/Horse_Head_Part1.zip",
+      "filename": "erellaz_moana_Horse_Head_Part1.zip",
+      "citation": {
+        "site": "Erellaz — Moana Project Open Datasets",
+        "use_case": {
+          "verdict": "MATCH",
+          "evidence": "Parent page states: \"The data distributed here is under Creative Commons license, attribution: 'Moana Project'.\" — the license link resolves to creativecommons.org/licenses/by/4.0/ (CC BY 4.0, attribution-only). Attribution-only clearly permits an open-source solo-dev project using files for internal testing/calibration with accreditation embedded in receipts."
+        },
+        "blockers": [
+          "none-explicit — CC BY 4.0 imposes only an attribution condition ('Moana Project'), no NC/ND/redistribution prohibition"
+        ],
+        "accreditation": {
+          "person": "BlackRig",
+          "organization": "Moana Project",
+          "page_url": "https://erellaz.com/moana/open-datasets/",
+          "domain": "erellaz.com"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "Horsehead / B33"
+          },
+          {
+            "type": "instrument",
+            "value": "ZWO ASI1600MM (mono CMOS)"
+          },
+          {
+            "type": "telescope",
+            "value": "254mm (10-inch) Newtonian ATM, f/5.3, 1325mm FL"
+          },
+          {
+            "type": "plate_scale_arcsec_per_px",
+            "value": 0.591
+          },
+          {
+            "type": "filters",
+            "value": "narrowband (strong Ha+SII, weak OIII) + RGB, 6.5nm"
+          },
+          {
+            "type": "location",
+            "value": "Dark Sky Observatory (DSO), near Fort Davis, TX, USA"
+          },
+          {
+            "type": "frame_type",
+            "value": "Horsehead/B33 narrowband + RGB light frames, part 1 of 3, >1000 min total integration, dark sky"
+          }
+        ],
+        "notes": "Mono + narrowband + long focal length + dark site — all axes the corpus lacks. Part 1 of a 3-part set; a single extracted FITS sub is a valid single-frame test frame. CC BY 4.0 attribution 'Moana Project'."
+      }
+    },
+    {
+      "label": "photographingspace_kalahari_5d3_single",
+      "type": "http",
+      "url": "https://www.photographingspace.com/downloads/CSM30803.CR2",
+      "filename": "CSM30803.CR2",
+      "citation": {
+        "site": "PhotographingSpace.com — Cory Schmitz Kalahari Milky Way (Homework Data)",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 by name",
+          "evidence": "No formal license or usage terms stated on the page. Author openly offers the raw files as a public 'homework' processing exercise and only asks participants to \"Share your results\" and email processed output to info@photographingspace.com. No grant of redistribution/derivative rights and no prohibition either — silent on our internal-testing/receipt-embedding use. Per protocol, UNCLEAR ⇒ owner decides before pulling."
+        },
+        "blockers": [
+          "none-explicit — no stated license; author requests processed results be shared/emailed to info@photographingspace.com (courtesy, not a condition)"
+        ],
+        "accreditation": {
+          "person": "Cory Schmitz",
+          "organization": "PhotographingSpace.com",
+          "page_url": "https://www.photographingspace.com/homework-download-stack-data/",
+          "domain": "photographingspace.com"
+        },
+        "hints": [
+          {
+            "type": "camera",
+            "value": "Canon EOS 5D Mark III"
+          },
+          {
+            "type": "lens",
+            "value": "Canon EF 24-70mm f/2.8L II at 24mm"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 24
+          },
+          {
+            "type": "target",
+            "value": "Milky Way (galactic core, wide field)"
+          },
+          {
+            "type": "location",
+            "value": "Kalahari Basin, South Africa/Namibia border (SOUTHERN HEMISPHERE)"
+          },
+          {
+            "type": "settings",
+            "value": "f/2.8, 15s, ISO 6400"
+          }
+        ],
+        "notes": "Value = SOUTHERN-HEMISPHERE sky (a hemisphere the corpus lacks) + direct single .CR2 URL (no Drive indirection). Body Canon 5D3; diversity is in sky/lens/FL, not sensor. Single 5D3 CR2 light frame (33.3MB), also present inside the 11x stack zip (fetcher sha-dedups). APPROVAL: UNCLEAR license; OWNER-APPROVED by name 2026-07-17 for internal use — raws kept internal, results carry credit + link-back."
+      }
+    },
+    {
+      "label": "photographingspace_kalahari_5d3_11x_stack",
+      "type": "http",
+      "url": "https://www.photographingspace.com/downloads/11x_ISO6400_f2.8_15s_5DMkIII_raw.zip",
+      "filename": "11x_ISO6400_f2.8_15s_5DMkIII_raw.zip",
+      "citation": {
+        "site": "PhotographingSpace.com — Cory Schmitz Kalahari Milky Way (Homework Data)",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 by name",
+          "evidence": "No formal license or usage terms stated on the page. Author openly offers the raw files as a public 'homework' processing exercise and only asks participants to \"Share your results\" and email processed output to info@photographingspace.com. No grant of redistribution/derivative rights and no prohibition either — silent on our internal-testing/receipt-embedding use. Per protocol, UNCLEAR ⇒ owner decides before pulling."
+        },
+        "blockers": [
+          "none-explicit — no stated license; author requests processed results be shared/emailed to info@photographingspace.com (courtesy, not a condition)"
+        ],
+        "accreditation": {
+          "person": "Cory Schmitz",
+          "organization": "PhotographingSpace.com",
+          "page_url": "https://www.photographingspace.com/homework-download-stack-data/",
+          "domain": "photographingspace.com"
+        },
+        "hints": [
+          {
+            "type": "camera",
+            "value": "Canon EOS 5D Mark III"
+          },
+          {
+            "type": "lens",
+            "value": "Canon EF 24-70mm f/2.8L II at 24mm"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 24
+          },
+          {
+            "type": "target",
+            "value": "Milky Way (galactic core, wide field)"
+          },
+          {
+            "type": "location",
+            "value": "Kalahari Basin, South Africa/Namibia border (SOUTHERN HEMISPHERE)"
+          },
+          {
+            "type": "settings",
+            "value": "f/2.8, 15s, ISO 6400"
+          }
+        ],
+        "notes": "Value = SOUTHERN-HEMISPHERE sky (a hemisphere the corpus lacks) + direct single .CR2 URL (no Drive indirection). Body Canon 5D3; diversity is in sky/lens/FL, not sensor. 11 individual 5D3 Milky Way light frames for stacking (zip 360.8MB → 11 CR2 members ~33MB each). APPROVAL: UNCLEAR license; OWNER-APPROVED by name 2026-07-17 for internal use — raws kept internal, results carry credit + link-back."
+      }
+    },
+    {
+      "label": "siril_m8m20_asi2600mc_lights_rvb",
+      "type": "http",
+      "url": "http://colmic.astrosurf.com/Traitement_SiriL/brutes/Brutes_180s.zip",
+      "filename": "Brutes_180s.zip",
+      "citation": {
+        "site": "Siril official tutorial dataset (M8/M20, ASI2600MC) — hosted by Colmic / astrosurf.com",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 for internal use",
+          "evidence": "NO explicit licensing or attribution terms are stated on the Siril tutorial page or on the reachable archive host. It is the Siril project's official learning dataset (M8/M20, ZWO ASI2600MC on a 106mm refractor), openly linked for tutorial use and widely redistributed, but with no written license grant. Per protocol UNCLEAR ⇒ record and STOP; owner decides before any pull."
+        },
+        "blockers": [
+          "none-explicit — no written license grant on the Siril tutorial page or the archive host"
+        ],
+        "accreditation": {
+          "person": "Michel (astrosurf.com/colmic)",
+          "organization": "Siril project (free-astro.org) — dataset hosted on astrosurf.com/colmic",
+          "page_url": "https://siril.org/tutorials/tuto-scripts/",
+          "domain": "siril.org"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M8 Lagoon Nebula"
+          },
+          {
+            "type": "target",
+            "value": "M20 Trifid Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "ZWO ASI 2600MC (color CMOS, gain 100)"
+          },
+          {
+            "type": "telescope",
+            "value": "106mm refractor (Takahashi FSQ-106 Red073x), f/3.7, 388mm focal length"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 388
+          },
+          {
+            "type": "filter",
+            "value": "Optolong L-Pro"
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2
+          },
+          {
+            "type": "calibration",
+            "value": "FULL set: 15 lights (180s) + 15 darks (180s) + 15 flats (3s) + 15 bias/offsets (3s)"
+          }
+        ],
+        "notes": "RVB LIGHT frames: 15 x 180s FITS (zip 553MB → 15 members ~52MB). Directory index enumerated 2026-07-17 (dossier gave only the parent dir URL): www.astrosurf.com/colmic/Traitement_SiriL/brutes/ 301-redirects to colmic.astrosurf.com/Traitement_SiriL/brutes/ (HTTP/legacy-TLS). Raw calibration = 4 RVB zips; the *_resultat.fit/hoo.fit/rvb.fit files on the index are already-PROCESSED tutorial outputs, NOT raw frames. HOO-narrowband variants (Brutes_HOO_180s.zip, Flats_HOO_3s.zip) exist but are SKIPPED (beyond the described full set; ~3GB extra). CALIBRATION GOLD: dedicated color CMOS on a fast refractor WITH a complete calibration stack. APPROVAL: UNCLEAR license; OWNER-APPROVED 2026-07-17 for internal use — raws kept internal, results credit the Siril project."
+      }
+    },
+    {
+      "label": "siril_m8m20_asi2600mc_darks",
+      "type": "http",
+      "url": "http://colmic.astrosurf.com/Traitement_SiriL/brutes/Darks_180s.zip",
+      "filename": "Darks_180s.zip",
+      "citation": {
+        "site": "Siril official tutorial dataset (M8/M20, ASI2600MC) — hosted by Colmic / astrosurf.com",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 for internal use",
+          "evidence": "NO explicit licensing or attribution terms are stated on the Siril tutorial page or on the reachable archive host. It is the Siril project's official learning dataset (M8/M20, ZWO ASI2600MC on a 106mm refractor), openly linked for tutorial use and widely redistributed, but with no written license grant. Per protocol UNCLEAR ⇒ record and STOP; owner decides before any pull."
+        },
+        "blockers": [
+          "none-explicit — no written license grant on the Siril tutorial page or the archive host"
+        ],
+        "accreditation": {
+          "person": "Michel (astrosurf.com/colmic)",
+          "organization": "Siril project (free-astro.org) — dataset hosted on astrosurf.com/colmic",
+          "page_url": "https://siril.org/tutorials/tuto-scripts/",
+          "domain": "siril.org"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M8 Lagoon Nebula"
+          },
+          {
+            "type": "target",
+            "value": "M20 Trifid Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "ZWO ASI 2600MC (color CMOS, gain 100)"
+          },
+          {
+            "type": "telescope",
+            "value": "106mm refractor (Takahashi FSQ-106 Red073x), f/3.7, 388mm focal length"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 388
+          },
+          {
+            "type": "filter",
+            "value": "Optolong L-Pro"
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2
+          },
+          {
+            "type": "calibration",
+            "value": "FULL set: 15 lights (180s) + 15 darks (180s) + 15 flats (3s) + 15 bias/offsets (3s)"
+          }
+        ],
+        "notes": "DARK calibration frames: 15 x 180s FITS (zip 289MB → 15 members ~52MB). Directory index enumerated 2026-07-17 (dossier gave only the parent dir URL): www.astrosurf.com/colmic/Traitement_SiriL/brutes/ 301-redirects to colmic.astrosurf.com/Traitement_SiriL/brutes/ (HTTP/legacy-TLS). Raw calibration = 4 RVB zips; the *_resultat.fit/hoo.fit/rvb.fit files on the index are already-PROCESSED tutorial outputs, NOT raw frames. HOO-narrowband variants (Brutes_HOO_180s.zip, Flats_HOO_3s.zip) exist but are SKIPPED (beyond the described full set; ~3GB extra). CALIBRATION GOLD: dedicated color CMOS on a fast refractor WITH a complete calibration stack. APPROVAL: UNCLEAR license; OWNER-APPROVED 2026-07-17 for internal use — raws kept internal, results credit the Siril project."
+      }
+    },
+    {
+      "label": "siril_m8m20_asi2600mc_flats_rvb",
+      "type": "http",
+      "url": "http://colmic.astrosurf.com/Traitement_SiriL/brutes/Flats_3s.zip",
+      "filename": "Flats_3s.zip",
+      "citation": {
+        "site": "Siril official tutorial dataset (M8/M20, ASI2600MC) — hosted by Colmic / astrosurf.com",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 for internal use",
+          "evidence": "NO explicit licensing or attribution terms are stated on the Siril tutorial page or on the reachable archive host. It is the Siril project's official learning dataset (M8/M20, ZWO ASI2600MC on a 106mm refractor), openly linked for tutorial use and widely redistributed, but with no written license grant. Per protocol UNCLEAR ⇒ record and STOP; owner decides before any pull."
+        },
+        "blockers": [
+          "none-explicit — no written license grant on the Siril tutorial page or the archive host"
+        ],
+        "accreditation": {
+          "person": "Michel (astrosurf.com/colmic)",
+          "organization": "Siril project (free-astro.org) — dataset hosted on astrosurf.com/colmic",
+          "page_url": "https://siril.org/tutorials/tuto-scripts/",
+          "domain": "siril.org"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M8 Lagoon Nebula"
+          },
+          {
+            "type": "target",
+            "value": "M20 Trifid Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "ZWO ASI 2600MC (color CMOS, gain 100)"
+          },
+          {
+            "type": "telescope",
+            "value": "106mm refractor (Takahashi FSQ-106 Red073x), f/3.7, 388mm focal length"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 388
+          },
+          {
+            "type": "filter",
+            "value": "Optolong L-Pro"
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2
+          },
+          {
+            "type": "calibration",
+            "value": "FULL set: 15 lights (180s) + 15 darks (180s) + 15 flats (3s) + 15 bias/offsets (3s)"
+          }
+        ],
+        "notes": "RVB FLAT calibration frames: 15 x 3s FITS (zip 683MB → 15 members ~52MB). Directory index enumerated 2026-07-17 (dossier gave only the parent dir URL): www.astrosurf.com/colmic/Traitement_SiriL/brutes/ 301-redirects to colmic.astrosurf.com/Traitement_SiriL/brutes/ (HTTP/legacy-TLS). Raw calibration = 4 RVB zips; the *_resultat.fit/hoo.fit/rvb.fit files on the index are already-PROCESSED tutorial outputs, NOT raw frames. HOO-narrowband variants (Brutes_HOO_180s.zip, Flats_HOO_3s.zip) exist but are SKIPPED (beyond the described full set; ~3GB extra). CALIBRATION GOLD: dedicated color CMOS on a fast refractor WITH a complete calibration stack. APPROVAL: UNCLEAR license; OWNER-APPROVED 2026-07-17 for internal use — raws kept internal, results credit the Siril project."
+      }
+    },
+    {
+      "label": "siril_m8m20_asi2600mc_bias_offsets",
+      "type": "http",
+      "url": "http://colmic.astrosurf.com/Traitement_SiriL/brutes/Offsets_3s.zip",
+      "filename": "Offsets_3s.zip",
+      "citation": {
+        "site": "Siril official tutorial dataset (M8/M20, ASI2600MC) — hosted by Colmic / astrosurf.com",
+        "use_case": {
+          "verdict": "UNCLEAR terms; OWNER-APPROVED 2026-07-17 for internal use",
+          "evidence": "NO explicit licensing or attribution terms are stated on the Siril tutorial page or on the reachable archive host. It is the Siril project's official learning dataset (M8/M20, ZWO ASI2600MC on a 106mm refractor), openly linked for tutorial use and widely redistributed, but with no written license grant. Per protocol UNCLEAR ⇒ record and STOP; owner decides before any pull."
+        },
+        "blockers": [
+          "none-explicit — no written license grant on the Siril tutorial page or the archive host"
+        ],
+        "accreditation": {
+          "person": "Michel (astrosurf.com/colmic)",
+          "organization": "Siril project (free-astro.org) — dataset hosted on astrosurf.com/colmic",
+          "page_url": "https://siril.org/tutorials/tuto-scripts/",
+          "domain": "siril.org"
+        },
+        "hints": [
+          {
+            "type": "target",
+            "value": "M8 Lagoon Nebula"
+          },
+          {
+            "type": "target",
+            "value": "M20 Trifid Nebula"
+          },
+          {
+            "type": "camera",
+            "value": "ZWO ASI 2600MC (color CMOS, gain 100)"
+          },
+          {
+            "type": "telescope",
+            "value": "106mm refractor (Takahashi FSQ-106 Red073x), f/3.7, 388mm focal length"
+          },
+          {
+            "type": "focal_length_mm",
+            "value": 388
+          },
+          {
+            "type": "filter",
+            "value": "Optolong L-Pro"
+          },
+          {
+            "type": "approx_plate_scale_arcsec_per_px",
+            "value": 2
+          },
+          {
+            "type": "calibration",
+            "value": "FULL set: 15 lights (180s) + 15 darks (180s) + 15 flats (3s) + 15 bias/offsets (3s)"
+          }
+        ],
+        "notes": "BIAS/OFFSET calibration frames: 15 x 3s FITS (zip 286MB → 15 members ~52MB). Directory index enumerated 2026-07-17 (dossier gave only the parent dir URL): www.astrosurf.com/colmic/Traitement_SiriL/brutes/ 301-redirects to colmic.astrosurf.com/Traitement_SiriL/brutes/ (HTTP/legacy-TLS). Raw calibration = 4 RVB zips; the *_resultat.fit/hoo.fit/rvb.fit files on the index are already-PROCESSED tutorial outputs, NOT raw frames. HOO-narrowband variants (Brutes_HOO_180s.zip, Flats_HOO_3s.zip) exist but are SKIPPED (beyond the described full set; ~3GB extra). CALIBRATION GOLD: dedicated color CMOS on a fast refractor WITH a complete calibration stack. APPROVAL: UNCLEAR license; OWNER-APPROVED 2026-07-17 for internal use — raws kept internal, results credit the Siril project."
+      }
+    }
+  ]
+}

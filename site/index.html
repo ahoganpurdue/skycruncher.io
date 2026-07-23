@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>skycruncher.io — an astrophotography pipeline that shows its work</title>
+<meta name="description" content="RAW/FITS ingest, blind plate solving, measured lens and atmospheric correction, color calibration, PSF diagnostics with windowed deconvolution, FITS/ASDF and tabular Arrow export, and a database of every measurement — each value measured, labeled approximate, or absent.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://skycruncher.io/">
+<meta property="og:title" content="skycruncher.io — an astrophotography pipeline that shows its work">
+<meta property="og:description" content="RAW/FITS ingest, blind plate solving, measured lens and atmospheric correction, color calibration, PSF diagnostics with windowed deconvolution, FITS/ASDF and tabular Arrow export, and a database of every measurement — each value measured, labeled approximate, or absent.">
+<meta property="og:image" content="https://skycruncher.io/logo-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+<!-- Warm the DAG page's cache while the visitor reads this page — its graph
+     data is ~1.3 MB and the prefetch makes the "Pipeline DAG" click instant. -->
+<link rel="prefetch" href="dag/data/dag_base.json" as="fetch">
+<link rel="prefetch" href="dag/data/enrichment.json" as="fetch">
+<link rel="prefetch" href="dag/data/steps_map.json" as="fetch">
+<link rel="prefetch" href="dag/dag_style.css" as="style">
+<link rel="prefetch" href="dag/dag_app.js" as="script">
+<link rel="prefetch" href="dag/dag_model.mjs" as="script">
+<link rel="prefetch" href="dag/steps_model.js" as="script">
+<style>
+  :root {
+    --bg: #0b0e15;
+    --surface: #10141d;
+    --text: #dbe1ea;
+    --muted: #98a1b3;
+    --faint: #626c80;
+    --accent: #6aa6f8;
+    --ok: #3ddc97;
+    --warn: #f0b23e;
+    --hairline: rgba(255, 255, 255, 0.08);
+    --border: #232b3d;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .spectrum {
+    height: 2px;
+    background: linear-gradient(90deg, #7c5cff, #60a5fa, #4fd1c5, #9ae6b4, #f6e05e, #f08c5a, #e05656);
+    opacity: 0.7;
+  }
+  .wrap { max-width: 44rem; margin: 0 auto; padding: 0 1.25rem; }
+  .wrap-wide { max-width: 62rem; margin: 0 auto; padding: 0 1.25rem; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 62rem; margin: 0 auto; padding: 1.4rem 1.25rem;
+  }
+  .brand { display: flex; align-items: center; gap: 0.65rem; color: var(--text); font-weight: 550; letter-spacing: 0.01em; }
+  .brand:hover { text-decoration: none; }
+  .brand img { display: block; width: 26px; height: 26px; border-radius: 6px; }
+  header nav { display: flex; gap: 1.4rem; }
+  header nav a { color: var(--muted); font-size: 0.95rem; }
+  header nav a:hover { color: var(--accent); }
+
+  main { display: block; }
+
+  .hero { padding: 4rem 0 4.5rem; }
+  .hero-mark {
+    display: block;
+    width: 120px; height: 120px;
+    border-radius: 18px;
+    border: 1px solid var(--hairline);
+    margin-bottom: 2.2rem;
+  }
+  .dag-card {
+    display: block;
+    margin-top: 1.8rem;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    overflow: hidden;
+    color: var(--text);
+  }
+  .dag-card:hover, .dag-card:focus-visible { border-color: var(--accent); text-decoration: none; }
+  .dag-card img { display: block; width: 100%; height: auto; }
+  .dag-card .dag-card-cap {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    padding: 0.8rem 1.1rem 0.9rem;
+    border-top: 1px solid var(--hairline);
+  }
+  .dag-card .dag-card-cap span { color: var(--muted); font-size: 0.9rem; }
+  .dag-card .dag-card-cap b { color: var(--accent); font-weight: 570; white-space: nowrap; }
+  h1 {
+    font-size: clamp(1.9rem, 5.2vw, 3rem);
+    line-height: 1.14;
+    font-weight: 640;
+    letter-spacing: -0.022em;
+    max-width: 21ch;
+  }
+  .scope { margin-top: 1.6rem; color: var(--muted); max-width: 62ch; }
+  .cta { margin-top: 2.4rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+  .cta a {
+    display: inline-block;
+    padding: 0.6rem 1.15rem;
+    border-radius: 7px;
+    font-size: 0.97rem;
+  }
+  .cta .primary {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: #0b0e15;
+    font-weight: 570;
+  }
+  .cta .primary:hover, .cta .primary:focus-visible { background: #8dbcfa; border-color: #8dbcfa; text-decoration: none; }
+  .cta .secondary {
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .cta .secondary:hover, .cta .secondary:focus-visible { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  .cta-note {
+    margin-top: 0.85rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    color: var(--muted);
+  }
+
+  .cards {
+    border-top: 1px solid var(--hairline);
+    padding-top: 3.2rem;
+  }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    padding: 1.15rem 1.3rem 1.25rem;
+  }
+  .card .label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .card .num {
+    font-size: 2.05rem;
+    font-weight: 620;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-top: 0.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .card .sub {
+    font-size: 0.86rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+  }
+  .cards-asof {
+    margin-top: 0.9rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--faint);
+  }
+
+  section.block { padding: 4.5rem 0 0; }
+  section.block:last-of-type { padding-bottom: 5rem; }
+  h2 { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.012em; }
+  .block p { margin-top: 0.9rem; color: var(--muted); max-width: 62ch; }
+
+  /* ── measurement-corpus analytics ─────────────────────────────────────── */
+  .corpus { padding-top: 4.5rem; }
+  .corpus-lede { margin-top: 0.9rem; color: var(--muted); max-width: 68ch; }
+  .corpus-asof {
+    margin-top: 0.7rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--faint);
+  }
+  .charts {
+    margin-top: 1.8rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .chart {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    padding: 1rem 1.1rem 0.85rem;
+  }
+  .chart h3 {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .chart svg { display: block; width: 100%; height: auto; margin-top: 0.6rem; }
+  .chart .chart-note {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--faint);
+    margin-top: 0.45rem;
+  }
+  .db-section {
+    margin-top: 1.6rem;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    padding: 1.1rem 1.2rem 1.15rem;
+  }
+  .db-shead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 1rem; }
+  .db-shead h3 {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .db-src { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); }
+  .db-tiles { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.85rem; }
+  .tile {
+    min-width: 7.4rem;
+    flex: 0 1 auto;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 0.5rem 0.75rem 0.55rem;
+  }
+  .tile .lbl {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .tile .val {
+    font-size: 1.35rem;
+    font-weight: 620;
+    font-variant-numeric: tabular-nums;
+    margin-top: 0.15rem;
+  }
+  .tile.accent { border-color: rgba(106, 166, 248, 0.45); }
+  .tile.accent .val { color: var(--accent); }
+  .tile.pass { border-color: rgba(61, 220, 151, 0.4); }
+  .tile.pass .val { color: var(--ok); }
+  .tile.warn { border-color: rgba(240, 178, 62, 0.45); }
+  .tile.warn .val { color: var(--warn); }
+  .db-chiprow { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.8rem; }
+  .db-statchip {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.12rem 0.65rem;
+  }
+  .db-statchip b { color: var(--text); font-weight: 620; }
+  .db-statchip.ok { border-color: rgba(61, 220, 151, 0.4); }
+  .db-statchip.ok b { color: var(--ok); }
+  .db-statchip.warn { border-color: rgba(240, 178, 62, 0.45); }
+  .db-statchip.warn b { color: var(--warn); }
+  .db-note { margin-top: 0.8rem; font-size: 0.86rem; color: var(--muted); }
+  .db-note b { color: var(--text); font-weight: 600; }
+  .db-thr { font-style: italic; font-size: 0.8rem; color: var(--faint); }
+  .db-frameid { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--faint); word-break: break-all; }
+  .db-nm {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--warn);
+    border: 1px solid rgba(240, 178, 62, 0.45);
+    border-radius: 4px;
+    padding: 0 0.35rem;
+  }
+  .db-table { border-collapse: collapse; margin-top: 0.85rem; font-size: 0.86rem; }
+  .db-table th, .db-table td { padding: 0.28rem 0.9rem 0.28rem 0; text-align: left; }
+  .db-table th {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .db-table td.num, .db-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 46rem) {
+    .charts { grid-template-columns: 1fr; }
+  }
+
+  /* ── widget gallery ───────────────────────────────────────────────────── */
+  .gallery { padding-top: 4.5rem; }
+  .gallery-lede { margin-top: 0.9rem; color: var(--muted); max-width: 62ch; }
+  .gallery-grid {
+    margin-top: 1.8rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .gallery figure {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .gallery figure.wide { grid-column: 1 / -1; }
+  .gallery img { display: block; width: 100%; height: auto; }
+  .gallery figcaption {
+    padding: 0.7rem 1rem 0.8rem;
+    font-size: 0.86rem;
+    color: var(--muted);
+    border-top: 1px solid var(--hairline);
+  }
+  @media (max-width: 46rem) {
+    .gallery-grid { grid-template-columns: 1fr; }
+  }
+
+  footer {
+    border-top: 1px solid var(--hairline);
+    margin-top: 5.5rem;
+  }
+  footer .wrap-wide {
+    padding-top: 1.6rem; padding-bottom: 2.2rem;
+    color: var(--muted); font-size: 0.85rem;
+    display: flex; flex-wrap: wrap; gap: 0.4rem 2rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    a, .cta a { transition: color 120ms ease, border-color 120ms ease; }
+  }
+</style>
+</head>
+<body>
+
+<div class="spectrum" aria-hidden="true"></div>
+
+<header>
+  <a class="brand" href="/">
+    <img src="logo-128.png" width="26" height="26" alt="">
+    skycruncher.io
+  </a>
+  <nav>
+    <a href="dag/">Pipeline DAG</a>
+    <a href="https://github.com/ahoganpurdue/skycruncher.io">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <img class="hero-mark" src="logo-128.png" width="120" height="120"
+         alt="SkyCruncher mark: an S drawn as a quad mesh over stars — the solve geometry itself">
+    <h1>An astrophotography processing pipeline that shows its work.</h1>
+    <p class="scope">RAW/FITS ingest, blind plate solving, measured lens and atmospheric correction, color calibration, PSF diagnostics with windowed deconvolution, FITS/ASDF and tabular Arrow export, and a database of every measurement — each value measured, labeled approximate, or absent.</p>
+    <p class="cta">
+      <a class="primary" href="https://github.com/ahoganpurdue/skycruncher.io/releases">Download</a>
+      <a class="secondary" href="https://github.com/ahoganpurdue/skycruncher.io">View on GitHub</a>
+    </p>
+    <p class="cta-note">Windows installer. Star data (~1.3 GB total) downloads in-app on first run.</p>
+  </div>
+
+  <!-- Reference-data values are baked static at export ("as of" stamp below).
+       Regenerate from the starplates g15u release manifest (stars/quads/bands)
+       and docs/GATES.md (test count) whenever this page is re-exported, or set
+       STATS_URL in the script at the bottom of this file to hydrate them live. -->
+  <div class="wrap-wide cards" role="group" aria-label="Reference data">
+    <div class="cards-grid">
+      <div class="card">
+        <div class="label">Stars indexed</div>
+        <div class="num" data-stat="stars_indexed">6.49M</div>
+        <div class="sub">Gaia DR3, G &lt; 15</div>
+      </div>
+      <div class="card">
+        <div class="label">Quad patterns</div>
+        <div class="num" data-stat="quad_patterns">20.9M</div>
+        <div class="sub">all-sky index</div>
+      </div>
+      <div class="card">
+        <div class="label">Scale bands</div>
+        <div class="num" data-stat="scale_bands">15</div>
+        <div class="sub">0.25&deg; to 45.25&deg;</div>
+      </div>
+      <div class="card">
+        <div class="label">Automated tests</div>
+        <div class="num" data-stat="automated_tests">2,400+</div>
+        <div class="sub">every merge gated</div>
+      </div>
+    </div>
+    <p class="cards-asof">as of <span data-stat="as_of">2026-07-22</span></p>
+  </div>
+
+  <section class="block wrap">
+    <h2>Your rig, measured.</h2>
+    <p>Measures your lens on every frame: distortion, a SIP layer with atmospheric refraction separated out where site and time are known, and a final thin-plate-spline pass for what the parametric models miss.</p>
+  </section>
+
+  <section class="block wrap-wide">
+    <h2>See how SkyCruncher works.</h2>
+    <p>The full pipeline as an interactive graph — every module, every data seam, every evidence state. Three views: force web, adjacency matrix, and a step-by-step procedure walk.</p>
+    <a class="dag-card" href="dag/">
+      <img src="dag_preview.png" width="1440" height="810" loading="lazy"
+           alt="The SkyCruncher pipeline DAG: an interactive force-directed graph of modules and data seams, with edge layers and evidence states">
+      <span class="dag-card-cap"><span>909 nodes, 1,534 edges, extracted from the codebase and drift-gated.</span><b>Open the Pipeline DAG &rarr;</b></span>
+    </a>
+  </section>
+
+  <!-- The measurement corpus: rendered by renderCorpusSection() below from the
+       baked snapshot (site/database_summary.json content, inlined). The two
+       time-series charts read site/series.json content (inlined) — one honest
+       data point today; the improvement story arrives as data, never as
+       styling tricks (rate axis is 0-100%, time axis is real). -->
+  <section class="wrap-wide corpus" id="corpus">
+    <h2>The measurement corpus.</h2>
+    <p class="corpus-lede">Every frame processed leaves a measurement receipt, and the receipts add up to a database. These are the project corpus numbers, published as they stand: today's snapshot is the pre-cutover baseline — the honest before. New snapshots land here as the corpus re-runs on the current solver core; the story is in the data arriving.</p>
+    <p class="corpus-asof">as of <span id="corpus-asof">2026-07-12</span> · pre-cutover solver · a fresh regeneration replaces this snapshot</p>
+    <div class="charts">
+      <div class="chart">
+        <h3>Blind solve rate over time</h3>
+        <div id="chart-rate"></div>
+        <div class="chart-note">series begins 2026-07-12 · pre-cutover solver baseline · rate axis 0&ndash;100%</div>
+      </div>
+      <div class="chart">
+        <h3>Solve wall time over time</h3>
+        <div id="chart-wall"></div>
+        <div class="chart-note">series begins 2026-07-12 · blind lane, n=82 attempts · median and p90</div>
+      </div>
+    </div>
+    <div id="db-modules"></div>
+  </section>
+
+  <!-- Gallery PNGs: standard dark-theme captures of the widget registry's SSR
+       twins (test_results/mcp_renders/*.html), each rendered from a real
+       measurement record. Re-render path is documented in site/README.md. -->
+  <section class="wrap-wide gallery">
+    <h2>What it shows you.</h2>
+    <p class="gallery-lede">Every panel below is rendered from a real measurement record — no mockups, no sample data.</p>
+    <div class="gallery-grid">
+      <figure class="wide">
+        <img src="widgets/solve_flowchart.png" width="2400" height="1166" loading="lazy"
+             alt="Solve flowchart widget: the end-to-end solve pipeline as a receipt-driven diagram, each stage annotated from the actual run">
+        <figcaption>Solve flowchart — the path this solve actually took, drawn from the receipt. Stages with no evidence read NOT RUN.</figcaption>
+      </figure>
+      <figure>
+        <img src="widgets/distortion_cascade_2d.png" width="2400" height="2154" loading="lazy"
+             alt="Distortion cascade widget: wireframe displacement surfaces for each fitted lens model, with an absent stage shown as NOT MEASURED">
+        <figcaption>Distortion cascade — displacement surfaces for each model the pipeline fitted. An absent stage says NOT MEASURED, not zero.</figcaption>
+      </figure>
+      <figure>
+        <img src="widgets/psf_field.png" width="1800" height="660" loading="lazy"
+             alt="PSF field widget: per-region median star width and ellipticity across the frame">
+        <figcaption>PSF field — per-region star sharpness across the frame, with approximations labeled as such.</figcaption>
+      </figure>
+      <figure>
+        <img src="widgets/culling_waterfall.png" width="1800" height="574" loading="lazy"
+             alt="Culling waterfall widget: the detection funnel from raw detections through each cull bucket to matched stars">
+        <figcaption>Culling waterfall — where detections get thrown away, counted at the moment of rejection.</figcaption>
+      </figure>
+      <figure>
+        <img src="widgets/lens_profile_3d.png" width="2400" height="1114" loading="lazy"
+             alt="Lens Profile 3D widget: measured FWHM, ellipticity and vignette statistics for the rig, with the interactive surface area left blank in this static export">
+        <figcaption>Lens profile — your actual copy of the lens, measured. The 3D surface draws live in-app; this static export carries the measured stats.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="block wrap">
+    <h2>Runs on your machine.</h2>
+    <p>Solves happen locally; your images and measurements never leave your computer. Once the star data is downloaded, the network is not involved.</p>
+  </section>
+
+  <section class="block wrap" id="contact">
+    <h2>Contact</h2>
+    <p><a href="mailto:ahoganpurdue@gmail.com">ahoganpurdue@gmail.com</a></p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap-wide">
+    <span>Apache-2.0</span>
+    <span>Star catalog: ESA Gaia DR3, processed by the Gaia Data Processing and Analysis Consortium (DPAC).</span>
+  </div>
+</footer>
+
+<script>
+'use strict';
+/* ═════════════════════════════════════════════════════════════════════════
+   Measurement-corpus section — adapted from the Clockdrive dashboard's
+   Database tab (tools/theses/dashboard/ui/tab_database.js). Same honesty
+   rules: a null never renders as 0 — it renders NOT MEASURED.
+
+   BAKED data = the sanitized snapshot also shipped as ./database_summary.json
+   (provenance block stripped; no local paths). SERIES = ./series.json.
+
+   Live-hydration seam: set STATS_URL to a JSON endpoint to refresh
+   everything at load. Envelope shape (all keys optional):
+     {
+       "as_of": "YYYY-MM-DD",                       // stat-bar stamp
+       "stats": { "stars_indexed": "6.49M", "quad_patterns": "20.9M",
+                  "scale_bands": "15", "automated_tests": "2,400+" },
+       "database": <same shape as ./database_summary.json>,
+       "series": <same shape as ./series.json>
+     }
+   Default null = fully static page, zero network requests; baked values
+   stand, honestly stamped with their snapshot dates.
+   ═════════════════════════════════════════════════════════════════════════ */
+var STATS_URL = null;
+
+var BAKED_DB = {
+  "generated_at": "2026-07-13T01:35:38.147Z",
+  "data": {
+    "modules": [
+      { "name": "solve_stats", "source_file": "solve_stats.json", "git_head": "9fbec68", "tool_version": "1.0.0", "status": "ok" },
+      { "name": "wall_stats", "source_file": "wall_stats.json", "git_head": "9fbec68", "tool_version": "1.0.0", "status": "ok" },
+      { "name": "residuals", "source_file": "residuals.json", "git_head": "9fbec68", "tool_version": "1.0.0", "status": "ok" }
+    ],
+    "corpus": {
+      "present": true, "source": "solve_stats.json", "n_frames": 96,
+      "by_kind": { "assisted": 11, "no_solve": 42, "solved": 43 },
+      "by_solve_class": { "assisted": 11, "blind": 85 },
+      "with_receipt": 74, "with_dossier": 96, "with_envelope": 11
+    },
+    "solve": {
+      "present": true, "source": "solve_stats.json",
+      "rate_all_blind": { "n": 43, "d": 96, "pct": 44.8 },
+      "rate_attempted": { "n": 43, "d": 81, "pct": 53.1 },
+      "denominators": { "n_attempted": 81, "n_blind_frames": 96, "n_skipped": 15, "n_solved": 43 },
+      "by_format": [
+        { "format": "CR2", "n_frames": 45, "n_attempted": 31, "n_solved": 2, "n_skipped": 14, "pct_all_blind": 4.4, "pct_attempted": 6.5 },
+        { "format": "FITS", "n_frames": 51, "n_attempted": 50, "n_solved": 41, "n_skipped": 1, "pct_all_blind": 80.4, "pct_attempted": 82 }
+      ],
+      "assisted": { "n_assisted_frames": 11, "of_which_failed_blind": 11 },
+      "lanes_note": "blind and assisted (hinted) solves are NEVER pooled — an assisted rescue never inflates a blind rate."
+    },
+    "residuals": {
+      "present": true, "source": "residuals.json",
+      "frames_measured": 39, "frames_not_measured": 57, "frames_flagged": 15,
+      "refit_candidate_count": 25, "matched_stars_used": 38815,
+      "top_refit": {
+        "rig": "Canon EOS Rebel T6 | Unknown Lens",
+        "id": "challenge_DSLR_Images_-_All_Canon_T6_Rokinon_14mm_IMG_1410.CR2",
+        "edge_excess_arcsec": 1929.1, "edge_excess_px": 30.5,
+        "slope_arcsec_per_radius": 3008.2, "n_stars_used": 54
+      },
+      "thresholds": { "signature_rule": "slope>=slope_threshold AND edge_excess>=edge_excess_threshold", "slope_arcsec_per_radius": 3, "edge_excess_arcsec": 2 }
+    },
+    "wall": {
+      "present": true, "source": "wall_stats.json",
+      "solve_share": { "frames": 40, "of_pipeline": 0.711, "of_wall": 0.5942 },
+      "blind_vs_assisted": { "paired_frames": 11, "blind_median_ms": 195897.5, "assisted_median_ms": 9895, "speedup_median": 19.8 },
+      "corpus_summary": { "timing_rows": 143, "rows_with_stage_decomposition": 40 }
+    }
+  }
+};
+
+var BAKED_SERIES = [
+  {
+    "date": "2026-07-12", "git": "9fbec68",
+    "blind_rate_all": 44.8, "blind_rate_attempted": 53.1,
+    "rate_by_format": { "CR2": 6.5, "FITS": 82.0 },
+    "wall_median_s": 10.8, "wall_p90_s": 195.9
+  }
+];
+
+/* ── helpers (null → NOT MEASURED, never 0) ─────────────────────────────── */
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+var NM = '<span class="db-nm" title="not present in the analytics result — nothing is fabricated">NOT MEASURED</span>';
+function fInt(v) { return (typeof v === 'number' && isFinite(v)) ? esc(v.toLocaleString('en-US')) : NM; }
+function fNum(v, dp) { return (typeof v === 'number' && isFinite(v)) ? esc(v.toFixed(dp)) : NM; }
+function fPct(v) { return (typeof v === 'number' && isFinite(v)) ? esc(v.toFixed(1)) + '%' : NM; }
+function tile(lbl, valHtml, cls) { return '<div class="tile' + (cls ? ' ' + cls : '') + '"><div class="lbl">' + esc(lbl) + '</div><div class="val">' + valHtml + '</div></div>'; }
+function srcLine(section, modules) {
+  if (!section || !section.source) return '';
+  var file = String(section.source).split(' ')[0];
+  var mod = (modules || []).filter(function (m) { return m && m.source_file === file; })[0];
+  var bits = ['source: ' + esc(file)];
+  if (mod && mod.git_head) bits.push('git ' + esc(mod.git_head));
+  if (mod && mod.tool_version) bits.push('v' + esc(mod.tool_version));
+  return '<div class="db-src">' + bits.join(' · ') + '</div>';
+}
+function sectionHead(title, section, modules) { return '<div class="db-shead"><h3>' + esc(title) + '</h3>' + srcLine(section, modules) + '</div>'; }
+function absent(title, modules) { return '<section class="db-section"><div class="db-shead"><h3>' + esc(title) + '</h3></div><div class="db-note">' + NM + '</div></section>'; }
+
+/* ── the four modules (composition per the Database tab) ────────────────── */
+function renderCorpusModule(c, modules) {
+  if (!c || c.present !== true) return absent('Corpus', modules);
+  var k = c.by_kind || {}, cl = c.by_solve_class || {};
+  var tiles = [
+    tile('frames', fInt(c.n_frames), 'accent'),
+    tile('solved', fInt(k.solved), 'pass'),
+    tile('no-solve', fInt(k.no_solve)),
+    tile('assisted', fInt(k.assisted)),
+    tile('blind lane', fInt(cl.blind)),
+    tile('with receipt', fInt(c.with_receipt)),
+    tile('with dossier', fInt(c.with_dossier)),
+    tile('with envelope', fInt(c.with_envelope))
+  ].join('');
+  var note = '<div class="db-note db-thr">' + esc('blind and assisted (hinted) solves are NEVER pooled — an assisted rescue never inflates a blind rate.') + '</div>';
+  return '<section class="db-section">' + sectionHead('Corpus', c, modules) + '<div class="db-tiles">' + tiles + '</div>' + note + '</section>';
+}
+
+function rate(r) {
+  if (!r) return NM;
+  return fPct(r.pct) + ' <span class="db-src">' + fInt(r.n) + '/' + fInt(r.d) + '</span>';
+}
+function renderSolveModule(s, modules) {
+  if (!s || s.present !== true) return absent('Blind solve rate', modules);
+  var den = s.denominators || {};
+  var tiles = [
+    tile('of all blind', rate(s.rate_all_blind), 'accent'),
+    tile('of attempted', rate(s.rate_attempted), 'pass'),
+    tile('blind frames', fInt(den.n_blind_frames)),
+    tile('attempted', fInt(den.n_attempted)),
+    tile('solved', fInt(den.n_solved)),
+    tile('skipped', fInt(den.n_skipped))
+  ].join('');
+  var rows = (s.by_format || []).map(function (f) {
+    return '<tr><td>' + esc(f.format) + '</td><td class="num">' + fInt(f.n_solved) + '/' + fInt(f.n_frames) + '</td>'
+      + '<td class="num">' + fPct(f.pct_all_blind) + '</td><td class="num">' + fPct(f.pct_attempted) + '</td>'
+      + '<td class="num">' + fInt(f.n_skipped) + '</td></tr>';
+  }).join('');
+  var byFmt = rows ? '<div style="overflow-x:auto"><table class="db-table"><thead><tr><th>format</th><th class="num">solved/frames</th>'
+    + '<th class="num">% all blind</th><th class="num">% attempted</th><th class="num">skipped</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody></table></div>' : '';
+  var assistedNote = s.assisted ? '<div class="db-note"><b>Assisted lane (kept apart):</b> '
+    + fInt(s.assisted.n_assisted_frames) + ' hinted solves, ' + fInt(s.assisted.of_which_failed_blind)
+    + ' of which failed blind first. ' + esc(s.lanes_note || '') + '</div>' : '';
+  var before = '<div class="db-note db-thr">Snapshot 2026-07-12, measured with the pre-cutover solver — the honest before. The full-corpus re-pass on the current engine lands here when it runs.</div>';
+  return '<section class="db-section">' + sectionHead('Blind solve rate', s, modules) + '<div class="db-tiles">' + tiles + '</div>' + byFmt + assistedNote + before + '</section>';
+}
+
+function renderResidualsModule(r, modules) {
+  if (!r || r.present !== true) return absent('Edge residuals', modules);
+  var tiles = [
+    tile('measured', fInt(r.frames_measured), 'accent'),
+    tile('not measured', fInt(r.frames_not_measured)),
+    tile('distortion-flagged', fInt(r.frames_flagged), 'warn'),
+    tile('refit candidates', fInt(r.refit_candidate_count)),
+    tile('matched stars used', fInt(r.matched_stars_used))
+  ].join('');
+  var t = r.top_refit;
+  var top = t ? '<div class="db-note"><b>Worst edge-growth frame:</b> ' + esc(t.rig) + ' — edge excess '
+    + fNum(t.edge_excess_arcsec, 1) + '&Prime; (' + fNum(t.edge_excess_px, 1) + ' px), slope '
+    + fNum(t.slope_arcsec_per_radius, 1) + '&Prime;/radius over ' + fInt(t.n_stars_used) + ' stars.'
+    + '<span class="db-frameid">' + esc(t.id) + '</span></div>' : '';
+  var th = r.thresholds || {};
+  var thr = '<div class="db-note db-thr">signature rule: ' + esc(th.signature_rule || '') + ' · slope &ge; '
+    + fNum(th.slope_arcsec_per_radius, 0) + '&Prime;/radius AND edge-excess &ge; ' + fNum(th.edge_excess_arcsec, 0) + '&Prime;</div>';
+  return '<section class="db-section">' + sectionHead('Edge residuals', r, modules) + '<div class="db-tiles">' + tiles + '</div>' + top + thr + '</section>';
+}
+
+function renderWallModule(w, modules) {
+  if (!w || w.present !== true) return absent('Wall-clock economics', modules);
+  var ss = w.solve_share || {}, bva = w.blind_vs_assisted || {}, cs = w.corpus_summary || {};
+  function pctOf(x) { return (typeof x === 'number' && isFinite(x)) ? esc((x * 100).toFixed(1)) + '%' : NM; }
+  function secs(ms) { return (typeof ms === 'number' && isFinite(ms)) ? esc((ms / 1000).toFixed(1)) + 's' : NM; }
+  var tiles = [
+    tile('solve % of pipeline', pctOf(ss.of_pipeline), 'accent'),
+    tile('solve % of wall', pctOf(ss.of_wall)),
+    tile('blind→assisted speedup', (typeof bva.speedup_median === 'number') ? fNum(bva.speedup_median, 1) + '×' : NM, 'pass'),
+    tile('timing rows', fInt(cs.timing_rows)),
+    tile('rows w/ stages', fInt(cs.rows_with_stage_decomposition))
+  ].join('');
+  var bvaNote = (bva.paired_frames != null) ? '<div class="db-note"><b>Blind vs assisted</b> (' + fInt(bva.paired_frames)
+    + ' paired frames): blind median ' + secs(bva.blind_median_ms) + ' → assisted median ' + secs(bva.assisted_median_ms)
+    + ' (median speedup ' + ((typeof bva.speedup_median === 'number') ? fNum(bva.speedup_median, 1) + '×' : NM) + ').</div>' : '';
+  var shareNote = (ss.frames != null) ? '<div class="db-note db-thr">solve share measured over ' + fInt(ss.frames)
+    + ' solved frames carrying a stage decomposition (denominator: pipeline_ms).</div>' : '';
+  return '<section class="db-section">' + sectionHead('Wall-clock economics', w, modules) + '<div class="db-tiles">' + tiles + '</div>' + bvaNote + shareNote + '</section>';
+}
+
+function renderCorpusSection(db) {
+  var d = (db && db.data) ? db.data : {};
+  var mods = d.modules || [];
+  document.getElementById('db-modules').innerHTML =
+    renderCorpusModule(d.corpus, mods) +
+    renderSolveModule(d.solve, mods) +
+    renderResidualsModule(d.residuals, mods) +
+    renderWallModule(d.wall, mods);
+}
+
+/* ── time-series charts (honest axes: rate 0-100%, real time axis) ──────── */
+function chartScaffold(w, h, pad, yMax, yTicks, yFmt, xDomain) {
+  var iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  function x(dateMs) { return pad.l + (dateMs - xDomain[0]) / (xDomain[1] - xDomain[0]) * iw; }
+  function y(v) { return pad.t + ih - (v / yMax) * ih; }
+  var parts = [];
+  var i;
+  for (i = 0; i < yTicks.length; i++) {
+    var ty = y(yTicks[i]);
+    parts.push('<line x1="' + pad.l + '" y1="' + ty + '" x2="' + (w - pad.r) + '" y2="' + ty + '" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>');
+    parts.push('<text x="' + (pad.l - 8) + '" y="' + (ty + 3.5) + '" text-anchor="end" font-size="11" fill="#626c80" font-family="ui-monospace,Consolas,monospace">' + yFmt(yTicks[i]) + '</text>');
+  }
+  // month ticks across the x domain
+  var d0 = new Date(xDomain[0]); var m = new Date(Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), 1));
+  var names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  while (m.getTime() <= xDomain[1]) {
+    var mx = x(m.getTime());
+    if (mx >= pad.l - 1) {
+      parts.push('<line x1="' + mx + '" y1="' + pad.t + '" x2="' + mx + '" y2="' + (h - pad.b) + '" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>');
+      parts.push('<text x="' + mx + '" y="' + (h - pad.b + 16) + '" text-anchor="middle" font-size="11" fill="#626c80" font-family="ui-monospace,Consolas,monospace">' + names[m.getUTCMonth()] + (m.getUTCMonth() === 0 ? ' ' + m.getUTCFullYear() : '') + '</text>');
+    }
+    m = new Date(Date.UTC(m.getUTCFullYear(), m.getUTCMonth() + 1, 1));
+  }
+  parts.push('<line x1="' + pad.l + '" y1="' + (h - pad.b) + '" x2="' + (w - pad.r) + '" y2="' + (h - pad.b) + '" stroke="#232b3d" stroke-width="1"/>');
+  return { parts: parts, x: x, y: y };
+}
+
+function seriesPaths(sc, pts, color, label, labelDy) {
+  var parts = [];
+  if (pts.length > 1) {
+    var dstr = pts.map(function (p, i) { return (i ? 'L' : 'M') + sc.x(p[0]).toFixed(1) + ' ' + sc.y(p[1]).toFixed(1); }).join(' ');
+    parts.push('<path d="' + dstr + '" fill="none" stroke="' + color + '" stroke-width="1.8"/>');
+  }
+  pts.forEach(function (p) {
+    parts.push('<circle cx="' + sc.x(p[0]).toFixed(1) + '" cy="' + sc.y(p[1]).toFixed(1) + '" r="3.4" fill="' + color + '"/>');
+  });
+  if (pts.length) {
+    var last = pts[pts.length - 1];
+    parts.push('<text x="' + (sc.x(last[0]) + 9) + '" y="' + (sc.y(last[1]) + (labelDy || 4)) + '" font-size="11" fill="' + color + '" font-family="ui-monospace,Consolas,monospace">' + esc(label) + '</text>');
+  }
+  return parts.join('');
+}
+
+function xDomainFor(series) {
+  var first = Date.UTC(2026, 6, 1); // 2026-07-01 — series begins in July 2026
+  var lastPt = series.length ? new Date(series[series.length - 1].date + 'T00:00:00Z').getTime() : first;
+  var minSpanEnd = Date.UTC(2027, 0, 1); // room for future points — honest, not truncated
+  return [first, Math.max(minSpanEnd, lastPt + 30 * 86400000)];
+}
+
+function renderCharts(series) {
+  var W = 460, H = 230, pad = { l: 46, t: 12, r: 78, b: 28 };
+  var xd = xDomainFor(series);
+  function pts(key) {
+    return series.filter(function (s) { return typeof s[key] === 'number'; })
+      .map(function (s) { return [new Date(s.date + 'T00:00:00Z').getTime(), s[key]]; });
+  }
+  // rate chart: 0-100%, never truncated
+  var rc = chartScaffold(W, H, pad, 100, [0, 25, 50, 75, 100], function (v) { return v + '%'; }, xd);
+  var rateSvg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Blind solve rate over time — one snapshot so far">'
+    + rc.parts.join('')
+    + seriesPaths(rc, pts('blind_rate_attempted'), '#3ddc97', 'attempted', -4)
+    + seriesPaths(rc, pts('blind_rate_all'), '#6aa6f8', 'all blind', 12)
+    + '</svg>';
+  document.getElementById('chart-rate').innerHTML = rateSvg;
+  // wall chart: seconds, axis covers the worst measured value
+  var wallMax = 240;
+  series.forEach(function (s) { if (typeof s.wall_p90_s === 'number' && s.wall_p90_s > wallMax) wallMax = Math.ceil(s.wall_p90_s / 60) * 60; });
+  var ticks = [0, wallMax / 4, wallMax / 2, (3 * wallMax) / 4, wallMax];
+  var wc = chartScaffold(W, H, pad, wallMax, ticks, function (v) { return v + 's'; }, xd);
+  var wallSvg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Solve wall time over time — one snapshot so far">'
+    + wc.parts.join('')
+    + seriesPaths(wc, pts('wall_p90_s'), '#f0b23e', 'p90', -4)
+    + seriesPaths(wc, pts('wall_median_s'), '#6aa6f8', 'median', 12)
+    + '</svg>';
+  document.getElementById('chart-wall').innerHTML = wallSvg;
+}
+
+/* ── boot: baked render, then optional live hydration ───────────────────── */
+renderCorpusSection(BAKED_DB);
+renderCharts(BAKED_SERIES);
+
+if (STATS_URL) {
+  fetch(STATS_URL)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (env) {
+      if (!env) return;
+      if (env.stats) {
+        Object.keys(env.stats).forEach(function (k) {
+          var el = document.querySelector('[data-stat="' + k + '"]');
+          if (el && typeof env.stats[k] === 'string') el.textContent = env.stats[k];
+        });
+      }
+      if (typeof env.as_of === 'string') {
+        var asOf = document.querySelector('[data-stat="as_of"]');
+        if (asOf) asOf.textContent = env.as_of;
+      }
+      if (env.database) {
+        renderCorpusSection(env.database);
+        var stamp = document.getElementById('corpus-asof');
+        if (stamp && env.database.generated_at) stamp.textContent = String(env.database.generated_at).slice(0, 10);
+      }
+      if (Array.isArray(env.series) && env.series.length) renderCharts(env.series);
+    })
+    .catch(function () { /* baked values stand */ });
+}
+</script>
+
+</body>
+</html>

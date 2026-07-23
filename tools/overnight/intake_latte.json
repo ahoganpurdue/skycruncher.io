@@ -1,0 +1,25 @@
+{
+  "dest": "D:/AstroLogic/intake/latte",
+  "citation": {
+    "site": "LATTE (Lulin-ASIAA Telescope for Transients and Education) annual raw-data release",
+    "accreditation": { "person": "Wei-Hao Wang (whwang@asiaa.sinica.edu.tw), LATTE PI", "organization": "ASIAA / Lulin Observatory (MOU w/ Institute of Astronomy, National Central University)", "page_url": "https://www.dropbox.com/scl/fo/31lfk286m0wxm6x9jr8kr/h?rlkey=61qkbw056y3btc7pp5krpbvdw", "domain": "dropbox.com (temporary release host)" },
+    "readme_extractions_2026_07_09": {
+      "ROW_ORDER_TRAP": "MaxIM DL files (folders YYYYMMDD) are MIRRORED-at-save (correct in DS9); N.I.N.A. files (folders YYYY-MM-DD) are NOT — vertically mirrored vs MaxIM. Mixing calibration frames across the two systems requires mirroring one. FOLDER NAME FORMAT = the parity discriminator (feeds our image-space parity trap).",
+      "filters": "Johnson-Cousins B,V,R,I + Ha + [OIII] + L (swaps documented in observing logs) — PHOTOMETRIC-STANDARD filters: measured B-V vs catalog B-V becomes directly testable (color fidelity gate on real photometric system).",
+      "calibration_rules": "Bias/darks in Calibration_Frames dir. 16803-era flats NIGHTLY (use closest-in-time); CMOS-era flats per equipment epoch (pick within same period per logs). 16803 short flats = long/short PAIRS, subtract short from long to kill shutter shadow.",
+      "on_disk": "D:/AstroLogic/intake/latte — readme.pdf + 30x M33-Pos13 Johnson-B Bin2 300s raw subs (16803, 20230216, MaxIM-era) + 7x Moravian Panel Ha/L frames (20230305); Moravian zip still downloading"
+    },
+    "use_case": { "verdict": "MATCH", "evidence": "Terms explicitly allow scientific studies + astrophotographic processing, free download without permission; instrument testing = scientific use." },
+    "blockers": [
+      "MUST acknowledge LATTE as data source on any public display of results",
+      "NO selling products derived from LATTE data (LATTE-derived dossiers must never enter any paid tier)",
+      "NO use in religious/political/commercial activities even non-profit"
+    ],
+    "etiquette_HARD": "Dropbox TRIAL account, 100k daily download cap shared by ALL users: read README first, use observing logs to select, download ONLY immediately-needed files, NEVER bulk-mirror or folder-zip; provide Dropbox-experience feedback to the project.",
+    "terms": "2022 release = Apogee F16M / Kodak 16803 CCD (4kx4k, 9um, 36x36mm), PlaneWave CDK20 50cm F/6.8 @ Lulin (el 2862m). Shutter-shadow trap: short flats taken in long/short PAIRS — subtract short from long to remove the shadow. Post-Mar-2023 camera = Moravian C5A-100M (IMX461, 3.76um, default 2x2 bin) — future releases.",
+    "owner_authorization": "owner supplied link + terms screenshot 2026-07-09 late; 'readme is a goldmine — data and mono fits'"
+  },
+  "sources": [
+    { "label": "latte_PENDING_SELECTION", "type": "http", "url": "PENDING — Dropbox folder is a JS shell (no keyless enumeration); obtain README + observing-log FILE links first (owner browser / Chrome-extension session), then add selective per-file dl=1 http entries here per LATTE etiquette." }
+  ]
+}

@@ -1,0 +1,6 @@
+# Volatile telemetry snapshot — regenerated from test_results/agent_runs.jsonl by
+# gen_token_split.mjs. NOT committed (per-run churn + session ids); the tokens tab
+# shows NOT MEASURED honestly when it is absent. Regenerate:
+#   node tools/theses/dashboard/ui/gen_token_split.mjs
+token_split.js
+token_split.json

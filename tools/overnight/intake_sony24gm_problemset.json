@@ -1,0 +1,15 @@
+{
+  "dest": "D:/AstroLogic/intake/sony24gm_problemset",
+  "citation": {
+    "site": "Owner-relayed forum post: Sony 24mm f/1.4 GM astigmatism report (A7IV + A7RIV)",
+    "accreditation": { "person": "UNATTRIBUTED (forum author unknown; owner-relayed quote)", "organization": null, "page_url": "https://drive.google.com/drive/folders/1xrBVWIe4B-vbWqcMbarZtC3mRVa8hBHx", "domain": "drive.google.com" },
+    "use_case": { "verdict": "UNCLEAR-BUT-OWNER-AUTHORIZED", "evidence": "Files shared publicly via Drive link by the author for diagnosis; owner directed the pull 2026-07-09 late. Original post: heavy astigmatism at frame edge (present in center) wide open f/1.4, persistent to f/2.8; elongated stars stretching TOWARD frame center even at 2s exposures; worse on A7RIV than A7IV." },
+    "blockers": [],
+    "terms": "Diagnostic use; do not republish images without author attribution once known.",
+    "owner_authorization": "owner supplied links + quote 2026-07-09 late; measurement study intended ('we will judge' the claimed-good frame)"
+  },
+  "sources": [
+    { "label": "sony24gm_problem_jpgs", "type": "gdrive_folder", "id": "1xrBVWIe4B-vbWqcMbarZtC3mRVa8hBHx" },
+    { "label": "sony24gm_claimed_good", "type": "gdrive_file", "id": "1ombcsDcvL7gv8pnONiAbF2d0XjF8HKEg" }
+  ]
+}

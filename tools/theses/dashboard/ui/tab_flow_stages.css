@@ -1,0 +1,97 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   #flow tab — PROCESSING-STAGE chain (tab_flow_stages.js). Tab-local styles,
+   kept in a dedicated file so the stage-chain surgeon never collides on the
+   memory-map's tab_flow_edges.css or on style.css's tail. Palette tokens
+   (--panel/--ink/--mono/--accent …) come from style.css :root.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --stage-always: #4cc2ff;       /* always-runs spine (sky) */
+  --stage-conditional: #e0a53a;  /* guarded / default-off (amber) */
+  --stage-render: #b487ff;       /* RENDER plane, display-only (violet) */
+  --stage-product: #3ddc97;      /* receipt block folded by step 6 (emerald) */
+  --stage-flow: #4cc2ff;         /* primary data-flow edge */
+  --stage-fold: #6b7590;         /* folded-into-receipt edge (faint) */
+}
+
+/* ── source banner ── */
+.stage-srcbanner {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px;
+  margin-top: 12px; padding: 9px 14px;
+  border: 1px solid var(--line-strong); border-left: 3px solid var(--stage-conditional);
+  border-radius: 8px; background: var(--panel);
+}
+.stage-src-tag { font: 700 9.5px var(--mono); letter-spacing: 0.14em; color: var(--stage-conditional); }
+.stage-src-ref { font-size: 13px; color: var(--ink); }
+.stage-src-ref code { font: 11.5px var(--mono); color: var(--ink-2); background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; }
+.stage-src-note { font-size: 11.5px; color: var(--muted); flex: 1 1 240px; line-height: 1.5; }
+.stage-src-meta { font: 10px var(--mono); color: var(--faint); letter-spacing: 0.02em; width: 100%; }
+
+/* ── canvas ── */
+.stage-canvas {
+  margin-top: 12px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background:
+    radial-gradient(1100px 400px at 25% -8%, rgba(76, 194, 255, 0.05), transparent 60%),
+    var(--panel);
+  padding: 8px 6px; overflow-x: auto;
+}
+.stage-canvas svg { display: block; width: 100%; min-width: 720px; height: auto; }
+
+/* step-lane bands */
+.stage-band rect { fill: rgba(255, 255, 255, 0.014); stroke: var(--line); stroke-width: 0.6; stroke-dasharray: 2 5; }
+.stage-band.odd rect { fill: rgba(255, 255, 255, 0.028); }
+.stage-band-t { font: 700 9px var(--mono); letter-spacing: 0.13em; fill: var(--faint); }
+
+/* nodes */
+.stage-node rect { fill: var(--panel-2); stroke: var(--line-strong); stroke-width: 1; }
+.stage-node-t { font: 600 12px var(--sans); fill: var(--ink); }
+.stage-node-f { font: 9.5px var(--mono); fill: var(--muted); letter-spacing: 0.01em; }
+.stage-node-badge { font: 700 9px var(--mono); fill: var(--faint); letter-spacing: 0.04em; }
+.stage-node-nv { font: 700 7.5px var(--mono); fill: var(--stage-conditional); letter-spacing: 0.08em; }
+.stage-node.cls-render rect:first-of-type { stroke-dasharray: 4 3; opacity: 0.92; }
+.stage-node.cls-product rect:first-of-type { opacity: 0.95; }
+.stage-node.unverified rect:first-of-type { stroke: var(--stage-conditional); stroke-dasharray: 5 3; }
+.stage-node:hover rect:first-of-type { stroke: var(--accent); }
+
+/* edges */
+.stage-edge path { transition: none; }
+.stage-edge.cls-fold { opacity: 0.72; }
+.stage-edge.cls-render { opacity: 0.82; }
+.stage-edge.unverified path { opacity: 0.5; }
+.stage-edge:hover path { filter: brightness(1.3); }
+.stage-edge-lbl {
+  font: 9px var(--mono); fill: var(--ink-2); letter-spacing: 0.01em;
+  paint-order: stroke; stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round;
+}
+
+/* ── legend ── */
+.stage-legend { margin-top: 10px; }
+.stage-steps { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 6px; }
+.stage-step-pill {
+  font-size: 11px; color: var(--ink-2);
+  border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 4px 9px;
+}
+.stage-step-pill b { color: var(--stage-always); font: 700 11px var(--mono); margin-right: 3px; }
+.stage-step-pill code { font: 9.5px var(--mono); color: var(--faint); margin-left: 3px; }
+
+.stage-leg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; margin-bottom: 8px; }
+.stage-leg-row {
+  display: flex; align-items: center; gap: 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 8px 12px;
+}
+.stage-leg-chip { flex: 0 0 16px; width: 16px; height: 16px; border-radius: 4px; }
+.stage-leg-chip.cls-always { background: var(--stage-always); }
+.stage-leg-chip.cls-conditional { background: var(--stage-conditional); }
+.stage-leg-chip.cls-render { background: var(--stage-render); }
+.stage-leg-chip.cls-product { background: var(--stage-product); }
+.stage-leg-line { flex: 0 0 60px; width: 60px; height: 14px; }
+.stage-leg-text { display: flex; flex-direction: column; gap: 2px; font-size: 12px; min-width: 0; }
+.stage-leg-text b { font: 600 11.5px var(--mono); letter-spacing: 0.04em; }
+.stage-leg-text span { color: var(--ink-2); line-height: 1.5; }
+
+.stage-section-divider { margin-top: 26px; padding-top: 8px; border-top: 1px dashed var(--line-strong); }
+
+@media (max-width: 620px) {
+  .stage-leg-grid { grid-template-columns: 1fr; }
+}

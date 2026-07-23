@@ -1,0 +1,37 @@
+# starplates fixture CSVs must be LF on every checkout: the builder's readline
+# uses crlfDelay Infinity, and the column-reversal test relocates a trailing \r
+# into mid-header on CRLF checkouts (truncates the header, fails Windows-only).
+tools/starplates/fixtures/*.csv text eol=lf
+
+# Every .mjs in the repo must check out LF, everywhere, forever (overrides
+# core.autocrlf=true's LF->CRLF smudge on checkout).
+#
+# WHY: many .mjs CLIs/fixtures carry a `#!/usr/bin/env node` shebang AND `import`
+# statements. When such a file is pulled into a Vitest test graph, vite's SSR
+# transform hoists the rewritten imports (`const __vite_ssr_import_0__ = await
+# __vite_ssr_import__(...)`) above the shebang. On a CRLF checkout vite-node's
+# hashbang strip mishandles the `\r`, leaving `#!...` mid-function-body when the
+# module is wrapped -- V8 then throws a bare, stackless
+#   SyntaxError: Invalid or unexpected token   ("no tests", import 0ms)
+# with no file attribution, and the whole suite fails to collect. LF checkouts
+# are fine; the bug needs CRLF + shebang + import together. Committed blobs drift
+# to CRLF (Windows editor / autocrlf), which breaks the gate on a fresh checkout
+# while an older LF worktree still passes -- it bit the gate three times on
+# 2026-07-22 (chip task_8a5043c0), each in a different lane. This one global rule
+# immunizes every tracked .mjs (388 files, including the 9 outside tools/ + src/:
+# .claude/hooks/*.mjs and crates/conformance/*.mjs) so a fresh clone -- like the
+# laptop's new-this-week checkout -- can't regress.
+#
+# CONSOLIDATION: replaces the three former per-dir pins that each carried this
+# same explanation -- tools/intake/alpaca/.gitattributes, tools/setup/.gitattributes,
+# and tools/stack/.gitattributes -- deleted in the same commit as redundant now
+# that this root rule covers the whole tree. (The full archaeology lives here.)
+*.mjs text eol=lf
+
+# EXCEPTION: tools/results/drain_to_r2.mjs embeds a literal NUL byte as a string
+# delimiter, so git correctly classifies it as binary. Keep it binary (a later,
+# more-specific pattern wins) so the text/eol rule can never rewrite its bytes.
+# Because git writes binary blobs verbatim and this blob is already pure-LF, the
+# file still checks out LF -- via the binary path, not eol conversion. The stray
+# NUL is a separate content matter, out of scope for this line-ending pass.
+tools/results/drain_to_r2.mjs -text

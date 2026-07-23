@@ -1,0 +1,422 @@
+{
+  "fragment": "stage_semantic_a",
+  "derived_by": "sonnet batch A (stage-level semantics, non-trap set)",
+  "notes": [
+    "Domain restricted to: stage:load, stage:extract.decode, stage:extract.luminance, stage:extract.detect, stage:extract.spectral_peek, stage:extract, stage:spcc, stage:spcc_render_gains, stage:psf_field, stage:psf_attribution, stage:forced_confirm, stage:calibrate.hardware_profile.",
+    "Skipped: any edge that would require asserting RA hours-vs-degrees, parity, RGB16 dominant-channel layout, or SIP-convention semantics — none of the edges below need those; they are structural (buffer/field identity) or control-flow (branch predicate) facts only.",
+    "The extract.spectral_peek -> calibrate.hardware_profile edge is real but MEDIATED by stage:solve (matched_stars pairing, out of this agent's domain) — the peak_rgb/measured_bv fields written in spectral_peek ride on the SignalPoint object through the solver's matching step and are read back by buildStarMeasurements; both endpoints of the edge are in-domain so it is emitted, with the mediation noted in `why`.",
+    "Did not audit m6_plate_solve/solver_entry.ts (runPostSolveConfirmation's implementation) beyond its call-site signature in orchestrator_session.ts — that file sits on the solve boundary reserved for the sibling agent; the forced_confirm edges below are cited entirely from the orchestrator call site and the psf_field/psf_characterize producer side, which is enough to establish them without reading solve-domain internals.",
+    "Did not emit an edge for the isDemoTierFormat degradation warning in step1_Load (stage:load) — it is an intra-stage warning, not a cross-stage edge to anything in this domain.",
+    "Did not emit a separate edge for CFA_LUMA_PARITY_FIX / cfaMosaicLuma weight selection inside computeluminance as its own edge — it is folded into the extract.decode -> extract.luminance data-flow edge's `how`, since it is an input value (not a new cross-stage hop) and the flag itself is default-OFF, outside stage scope."
+  ],
+  "nodes": {},
+  "edges": [
+    {
+      "from": "stage:load",
+      "to": "stage:extract.decode",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:641",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "sourceFormat string ('FITS'/'CR2'/...) set by detectMagicFormatSync, plus metadata.timestamp",
+        "transform": "decodeScienceFrame branches its whole decode arm (FITS pure-TS decoder vs RAW rawler/libraw vs browser JPEG) on sourceFormat; the timestamp is only a decode-cache-key discriminant (bayerCacheKey), not a pixel transform",
+        "lossy": false
+      },
+      "why": {
+        "text": "step1 (load) is the sole producer of sourceFormat; step2's decode substage passes it straight into decodeScienceFrame's dispatch, so which decoder actually runs is decided entirely by load's output.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "880-885" },
+          { "path": "src/engine/pipeline/stages/ingest.ts", "lines": "207-249" }
+        ]
+      }
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.luminance",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:995-998",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "fullRGB (interleaved linear Float32, w*h*3) + rawSensor.cfaMosaicLuma boolean",
+        "transform": "computeluminance calls reduceToLuminance(rgb, weights, lum) to project RGB -> single-channel Float32 luminance (w*h); cfaMosaicLuma selects LUMA_EQUAL vs LUMA_REC709 weights when the default-OFF CFA_LUMA_PARITY_FIX flag is on",
+        "lossy": true
+      },
+      "why": {
+        "text": "computeluminance's two parameters (rgb, cfaMosaicLuma) are exactly decode's fullRGB and rawSensor.cfaMosaicLuma output fields — extract.luminance has no other producer.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "2507-2522" }
+        ]
+      }
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.detect",
+      "type": "control",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1130-1148",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "isNativeBayer(rawSensor) — a predicate on decode's rawSensor payload (isDemosaiced flag + whether .data is a Uint16Array) — decides which branch detectSignal takes: the native-Bayer branch reads rawSensor.data directly (bypassing luminance entirely), the luminance branch reads the extract.luminance scienceBuffer. This changes which upstream buffer detection actually consumes, not just a data value.",
+        "cites": [
+          { "path": "src/engine/pipeline/stages/detect.ts", "lines": "100-104" },
+          { "path": "src/engine/pipeline/stages/detect.ts", "lines": "143-177" }
+        ]
+      }
+    },
+    {
+      "from": "stage:extract.luminance",
+      "to": "stage:extract.detect",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1106",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "luminance Float32 science buffer (w*h, native grid)",
+        "transform": "assigned to detectScienceBuffer (identity copy-reference unless a pre-detection transform intervenes) and passed into detectSignal",
+        "lossy": false
+      },
+      "why": {
+        "text": "Only reached on the non-native-Bayer branch (see the sibling control edge from extract.decode) — when isNativeBayer is true this buffer is built but never read by detection.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1137-1148" },
+          { "path": "src/engine/pipeline/stages/detect.ts", "lines": "152-177" }
+        ]
+      }
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:extract.detect",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1145-1147",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "metadata.focal_length + the full HardMetadata object",
+        "transform": "forwarded as SignalDetectParams.focalLength / .metadata; SignalProcessor reads it as detection context",
+        "lossy": false
+      }
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.spectral_peek",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1171-1174",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "fullRGB (interleaved linear Float32, w*h*3)",
+        "transform": "peekSpectralData nearest-pixel-samples fullRGB at each detected star's rounded (x,y) to fill peak_rgb + measured_bv",
+        "lossy": true
+      },
+      "why": {
+        "text": "peekSpectralData's `rgb` parameter is the same fullRGB reference produced by extract.decode; it is read here for the last time before the buffer is discarded.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1652-1672" }
+        ]
+      }
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:extract.spectral_peek",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1171-1174",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "SignalPacket.clean_stars + .anomalies (SignalPoint[] arrays)",
+        "transform": "spectral_peek iterates both arrays and mutates each SignalPoint IN PLACE, adding peak_rgb / measured_bv fields",
+        "lossy": false
+      },
+      "why": {
+        "text": "peekSpectralData's `packet` parameter is `this.signal` — extract.detect's own output object.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1652-1672" }
+        ]
+      }
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:extract",
+      "type": "control",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1158",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "`if (!this.signal) throw new Error('Signal analysis failed.')` — a null/failed detection result aborts the entire step2_Extract (stage:extract) call, not just the detect substage.",
+        "cites": []
+      }
+    },
+    {
+      "from": "stage:extract.spectral_peek",
+      "to": "stage:calibrate.hardware_profile",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1662-1665",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "per-star peak_rgb [r,g,b] + measured_bv, riding on the SignalPoint object that stage:solve later copies into solution.matched_stars[].detected",
+        "transform": "buildStarMeasurements reads d.peak_rgb[0..2] / d.measured_bv off the matched detection to build the HardwareProfiler's spectral-forensics StarMeasurement[] input; stars with no peak_rgb sample are dropped (flux_r === undefined filter)",
+        "lossy": true
+      },
+      "why": {
+        "text": "This is the ONLY producer of the flux_r/flux_g/flux_b/measured_bv fields HardwareProfiler.generateReport's spectral forensics consumes. The data crosses through stage:solve's matching step (out of this agent's domain — the SignalPoint object is copied by reference into matched_stars[].detected there) but both edge endpoints (spectral_peek, hardware_profile) are in-domain, so the edge is emitted with this mediation noted rather than silently dropped.",
+        "cites": [
+          { "path": "src/engine/pipeline/stages/calibrate.ts", "lines": "144-169" },
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1831-1834" }
+        ]
+      }
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:calibrate.hardware_profile",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1831-1834",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "HardMetadata (camera/lens/exposure EXIF record)",
+        "transform": "passed unchanged as generateHardwareProfile's `metadata` argument",
+        "lossy": false
+      },
+      "why": {
+        "cites": [
+          { "path": "src/engine/pipeline/stages/calibrate.ts", "lines": "172-183" }
+        ],
+        "text": "generateHardwareProfile forwards `metadata` straight into HardwareProfiler.generateReport."
+      }
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:calibrate.hardware_profile",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1831-1834",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "SignalPacket (this.signal — detection statistics: star/anomaly counts, culling tallies)",
+        "transform": "passed unchanged as generateHardwareProfile's `signal` argument",
+        "lossy": false
+      },
+      "why": {
+        "cites": [
+          { "path": "src/engine/pipeline/stages/calibrate.ts", "lines": "172-183" }
+        ],
+        "text": "generateHardwareProfile forwards `signal` straight into HardwareProfiler.generateReport."
+      }
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:spcc",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:923-932",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "full-res linear RGB Float32 (w*h*3), retained as this.scienceRgb for FITS and raw-DSLR (rawSensorDecode) inputs only",
+        "transform": "direct reference retained (no resample, no discard) across step2/step5; passed as runSpcc's `scienceRgb` aperture-photometry input",
+        "lossy": false
+      },
+      "why": {
+        "text": "this.scienceRgb is set once, immediately after decode, straight from decode's `fullRGB` output; SPCC is its sole consumer (released to null right after SPCC reads it).",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1907-1909" },
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1949-1953" }
+        ]
+      }
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:spcc",
+      "type": "control",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1926",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "cfa_verdict classification ({klass, supported}) on this.signal",
+        "transform": "gates SPCC's color-eligibility refusal (mono -> REFUSED_GRAY, unsupported CFA phase -> UNCALIBRATED_CFA) before any color fit is attempted",
+        "lossy": false
+      },
+      "why": {
+        "text": "A mono or CFA-phase-unsupported verdict makes runSpcc refuse to fit color entirely (INVALID_REFUSED), regardless of whether scienceRgb/matched-star inputs are otherwise present — a genuine run/no-run gate on the color fit, not just a data value feeding a computation.",
+        "cites": [
+          { "path": "src/engine/pipeline/stages/science.ts", "lines": "309-313" },
+          { "path": "src/engine/pipeline/stages/science.ts", "lines": "349-359" }
+        ]
+      }
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:spcc",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:652",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "FrameContext per-frame sensor profile (photometry gain_e_adu etc.)",
+        "transform": "used by runSpcc as the instrumental-magnitude zero-point basis (`ctx` argument)",
+        "lossy": false
+      },
+      "why": {
+        "text": "this.frameCtx originates at step1 (this.frameCtx = result.ctx) and may be extended during extract with master-calibration deposits before SPCC reads it; the base sensor profile is load's output.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1008-1023" },
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1917" }
+        ]
+      }
+    },
+    {
+      "from": "stage:spcc",
+      "to": "stage:spcc_render_gains",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1962-1981",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "TLS-fitted per-channel gains block {gains[3], applied, nStars, r2} (spcc.cal.gains)",
+        "transform": "spcc_render_gains re-renders the preview through spcc.cal.gains ONLY when the quality gate passed (g.applied) — otherwise SKIP, preview left on its empirical white-balance",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the load-bearing link between SPCC's measured color calibration and the render-lane white-balance application; spcc_render_gains has no other data source.",
+        "cites": []
+      }
+    },
+    {
+      "from": "stage:extract.luminance",
+      "to": "stage:psf_field",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:1990-1996",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "science luminance Float32 buffer (native or 2x-binned), this.scienceBuffer",
+        "transform": "runPsfCharacterization measures PSF stamps directly on this buffer at solved star positions — native grid, no resample before measurement",
+        "lossy": false
+      },
+      "why": {
+        "cites": [
+          { "path": "src/engine/pipeline/stages/psf_characterize.ts", "lines": "28-53" }
+        ],
+        "text": "runPsfCharacterization's `scienceBuffer` input is this.scienceBuffer; it returns null honestly if that buffer is absent."
+      }
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:psf_attribution",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:2016-2024",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "PsfFieldReport (measured FWHM-major/minor, ellipticity, orientation field)",
+        "transform": "psf_attribution copies (never mutates) psf_field's measured values and decomposes the measured anisotropy into physically-calculable systematics {drift/diffraction/seeing/refraction/coma} + residual",
+        "lossy": false
+      },
+      "why": {
+        "text": "Explicitly sequenced 'AFTER psf_field because it READS the measured field (the arbiter)' in the source comment — the clearest data-flow edge in this domain.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "2009-2014" },
+          { "path": "src/engine/pipeline/stages/psf_attribution.ts", "lines": "312-334" }
+        ]
+      }
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:psf_attribution",
+      "type": "fallback",
+      "cite": "src/engine/pipeline/stages/psf_attribution.ts:312-315",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "When psfField (or solution) is null, runPsfAttribution short-circuits to emptyReport() — every field NOT_MEASURED — instead of throwing or fabricating a decomposition.",
+        "cites": [
+          { "path": "src/engine/pipeline/stages/psf_attribution.ts", "lines": "284-306" }
+        ]
+      }
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:psf_attribution",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:2016-2024",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "EXIF fields exposure_time / aperture (f-number) / focal_length",
+        "transform": "validated (non-zero, non-DEFAULT) EXIF values feed the diffraction-floor and seeing/drift-magnitude physics calculations",
+        "lossy": false
+      },
+      "why": {
+        "cites": [
+          { "path": "src/engine/pipeline/stages/psf_attribution.ts", "lines": "337-340" }
+        ],
+        "text": "runPsfAttribution's `i.metadata` is this.metadata (load's output), read for exposureSec/fNumber/focalLengthMm."
+      }
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:psf_attribution",
+      "type": "control",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:2022",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "this.timestampTrusted boolean (derived during step2_Extract)",
+        "transform": "gates whether the differential-refraction/seeing attribution tier can be CALCULATED vs stays NOT_MEASURED",
+        "lossy": false
+      },
+      "why": {
+        "text": "psf_attribution's refraction block is explicitly `gatedOn: 'timestampTrusted && GPS present'` — a false timestampTrusted (unset-clock forensics from step2) forces that tier NOT_MEASURED regardless of other inputs.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "953-976" },
+          { "path": "src/engine/pipeline/stages/psf_attribution.ts", "lines": "296" }
+        ]
+      }
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:forced_confirm",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:2054-2075",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "frame-level PSF reference {fwhmPx, ellipticity, source, undersampled}",
+        "transform": "derived from psfField.fwhmMedianMajPx / .ellipticityMedian / .method, compared against the SOLVER_CONFIRM_UNDERSAMPLED_FWHM_PX constant, and passed as forced_confirm's `framePsf` shape-test reference",
+        "lossy": false
+      },
+      "why": {
+        "text": "Explicitly sequenced 'AFTER psf_field so it consumes the MEASURED frame PSF for the shape test' in the source comment.",
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "2038-2039" }
+        ]
+      }
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:forced_confirm",
+      "type": "fallback",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:2055-2060",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "When psfField is absent or fwhmMedianMajPx is null, framePsf is set to null (not a fabricated value) — forced_confirm's shape test runs without a frame-PSF reference rather than failing.",
+        "cites": []
+      }
+    },
+    {
+      "from": "stage:extract.luminance",
+      "to": "stage:forced_confirm",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:2045-2070",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "science luminance Float32 buffer (native or 2x-binned), this.scienceBuffer",
+        "transform": "measured directly on this buffer (native grid) as the forced-photometry probe input, via makeFrameProduct and runPostSolveConfirmation's `scienceBuffer` argument",
+        "lossy": false
+      },
+      "why": {
+        "text": "The whole forced_confirm block is gated on `if (this.scienceBuffer && this.solution)` — extract.luminance's buffer is a hard precondition for the stage to do any work.",
+        "cites": []
+      }
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:forced_confirm",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:2068",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "FrameContext (sensor gain_e_adu / read-noise profile, possibly extended with master-calibration deposits during extract)",
+        "transform": "feeds makeFrameProduct so forced-photometry SNR uses the CCD equation in electrons (source Poisson + read noise) rather than a raw-count heuristic",
+        "lossy": false
+      },
+      "why": {
+        "cites": [
+          { "path": "src/engine/pipeline/orchestrator_session.ts", "lines": "1008-1023" }
+        ],
+        "text": "this.frameCtx (originating at load, line 652) can be extended during extract before forced_confirm's makeFrameProduct(sb, bw, bh, this.frameCtx) call reads it."
+      }
+    }
+  ]
+}

@@ -1,0 +1,2988 @@
+{
+  "schema": "validation-truth/1",
+  "_note": "Ground-truth labels for the validation harness (Enh1, TWO-TIER). TRACKED (underlying sample files + corpus_manifest.json are gitignored/local, so a clone keeps the answers, not the frames). GOLD = independent/corroborated truth; COARSE = uncorroborated capture-header goto (loosened tol, honest lower tier). Regenerate: node tools/validation/truth/seed_labels.mjs",
+  "labels": [
+    {
+      "frame_id": "DSO_Stacked_738_M 66_60.0s_20260516_064736",
+      "source": "fits_header",
+      "tier": "GOLD",
+      "ra_hours": 11.3616668701172,
+      "dec_degrees": 12.8419437408447,
+      "pixel_scale_arcsec": 3.73854960875,
+      "provenance_note": "SeeStar M66 stack (imx585, FOCALLEN=160mm). center = OBJECT RA/DEC from FITS header (goto pointing, degrees->hours); scale = nominal 206.265*XPIXSZ(2.9um)/FOCALLEN(160mm) = APPROXIMATE (no CD/CDELT in header). TIER = GOLD: the goto is INDEPENDENTLY corroborated by an astrometry.net blind solve (agrees 0.079deg; MEMORY astrometry-truth-oracle-state) - unlike the uncorroborated COARSE goto frames.",
+      "generated_at": "2026-07-07T00:00:00.000Z"
+    },
+    {
+      "frame_id": "44k_Cygnus_loop_Collective_2x drizzle_.7_550ml",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 20.8642,
+      "dec_degrees": 30.983,
+      "pixel_scale_arcsec": 2.374,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_CRVAL, 20 51 25.18 +30 58 47.5_11): center = stacking-software CRVAL WCS; scale = nominal-FL header scale 2.374\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, tight center tol 1deg (a real WCS, near-gold)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 1,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "DSO_Stacked_738_M66_DUPLICATE_of_truth_anchor",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 11.3617,
+      "dec_degrees": 12.842,
+      "pixel_scale_arcsec": 3.739,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC, M 66): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 3.739\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "M101_IRCUT_d3x_maxcanvas_noBGE_jam2016",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 14.0717,
+      "dec_degrees": 54.205,
+      "pixel_scale_arcsec": 0.798,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC, M 101): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 0.798\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "M50_2X_Best20h_Zcom",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 13.5189,
+      "dec_degrees": 47.065,
+      "pixel_scale_arcsec": 1.196,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC, M 51): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 1.196\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "M50_3X_Best20h_Zcom.fits",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 13.5164,
+      "dec_degrees": 47.06,
+      "pixel_scale_arcsec": 0.798,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC, M 51): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 0.798\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "M51 IRCUT 150h",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 13.5181,
+      "dec_degrees": 47.077,
+      "pixel_scale_arcsec": 2.393,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 2.393\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "M51_stack_d3x_best38h_Jam_2016",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 13.5178,
+      "dec_degrees": 47.065,
+      "pixel_scale_arcsec": 0.798,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC, M 51): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 0.798\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "M51_STACK_LP_d3x_6_13_2025_Jam_2016",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 13.5169,
+      "dec_degrees": 47.127,
+      "pixel_scale_arcsec": 0.798,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC, M 51): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 0.798\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "M51_zemosaic_tinystork_17631lights",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 13.5006,
+      "dec_degrees": 47.214,
+      "pixel_scale_arcsec": null,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_CRVAL): center = stacking-software CRVAL WCS; scale = no header scale (center-only truth). TIER = COARSE (uncorroborated capture-header truth, tight center tol 1deg (a real WCS, near-gold)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 1,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "r_cc_M51_square08-linearfit4-5_stars",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 13.4998,
+      "dec_degrees": 47.226,
+      "pixel_scale_arcsec": 0.791,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC, M 51): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 0.791\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "r_cc_M51_stacked-lancos05-linearfit4-5_stars",
+      "source": "fits_header",
+      "tier": "COARSE",
+      "ra_hours": 13.4998,
+      "dec_degrees": 47.226,
+      "pixel_scale_arcsec": 0.791,
+      "provenance_note": "corpus_manifest.json ground_truth (FITS_RA_DEC, M 51): center = mount goto (OBJECT RA/DEC); scale = nominal-FL header scale 0.791\"/px = APPROXIMATE. TIER = COARSE (uncorroborated capture-header truth, loosened center tol 2deg (~1deg goto error)) - NOT the trusted gold bar.",
+      "generated_at": "2026-07-07T00:00:00.000Z",
+      "tolerances": {
+        "center_deg": 2,
+        "scale_frac": 0.05
+      }
+    },
+    {
+      "frame_id": "sample_observation",
+      "source": "bundled_known",
+      "ra_hours": 17.5858,
+      "dec_degrees": -33.83,
+      "pixel_scale_arcsec": 63.211,
+      "rotation_deg": 155.65,
+      "parity": 1,
+      "provenance_note": "Bundled Canon T6 + Rokinon 14mm beach CR2; blind solve agrees with brute-forced ground truth 0.2–0.3° pointing / 0.2% scale (WHITEPAPER; 7922172,1c811c0).",
+      "generated_at": "2026-07-07T00:00:00.000Z"
+    },
+    {
+      "frame_id": "DSO_Stacked_738_M66_DUPLICATE_of_truth_anchor",
+      "source": "astrometry_net",
+      "ra_hours": 11.341979622268687,
+      "dec_degrees": 13.060976207982963,
+      "pixel_scale_arcsec": 3.6760929468688732,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15480739 job 16294134)",
+      "generated_at": "2026-07-10T02:48:51.660Z",
+      "rotation_deg": 179.13359433161335,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15480739,
+        "job_id": 16294134,
+        "solved_at": "2026-07-10T02:48:51.660Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "5e063ba04e00d3924d41ace580fc964e81cde439df0884f11b06e8263821c659",
+        "submitted_bytes": "FITS xylist (300 of 3000 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 2.6170199999999997,
+          "scale_upper": 4.86018,
+          "scale_est": 3.7386,
+          "center_ra": 170.4255,
+          "center_dec": 12.842,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 170.1296943340303,
+          "dec": 13.060976207982963,
+          "width_arcsec": 7852.134534511913,
+          "height_arcsec": 14024.294592304752,
+          "radius": 2.2323417832374908,
+          "pixscale": 3.6760929468688732,
+          "orientation": 179.13359433161335,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294134"
+      }
+    },
+    {
+      "frame_id": "IMG_1238",
+      "source": "astrometry_net",
+      "ra_hours": 15.838735894455912,
+      "dec_degrees": 84.54252304101854,
+      "pixel_scale_arcsec": 61.062939637241755,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481325 job 16294398)",
+      "generated_at": "2026-07-10T03:29:30.770Z",
+      "rotation_deg": 139.28143421128345,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481325,
+        "job_id": 16294398,
+        "solved_at": "2026-07-10T03:29:30.770Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "537aeed0bb949f0afc60281d2e0242632e8e1b58219c17f17329edba24788462",
+        "submitted_bytes": "FITS xylist (300 of 595 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.346959999999996,
+          "scale_upper": 82.35864000000001,
+          "scale_est": 63.3528
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 237.58103841683868,
+          "dec": 84.54252304101854,
+          "width_arcsec": 314779.45382998127,
+          "height_arcsec": 141055.39056202845,
+          "radius": 47.90815700606866,
+          "pixscale": 61.062939637241755,
+          "orientation": 139.28143421128345,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294398"
+      }
+    },
+    {
+      "frame_id": "IMG_1241",
+      "source": "astrometry_net",
+      "ra_hours": 16.348334259607377,
+      "dec_degrees": 86.21991338171979,
+      "pixel_scale_arcsec": 61.35995364811525,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top291+scale-hint; submission 15481330 job 16294423)",
+      "generated_at": "2026-07-10T03:33:35.932Z",
+      "rotation_deg": 167.10075178991343,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481330,
+        "job_id": 16294423,
+        "solved_at": "2026-07-10T03:33:35.932Z",
+        "submitted_path": "xylist-top291+scale-hint",
+        "submitted_sha256": "e7a751cbb81b26ba67c54390e0573c7f4f4da3d35cafe41dc8d62072df98abbd",
+        "submitted_bytes": "FITS xylist (291 of 291 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 245.22501389411067,
+          "dec": 86.21991338171979,
+          "width_arcsec": 314101.602724702,
+          "height_arcsec": 158983.63990226662,
+          "radius": 48.89512558680765,
+          "pixscale": 61.35995364811525,
+          "orientation": 167.10075178991343,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294423"
+      }
+    },
+    {
+      "frame_id": "IMG_1266",
+      "source": "astrometry_net",
+      "ra_hours": 17.52703246136781,
+      "dec_degrees": -6.519153406916382,
+      "pixel_scale_arcsec": 59.52613835231853,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481406 job 16294438)",
+      "generated_at": "2026-07-10T03:36:54.193Z",
+      "rotation_deg": 120.70194177313466,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481406,
+        "job_id": 16294438,
+        "solved_at": "2026-07-10T03:36:54.193Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "be6e1b7fd2e7e0649cb9b1048e20a0296c7b8ff87c50930392f62d27ae18ff0a",
+        "submitted_bytes": "FITS xylist (300 of 1387 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 262.90548692051715,
+          "dec": -6.519153406916382,
+          "width_arcsec": 308702.5534951239,
+          "height_arcsec": 185007.237999006,
+          "radius": 49.98551963282521,
+          "pixscale": 59.52613835231853,
+          "orientation": 120.70194177313466,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294438"
+      }
+    },
+    {
+      "frame_id": "IMG_1286",
+      "source": "astrometry_net",
+      "ra_hours": 15.622181054283555,
+      "dec_degrees": -28.144797482283437,
+      "pixel_scale_arcsec": 61.20339428873724,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481459 job 16294448)",
+      "generated_at": "2026-07-10T03:37:25.055Z",
+      "rotation_deg": 151.4697397351021,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481459,
+        "job_id": 16294448,
+        "solved_at": "2026-07-10T03:37:25.055Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "7cf2243d1d4e1332a41fe6fa640e1a4f855e8454d26f0b18f7b98ff1d8a78d63",
+        "submitted_bytes": "FITS xylist (300 of 880 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 234.33271581425333,
+          "dec": -28.144797482283437,
+          "width_arcsec": 211763.74423903087,
+          "height_arcsec": 258645.54426420358,
+          "radius": 46.42742098591262,
+          "pixscale": 61.20339428873724,
+          "orientation": 151.4697397351021,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294448"
+      }
+    },
+    {
+      "frame_id": "IMG_1410",
+      "source": "astrometry_net",
+      "ra_hours": 18.190390288768512,
+      "dec_degrees": -13.711200345807917,
+      "pixel_scale_arcsec": 62.039061112007886,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481475 job 16294459)",
+      "generated_at": "2026-07-10T03:37:55.962Z",
+      "rotation_deg": 142.9551212902188,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481475,
+        "job_id": 16294459,
+        "solved_at": "2026-07-10T03:37:55.962Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "e038f1921938a2fad655304b34370796855e381f774a4973cced9f4ba26336fa",
+        "submitted_bytes": "FITS xylist (300 of 2023 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 272.85585433152767,
+          "dec": -13.711200345807917,
+          "width_arcsec": 305976.6494044229,
+          "height_arcsec": 212793.97961418706,
+          "radius": 51.76345991176633,
+          "pixscale": 62.039061112007886,
+          "orientation": 142.9551212902188,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294459"
+      }
+    },
+    {
+      "frame_id": "IMG_1414",
+      "source": "astrometry_net",
+      "ra_hours": 17.01024461857469,
+      "dec_degrees": -17.944074666125676,
+      "pixel_scale_arcsec": 61.0642841545871,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481489 job 16294465)",
+      "generated_at": "2026-07-10T03:38:31.826Z",
+      "rotation_deg": 161.48013014658733,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481489,
+        "job_id": 16294465,
+        "solved_at": "2026-07-10T03:38:31.826Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "edf711c0da8addd7b14d3e08e65dd57e33262bf89c76443fd74b16efd13e75a9",
+        "submitted_bytes": "FITS xylist (300 of 835 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 255.15366927862033,
+          "dec": -17.944074666125676,
+          "width_arcsec": 210549.65176501632,
+          "height_arcsec": 259217.88623622223,
+          "radius": 46.382457222786556,
+          "pixscale": 61.0642841545871,
+          "orientation": 161.48013014658733,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294465"
+      }
+    },
+    {
+      "frame_id": "CSM30803_5DMkIII_iso6400_15s",
+      "source": "astrometry_net",
+      "ra_hours": 13.842826666666667,
+      "dec_degrees": -59.6982,
+      "pixel_scale_arcsec": 52.74,
+      "provenance_note": "astrometry.net solve-field XYLIST mode (raw CR2 unsupported by solve-field; fed 17226 app detections as a FITS xylist). index-4117.fits, log-odds 104.824, 63 matches, 0 conflicts, SIP-on. Center RA 207.6424deg (13.842h) / dec -59.6982deg, scale 52.74\"/px, parity neg, field 72.99x52.69deg. GOLD: independent oracle solve (manual WSL solve-field xylist path — the normal astrometry_truth.mjs auto label-write was skipped, so seeded here by hand). CORRECTS the EXIF/nominal-FL scale prior 41.97\"/px (25.7% low). Study: test_results/5d3_truth_labeled_study_2026-07-09.json + test_results/deep_cones/5d3_oracle.wcs.",
+      "generated_at": "2026-07-09T00:00:00.000Z",
+      "parity": -1,
+      "content_sha256": "6610645abac70d82ec5eb77a120704149a065f8bba518938ecd95f3abc5c2e6c",
+      "tier": "GOLD"
+    },
+    {
+      "frame_id": "IMG_1576",
+      "source": "astrometry_net",
+      "ra_hours": 21.380574451627883,
+      "dec_degrees": 59.832525537583564,
+      "pixel_scale_arcsec": 60.553303325238225,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481497 job 16294494)",
+      "generated_at": "2026-07-10T03:42:51.262Z",
+      "rotation_deg": 18.822510472965302,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481497,
+        "job_id": 16294494,
+        "solved_at": "2026-07-10T03:42:51.262Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "e84946ae0c9695ad07d79ce8c184e20ed67e4a6dd8ba2f4b424e270de1fa6282",
+        "submitted_bytes": "FITS xylist (300 of 1001 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 320.70861677441826,
+          "dec": 59.832525537583564,
+          "width_arcsec": 209514.42950532425,
+          "height_arcsec": 276365.2763763873,
+          "radius": 48.167432022774115,
+          "pixscale": 60.553303325238225,
+          "orientation": 18.822510472965302,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294494"
+      }
+    },
+    {
+      "frame_id": "IMG_1753",
+      "source": "astrometry_net",
+      "ra_hours": 18.882289630678105,
+      "dec_degrees": 0.16932913277915523,
+      "pixel_scale_arcsec": 60.029878879651996,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481777 job 16294591)",
+      "generated_at": "2026-07-10T03:57:48.936Z",
+      "rotation_deg": 221.67450336327056,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481777,
+        "job_id": 16294591,
+        "solved_at": "2026-07-10T03:57:48.936Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "9e9104bf910f805ed15e64577069b0ec6b63233c8fe12ac625cb1c8ce706d872",
+        "submitted_bytes": "FITS xylist (300 of 6109 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 283.2343444601716,
+          "dec": 0.16932913277915523,
+          "width_arcsec": 207763.41080247556,
+          "height_arcsec": 235437.18496599514,
+          "radius": 43.61117810791704,
+          "pixscale": 60.029878879651996,
+          "orientation": -138.32549663672944,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294591"
+      }
+    },
+    {
+      "frame_id": "IMG_1754",
+      "source": "astrometry_net",
+      "ra_hours": 20.060605542497573,
+      "dec_degrees": 19.714864918305736,
+      "pixel_scale_arcsec": 60.62854236930778,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481836 job 16294600)",
+      "generated_at": "2026-07-10T03:58:35.004Z",
+      "rotation_deg": 224.13521817662075,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481836,
+        "job_id": 16294600,
+        "solved_at": "2026-07-10T03:58:35.004Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "f4742f21f57a405043a66f3ccee46d0fd90519f8d5d284bd7a8880e50354c31e",
+        "submitted_bytes": "FITS xylist (300 of 9218 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 300.9090831374636,
+          "dec": 19.714864918305736,
+          "width_arcsec": 209774.75659780492,
+          "height_arcsec": 266159.30100126116,
+          "radius": 47.06801250550247,
+          "pixscale": 60.62854236930778,
+          "orientation": -135.86478182337925,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294600"
+      }
+    },
+    {
+      "frame_id": "IMG_1757",
+      "source": "astrometry_net",
+      "ra_hours": 19.649048499808373,
+      "dec_degrees": 11.306365982892062,
+      "pixel_scale_arcsec": 59.883341184870126,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15481853 job 16294608)",
+      "generated_at": "2026-07-10T03:59:06.161Z",
+      "rotation_deg": 223.42371732032882,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15481853,
+        "job_id": 16294608,
+        "solved_at": "2026-07-10T03:59:06.161Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "c0b250752f67f9d12f645bdf202321a0bf74cc1a02c730891d83f694ad2731d4",
+        "submitted_bytes": "FITS xylist (300 of 4768 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 294.7357274971256,
+          "dec": 11.306365982892062,
+          "width_arcsec": 201866.7431341972,
+          "height_arcsec": 221568.36238401948,
+          "radius": 41.63024361578641,
+          "pixscale": 59.883341184870126,
+          "orientation": -136.57628267967118,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294608"
+      }
+    },
+    {
+      "frame_id": "IMG_1804",
+      "source": "astrometry_net",
+      "ra_hours": 18.733308485023016,
+      "dec_degrees": -2.9199362500679515,
+      "pixel_scale_arcsec": 59.97660067748719,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15482252 job 16294735)",
+      "generated_at": "2026-07-10T04:30:18.416Z",
+      "rotation_deg": 196.0947796134994,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482252,
+        "job_id": 16294735,
+        "solved_at": "2026-07-10T04:30:18.416Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "03ddfa206a383862a399a9ed0d78463806e8f3c83fbe7f3d9d479437459f6140",
+        "submitted_bytes": "FITS xylist (300 of 45565 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 280.99962727534523,
+          "dec": -2.9199362500679515,
+          "width_arcsec": 308219.75088160665,
+          "height_arcsec": 125770.93162069064,
+          "radius": 46.23513735045161,
+          "pixscale": 59.97660067748719,
+          "orientation": -163.9052203865006,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294735"
+      }
+    },
+    {
+      "frame_id": "IMG_1814",
+      "source": "astrometry_net",
+      "ra_hours": 19.97504786304089,
+      "dec_degrees": 0.10271283416210697,
+      "pixel_scale_arcsec": 60.64142922110248,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15482367 job 16294776)",
+      "generated_at": "2026-07-10T04:31:19.727Z",
+      "rotation_deg": 208.2645263406754,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482367,
+        "job_id": 16294776,
+        "solved_at": "2026-07-10T04:31:19.727Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "fab8e3c4d5fb2dcc4474a76f8deaa159b987a605e5737a4897556b980bb5297b",
+        "submitted_bytes": "FITS xylist (300 of 18316 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 299.6257179456133,
+          "dec": 0.10271283416210697,
+          "width_arcsec": 305632.80327435647,
+          "height_arcsec": 129469.45138705379,
+          "radius": 46.10059896904706,
+          "pixscale": 60.64142922110248,
+          "orientation": -151.7354736593246,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294776"
+      }
+    },
+    {
+      "frame_id": "IMG_1815",
+      "source": "astrometry_net",
+      "ra_hours": 20.17457057430507,
+      "dec_degrees": 0.5259732535269497,
+      "pixel_scale_arcsec": 60.89110123290184,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15482386 job 16294795)",
+      "generated_at": "2026-07-10T04:33:37.621Z",
+      "rotation_deg": 208.44214172583938,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482386,
+        "job_id": 16294795,
+        "solved_at": "2026-07-10T04:33:37.621Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "7540285017b269f770a2dffd6e4c0c4663f25fc3675acb8aeb3ff85bf5ad9bf0",
+        "submitted_bytes": "FITS xylist (300 of 13560 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 302.61855861457605,
+          "dec": 0.5259732535269497,
+          "width_arcsec": 315294.1221839657,
+          "height_arcsec": 129576.26342361512,
+          "radius": 47.34469239814687,
+          "pixscale": 60.89110123290184,
+          "orientation": -151.55785827416062,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294795"
+      }
+    },
+    {
+      "frame_id": "IMG_1816",
+      "source": "astrometry_net",
+      "ra_hours": 20.395347869484265,
+      "dec_degrees": 0.35897365816504634,
+      "pixel_scale_arcsec": 60.35301718010982,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15482425 job 16294809)",
+      "generated_at": "2026-07-10T04:35:39.701Z",
+      "rotation_deg": 207.05877368079754,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482425,
+        "job_id": 16294809,
+        "solved_at": "2026-07-10T04:35:39.701Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "c59e58818d368f74cf2138db071510dbd0b6c033535080bb5994a7810dae1cb0",
+        "submitted_bytes": "FITS xylist (300 of 15616 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 305.93021804226396,
+          "dec": 0.35897365816504634,
+          "width_arcsec": 312206.1578727081,
+          "height_arcsec": 130845.3412464781,
+          "radius": 47.01613287348331,
+          "pixscale": 60.35301718010982,
+          "orientation": -152.94122631920246,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294809"
+      }
+    },
+    {
+      "frame_id": "IMG_1817",
+      "source": "astrometry_net",
+      "ra_hours": 20.72692965893976,
+      "dec_degrees": 0.5259504959651774,
+      "pixel_scale_arcsec": 60.835629482090766,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15482457 job 16294816)",
+      "generated_at": "2026-07-10T04:36:25.623Z",
+      "rotation_deg": 208.383455453867,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482457,
+        "job_id": 16294816,
+        "solved_at": "2026-07-10T04:36:25.623Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "e91bac6e0a228fdbc690458eb8581a3d5caa6863a409be5b2543ac23ceed5505",
+        "submitted_bytes": "FITS xylist (300 of 15588 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 44.34697499999999,
+          "scale_upper": 82.35866785714285,
+          "scale_est": 63.352821428571424
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 310.9039448840964,
+          "dec": 0.5259504959651774,
+          "width_arcsec": 307889.1208088614,
+          "height_arcsec": 125747.24613948162,
+          "radius": 46.19137939656936,
+          "pixscale": 60.835629482090766,
+          "orientation": -151.616544546133,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294816"
+      }
+    },
+    {
+      "frame_id": "M50_2X_Best20h_Zcom",
+      "source": "astrometry_net",
+      "ra_hours": 13.502815572393551,
+      "dec_degrees": 47.24192387478182,
+      "pixel_scale_arcsec": 1.1869007709844936,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top293+scale-hint; submission 15482474 job 16294822)",
+      "generated_at": "2026-07-10T04:36:56.481Z",
+      "rotation_deg": 179.60464416800508,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482474,
+        "job_id": 16294822,
+        "solved_at": "2026-07-10T04:36:56.481Z",
+        "submitted_path": "xylist-top293+scale-hint",
+        "submitted_sha256": "db323ecf57e71852c66abdbde5808093b26c6cb38b39fa88304e0c601a856782",
+        "submitted_bytes": "FITS xylist (293 of 293 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.8374099999999999,
+          "scale_upper": 1.5551899999999999,
+          "scale_est": 1.1963,
+          "center_ra": 202.7835,
+          "center_dec": 47.065,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.54223358590326,
+          "dec": 47.24192387478182,
+          "width_arcsec": 2535.2200468228784,
+          "height_arcsec": 4524.46573899289,
+          "radius": 0.7203251113171603,
+          "pixscale": 1.1869007709844936,
+          "orientation": 179.60464416800508,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294822"
+      }
+    },
+    {
+      "frame_id": "M51 IRCUT 150h",
+      "source": "astrometry_net",
+      "ra_hours": 13.505479443730328,
+      "dec_degrees": 47.21691731496729,
+      "pixel_scale_arcsec": 2.374714411635383,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top143+scale-hint; submission 15482490 job 16294834)",
+      "generated_at": "2026-07-10T04:37:12.159Z",
+      "rotation_deg": 179.363719337405,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482490,
+        "job_id": 16294834,
+        "solved_at": "2026-07-10T04:37:12.159Z",
+        "submitted_path": "xylist-top143+scale-hint",
+        "submitted_sha256": "be494a36451581098bc7ea203f576abb5159930a9310cfd4a5ae2069d7959d80",
+        "submitted_bytes": "FITS xylist (143 of 143 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.67489,
+          "scale_upper": 3.11051,
+          "scale_est": 2.3927,
+          "center_ra": 202.7715,
+          "center_dec": 47.077,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.58219165595492,
+          "dec": 47.21691731496729,
+          "width_arcsec": 2453.0799872193506,
+          "height_arcsec": 4473.961951521062,
+          "radius": 0.7086591974754548,
+          "pixscale": 2.374714411635383,
+          "orientation": 179.363719337405,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294834"
+      }
+    },
+    {
+      "frame_id": "r_cc_M51_stacked-lancos05-linearfit4-5_stars",
+      "source": "astrometry_net",
+      "ra_hours": 13.501374445151317,
+      "dec_degrees": 47.194752662301696,
+      "pixel_scale_arcsec": 0.7908419636842201,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top274+scale-hint; submission 15482513 job 16294856)",
+      "generated_at": "2026-07-10T04:39:30.249Z",
+      "rotation_deg": 351.69239780065914,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482513,
+        "job_id": 16294856,
+        "solved_at": "2026-07-10T04:39:30.249Z",
+        "submitted_path": "xylist-top274+scale-hint",
+        "submitted_sha256": "4cc2319ce0e457a9a555406430e240f89a72c49beb3610c6b8c1a49950af0d65",
+        "submitted_bytes": "FITS xylist (274 of 274 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.55391,
+          "scale_upper": 1.02869,
+          "scale_est": 0.7913,
+          "center_ra": 202.497,
+          "center_dec": 47.226,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.52061667726974,
+          "dec": 47.194752662301696,
+          "width_arcsec": 2534.6484936079255,
+          "height_arcsec": 4476.165514452686,
+          "radius": 0.7144412678525318,
+          "pixscale": 0.7908419636842201,
+          "orientation": -8.307602199340877,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294856"
+      }
+    },
+    {
+      "frame_id": "M50_3X_Best20h_Zcom.fits",
+      "source": "astrometry_net",
+      "ra_hours": 13.500757593310594,
+      "dec_degrees": 47.19233596568943,
+      "pixel_scale_arcsec": 0.7912136912163168,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15482543 job 16294861)",
+      "generated_at": "2026-07-10T04:39:46.094Z",
+      "rotation_deg": 178.65007358998184,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482543,
+        "job_id": 16294861,
+        "solved_at": "2026-07-10T04:39:46.094Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "71a1b3e1c110fdd2d3531c9b423abd2e60a9935bb6d6d31407f28c44ada1ea96",
+        "submitted_bytes": "FITS xylist (300 of 998 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.5583199999999999,
+          "scale_upper": 1.03688,
+          "scale_est": 0.7976,
+          "center_ra": 202.746,
+          "center_dec": 47.06,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.5113638996589,
+          "dec": 47.19233596568943,
+          "width_arcsec": 2542.960803569242,
+          "height_arcsec": 4517.830176845169,
+          "radius": 0.7200479980585652,
+          "pixscale": 0.7912136912163168,
+          "orientation": 178.65007358998184,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294861"
+      }
+    },
+    {
+      "frame_id": "M51_stack_d3x_best38h_Jam_2016",
+      "source": "astrometry_net",
+      "ra_hours": 13.501067231017743,
+      "dec_degrees": 47.1931475082626,
+      "pixel_scale_arcsec": 0.791379902602357,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top183+scale-hint; submission 15482547 job 16294865)",
+      "generated_at": "2026-07-10T04:40:32.104Z",
+      "rotation_deg": 359.06821253479796,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482547,
+        "job_id": 16294865,
+        "solved_at": "2026-07-10T04:40:32.104Z",
+        "submitted_path": "xylist-top183+scale-hint",
+        "submitted_sha256": "d3b92262a5a991a525d7cb62c64f7970b69a247b5bef55c3519f5925f2bcbd8f",
+        "submitted_bytes": "FITS xylist (183 of 183 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.5583199999999999,
+          "scale_upper": 1.03688,
+          "scale_est": 0.7976,
+          "center_ra": 202.767,
+          "center_dec": 47.065,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.51600846526614,
+          "dec": 47.1931475082626,
+          "width_arcsec": 2534.7898280353497,
+          "height_arcsec": 4504.534405612616,
+          "radius": 0.7178821207330064,
+          "pixscale": 0.791379902602357,
+          "orientation": -0.9317874652020273,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294865"
+      }
+    },
+    {
+      "frame_id": "M51_STACK_LP_d3x_6_13_2025_Jam_2016",
+      "source": "astrometry_net",
+      "ra_hours": 13.50431026582725,
+      "dec_degrees": 47.22281755219767,
+      "pixel_scale_arcsec": 0.7904332664564732,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top69+scale-hint; submission 15482587 job 16294890)",
+      "generated_at": "2026-07-10T04:45:07.450Z",
+      "rotation_deg": 359.6230356458528,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482587,
+        "job_id": 16294890,
+        "solved_at": "2026-07-10T04:45:07.450Z",
+        "submitted_path": "xylist-top69+scale-hint",
+        "submitted_sha256": "c406b11b1201bed667329565445c75bea1cd6038de2685060be76311c6f04a03",
+        "submitted_bytes": "FITS xylist (69 of 69 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.5583199999999999,
+          "scale_upper": 1.03688,
+          "scale_est": 0.7976,
+          "center_ra": 202.7535,
+          "center_dec": 47.127,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.56465398740875,
+          "dec": 47.22281755219767,
+          "width_arcsec": 2511.996920798672,
+          "height_arcsec": 4509.421785134179,
+          "radius": 0.7169278885247895,
+          "pixscale": 0.7904332664564732,
+          "orientation": -0.37696435414720453,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294890"
+      }
+    },
+    {
+      "frame_id": "M51_Top65%_Zcom",
+      "source": "astrometry_net",
+      "ra_hours": 13.50120410829519,
+      "dec_degrees": 47.19488753985862,
+      "pixel_scale_arcsec": 2.3740168294365307,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top165+no-scale; submission 15482642 job 16294917)",
+      "generated_at": "2026-07-10T04:50:27.735Z",
+      "rotation_deg": 178.65654007425974,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482642,
+        "job_id": 16294917,
+        "solved_at": "2026-07-10T04:50:27.735Z",
+        "submitted_path": "xylist-top165+no-scale",
+        "submitted_sha256": "52acc234365c2f38fd2dbd2581945e475e2acdac9ae0668f43b67625f42e9786",
+        "submitted_bytes": "FITS xylist (165 of 165 detections, flux-sorted) 8640B",
+        "hints": {
+          "center_ra": 0,
+          "center_dec": 0,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.51806162442784,
+          "dec": 47.19488753985862,
+          "width_arcsec": 2506.9617718849763,
+          "height_arcsec": 4496.387874952789,
+          "radius": 0.7150061680607203,
+          "pixscale": 2.3740168294365307,
+          "orientation": 178.65654007425974,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294917"
+      }
+    },
+    {
+      "frame_id": "M51_zemosaic_tinystork_17631lights",
+      "source": "astrometry_net",
+      "ra_hours": 13.515736067046387,
+      "dec_degrees": 47.09232373185148,
+      "pixel_scale_arcsec": 2.3767160857360254,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top226+no-scale; submission 15482732 job 16294927)",
+      "generated_at": "2026-07-10T04:52:30.623Z",
+      "rotation_deg": 0.04026760496570029,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482732,
+        "job_id": 16294927,
+        "solved_at": "2026-07-10T04:52:30.623Z",
+        "submitted_path": "xylist-top226+no-scale",
+        "submitted_sha256": "a8e6e0b25856283ba770151a616f16389a0e50f9ba298429153ab23cb388353a",
+        "submitted_bytes": "FITS xylist (226 of 226 detections, flux-sorted) 8640B",
+        "hints": {
+          "center_ra": 202.50900000000001,
+          "center_dec": 47.214,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.7360410056958,
+          "dec": 47.09232373185148,
+          "width_arcsec": 5644.700703623061,
+          "height_arcsec": 6968.5315633780265,
+          "radius": 1.2455404878728455,
+          "pixscale": 2.3767160857360254,
+          "orientation": 0.04026760496570029,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294927"
+      }
+    },
+    {
+      "frame_id": "Andromeda Galaxy M31 90s-431_ISO100",
+      "source": "astrometry_net",
+      "ra_hours": 0.7162899701250383,
+      "dec_degrees": 41.26967292628423,
+      "pixel_scale_arcsec": 3.428360308009219,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15482771 job 16294934)",
+      "generated_at": "2026-07-10T04:52:46.228Z",
+      "rotation_deg": 90.24042475783942,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482771,
+        "job_id": 16294934,
+        "solved_at": "2026-07-10T04:52:46.228Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "485b219ca30fdafed7ad334fe1a2c96022153cdf191bf49864be227ddd866144",
+        "submitted_bytes": "FITS xylist (300 of 3000 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 2.38588,
+          "scale_upper": 4.43092,
+          "scale_est": 3.4084,
+          "center_ra": 11.8605,
+          "center_dec": 40.595,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 10.744349551875574,
+          "dec": 41.26967292628423,
+          "width_arcsec": 21389.539961669518,
+          "height_arcsec": 14248.265440086314,
+          "radius": 3.5695403354581225,
+          "pixscale": 3.428360308009219,
+          "orientation": 90.24042475783942,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294934"
+      }
+    },
+    {
+      "frame_id": "andromeda_11h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 0.7129916152237166,
+      "dec_degrees": 41.26658893068673,
+      "pixel_scale_arcsec": 2.0028846049687554,
+      "provenance_note": "nova.astrometry.net community solve (image+scale-hint; submission 15482778 job 16294939)",
+      "generated_at": "2026-07-10T04:53:36.286Z",
+      "rotation_deg": 266.5868410119166,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482778,
+        "job_id": 16294939,
+        "solved_at": "2026-07-10T04:53:36.286Z",
+        "submitted_path": "image+scale-hint",
+        "submitted_sha256": "2c0ef7438c75ff94876eae00416c8ba806aaab81c10ca71cd9ef291f49fa70f3",
+        "submitted_bytes": "original FITS image 102170880B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.1312,
+          "scale_upper": 2.1008,
+          "scale_est": 1.616,
+          "center_ra": 10.6995,
+          "center_dec": 41.27,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 10.694874228355749,
+          "dec": 41.26658893068673,
+          "width_arcsec": 5808.36535440939,
+          "height_arcsec": 5808.36535440939,
+          "radius": 1.1408707026977458,
+          "pixscale": 2.0028846049687554,
+          "orientation": -93.41315898808341,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294939"
+      }
+    },
+    {
+      "frame_id": "Arp-316 120s-84",
+      "source": "astrometry_net",
+      "ra_hours": 10.29922293364429,
+      "dec_degrees": 21.792223424334036,
+      "pixel_scale_arcsec": 0.7317377753856892,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top37+scale-hint; submission 15482796 job 16294955)",
+      "generated_at": "2026-07-10T04:54:07.019Z",
+      "rotation_deg": 358.5765489251838,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482796,
+        "job_id": 16294955,
+        "solved_at": "2026-07-10T04:54:07.019Z",
+        "submitted_path": "xylist-top37+scale-hint",
+        "submitted_sha256": "4ebeb932694378c12c34b9edaa14896bfc087269272f513ee7d90f94eab26dc8",
+        "submitted_bytes": "FITS xylist (37 of 37 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.5126099999999999,
+          "scale_upper": 0.95199,
+          "scale_est": 0.7323,
+          "center_ra": 154.533,
+          "center_dec": 21.795,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 154.48834400466433,
+          "dec": 21.792223424334036,
+          "width_arcsec": 1034.6772143953644,
+          "height_arcsec": 1043.4580676999929,
+          "radius": 0.2040939816307871,
+          "pixscale": 0.7317377753856892,
+          "orientation": -1.4234510748162188,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294955"
+      }
+    },
+    {
+      "frame_id": "Blowdryer Galaxy M100 120s-51",
+      "source": "astrometry_net",
+      "ra_hours": 12.381708989733852,
+      "dec_degrees": 15.706953226075465,
+      "pixel_scale_arcsec": 0.5221844715448131,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top96+scale-hint; submission 15482810 job 16294966)",
+      "generated_at": "2026-07-10T04:55:38.619Z",
+      "rotation_deg": 358.93548555447734,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482810,
+        "job_id": 16294966,
+        "solved_at": "2026-07-10T04:55:38.619Z",
+        "submitted_path": "xylist-top96+scale-hint",
+        "submitted_sha256": "3cdd1fec9eaf30927ba2fcf2b18ebe29ac8867d07fa387c2ebaa23d5567726e3",
+        "submitted_bytes": "FITS xylist (96 of 96 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.36561,
+          "scale_upper": 0.67899,
+          "scale_est": 0.5223,
+          "center_ra": 185.805,
+          "center_dec": 15.808,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 185.72563484600778,
+          "dec": 15.706953226075465,
+          "width_arcsec": 1515.3793364230476,
+          "height_arcsec": 1547.232589187281,
+          "radius": 0.30079316503339776,
+          "pixscale": 0.5221844715448131,
+          "orientation": -1.0645144455226894,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294966"
+      }
+    },
+    {
+      "frame_id": "Bode's Galaxy M81_180s-235",
+      "source": "astrometry_net",
+      "ra_hours": 9.98947824370437,
+      "dec_degrees": 69.20718352693545,
+      "pixel_scale_arcsec": 2.2508424816746606,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15482838 job 16294972)",
+      "generated_at": "2026-07-10T04:56:09.750Z",
+      "rotation_deg": 1.5124284953048537,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482838,
+        "job_id": 16294972,
+        "solved_at": "2026-07-10T04:56:09.750Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "45e96949fa222eb5ccf9341fbf1564a389243ae5355256a36a5bd7e7f043c61e",
+        "submitted_bytes": "FITS xylist (300 of 1721 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.57815,
+          "scale_upper": 2.9308500000000004,
+          "scale_est": 2.2545,
+          "center_ra": 151.236,
+          "center_dec": 69.031,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 149.84217365556555,
+          "dec": 69.20718352693545,
+          "width_arcsec": 6709.761437872164,
+          "height_arcsec": 6703.008910427139,
+          "radius": 1.3172586207892636,
+          "pixscale": 2.2508424816746606,
+          "orientation": 1.5124284953048537,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294972"
+      }
+    },
+    {
+      "frame_id": "bubble_9h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 23.363449293864335,
+      "dec_degrees": 61.25891258200575,
+      "pixel_scale_arcsec": 1.6011050060677936,
+      "provenance_note": "nova.astrometry.net community solve (image+scale-hint; submission 15482851 job 16294987)",
+      "generated_at": "2026-07-10T04:58:01.674Z",
+      "rotation_deg": 91.08212910467677,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482851,
+        "job_id": 16294987,
+        "solved_at": "2026-07-10T04:58:01.674Z",
+        "submitted_path": "image+scale-hint",
+        "submitted_sha256": "efc87b2cd8d4740992dad5e75d9ce2d53f735ce6b52c60409a39c8a2007a765a",
+        "submitted_bytes": "original FITS image 109284480B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.1312,
+          "scale_upper": 2.1008,
+          "scale_est": 1.616,
+          "center_ra": 350.4465,
+          "center_dec": 61.236,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 350.451739407965,
+          "dec": 61.25891258200575,
+          "width_arcsec": 4816.123858251924,
+          "height_arcsec": 4816.123858251924,
+          "radius": 0.945976066445626,
+          "pixscale": 1.6011050060677936,
+          "orientation": 91.08212910467677,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294987"
+      }
+    },
+    {
+      "frame_id": "c49_9h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 6.532053856830673,
+      "dec_degrees": 4.955563791800281,
+      "pixel_scale_arcsec": 1.9583935794786815,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+no-scale; submission 15482885 job 16294993)",
+      "generated_at": "2026-07-10T04:58:48.012Z",
+      "rotation_deg": 89.88420925718903,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482885,
+        "job_id": 16294993,
+        "solved_at": "2026-07-10T04:58:48.012Z",
+        "submitted_path": "xylist-top300+no-scale",
+        "submitted_sha256": "33e5878cc03f87ea7e82764cbe28e528c46f65a39847432188269f5473509302",
+        "submitted_bytes": "FITS xylist (300 of 917 detections, flux-sorted) 8640B",
+        "hints": {},
+        "center_source": null,
+        "calibration": {
+          "ra": 97.9808078524601,
+          "dec": 4.955563791800281,
+          "width_arcsec": 7588.775120479891,
+          "height_arcsec": 5029.1547121012545,
+          "radius": 1.2644374950034267,
+          "pixscale": 1.9583935794786815,
+          "orientation": 89.88420925718903,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16294993"
+      }
+    },
+    {
+      "frame_id": "carina60Da_180s_iso800_001",
+      "source": "astrometry_net",
+      "ra_hours": 10.619937245327929,
+      "dec_degrees": -58.53014490189582,
+      "pixel_scale_arcsec": 35.370115617881886,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+no-scale; submission 15482903 job 16295010)",
+      "generated_at": "2026-07-10T05:02:05.907Z",
+      "rotation_deg": 109.47308719323401,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482903,
+        "job_id": 16295010,
+        "solved_at": "2026-07-10T05:02:05.907Z",
+        "submitted_path": "xylist-top300+no-scale",
+        "submitted_sha256": "1e640e0c315b62c2c865edef39d261fcab9437fda8b8ecc09a4b244eae9cf7fe",
+        "submitted_bytes": "FITS xylist (300 of 3000 detections, flux-sorted) 8640B",
+        "hints": {
+          "center_ra": 161.25,
+          "center_dec": -59.68,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 159.29905867991894,
+          "dec": -58.53014490189582,
+          "width_arcsec": 182368.316125799,
+          "height_arcsec": 120859.68506630241,
+          "radius": 30.386294514257543,
+          "pixscale": 35.370115617881886,
+          "orientation": 109.47308719323401,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295010"
+      }
+    },
+    {
+      "frame_id": "carina60Da_180s_iso800_002",
+      "source": "astrometry_net",
+      "ra_hours": 10.618891750306165,
+      "dec_degrees": -58.526644538510794,
+      "pixel_scale_arcsec": 35.36248521654379,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+no-scale; submission 15482967 job 16295025)",
+      "generated_at": "2026-07-10T05:05:54.470Z",
+      "rotation_deg": 109.46603446521624,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15482967,
+        "job_id": 16295025,
+        "solved_at": "2026-07-10T05:05:54.470Z",
+        "submitted_path": "xylist-top300+no-scale",
+        "submitted_sha256": "e9ac02af0c62613cde4649244102e610f88ab6b6b838c0117a26eb82eadff4d2",
+        "submitted_bytes": "FITS xylist (300 of 3000 detections, flux-sorted) 8640B",
+        "hints": {
+          "center_ra": 161.25,
+          "center_dec": -59.68,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 159.28337625459247,
+          "dec": -58.526644538510794,
+          "width_arcsec": 182328.97377649977,
+          "height_arcsec": 120868.97447014667,
+          "radius": 30.382452747448415,
+          "pixscale": 35.36248521654379,
+          "orientation": 109.46603446521624,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295025"
+      }
+    },
+    {
+      "frame_id": "Crab Nebula M1_120s-92",
+      "source": "astrometry_net",
+      "ra_hours": 5.575184815932086,
+      "dec_degrees": 22.012369449550114,
+      "pixel_scale_arcsec": 0.42148570194599555,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483029 job 16295040)",
+      "generated_at": "2026-07-10T05:06:40.976Z",
+      "rotation_deg": 355.61097614243107,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483029,
+        "job_id": 16295040,
+        "solved_at": "2026-07-10T05:06:40.976Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "a272a7f3ca05166a61a7931d2f45c07ff0abd124a1e1295de740cfdef06bd140",
+        "submitted_bytes": "FITS xylist (300 of 567 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.29519,
+          "scale_upper": 0.5482100000000001,
+          "scale_est": 0.4217,
+          "center_ra": 83.529,
+          "center_dec": 22.004,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.62777223898128,
+          "dec": 22.012369449550114,
+          "width_arcsec": 1249.7051062698768,
+          "height_arcsec": 1257.7133346068508,
+          "radius": 0.24625300354927396,
+          "pixscale": 0.42148570194599555,
+          "orientation": -4.389023857568923,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295040"
+      }
+    },
+    {
+      "frame_id": "Crescent C27_30s-568",
+      "source": "astrometry_net",
+      "ra_hours": 20.20365334982752,
+      "dec_degrees": 38.32537033002076,
+      "pixel_scale_arcsec": 0.5226896898979508,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483042 job 16295046)",
+      "generated_at": "2026-07-10T05:07:11.776Z",
+      "rotation_deg": 1.6785857106403763,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483042,
+        "job_id": 16295046,
+        "solved_at": "2026-07-10T05:07:11.776Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "c547cba3e642e8ce5d774456fd2e42d747f7950fc0e1a04f545701b1ea47a2be",
+        "submitted_bytes": "FITS xylist (300 of 437 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.3661,
+          "scale_upper": 0.6799000000000001,
+          "scale_est": 0.523,
+          "center_ra": 303.111,
+          "center_dec": 38.364,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 303.0548002474128,
+          "dec": 38.32537033002076,
+          "width_arcsec": 1559.1833449655874,
+          "height_arcsec": 1553.956448066608,
+          "radius": 0.30573963349506467,
+          "pixscale": 0.5226896898979508,
+          "orientation": 1.6785857106403763,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295046"
+      }
+    },
+    {
+      "frame_id": "CSM30803_5DMkIII_iso6400_15s",
+      "source": "astrometry_net",
+      "ra_hours": 13.809164884450647,
+      "dec_degrees": -59.13268392992887,
+      "pixel_scale_arcsec": 52.825585749115305,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483059 job 16295053)",
+      "generated_at": "2026-07-10T05:07:57.856Z",
+      "rotation_deg": 95.56581808457005,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483059,
+        "job_id": 16295053,
+        "solved_at": "2026-07-10T05:07:57.856Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "dbfb707cd48de960a2531132680d2ee6386ec858b764d1b644204c7f44454d45",
+        "submitted_bytes": "FITS xylist (300 of 17226 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 29.38139225402244,
+          "scale_upper": 54.56544275747025,
+          "scale_est": 41.97341750574635
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 207.1374732667597,
+          "dec": -59.13268392992887,
+          "width_arcsec": 302056.6993134413,
+          "height_arcsec": 202163.51666186427,
+          "radius": 50.48154248571003,
+          "pixscale": 52.825585749115305,
+          "orientation": 95.56581808457005,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295053"
+      }
+    },
+    {
+      "frame_id": "cygnus_loop_r0c0_6h",
+      "source": "astrometry_net",
+      "ra_hours": 20.93355149930499,
+      "dec_degrees": 31.415037963236227,
+      "pixel_scale_arcsec": 1.6041949555295871,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483074 job 16295055)",
+      "generated_at": "2026-07-10T05:08:13.609Z",
+      "rotation_deg": 185.37190401290857,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483074,
+        "job_id": 16295055,
+        "solved_at": "2026-07-10T05:08:13.609Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "bcd54622fe0bf57775952fba59b4d032d6a0525f3fb1e2b2b6f25ff21b220dcd",
+        "submitted_bytes": "FITS xylist (300 of 2842 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 313.986,
+          "center_dec": 31.416,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 314.00327248957484,
+          "dec": 31.415037963236227,
+          "width_arcsec": 4785.313552344758,
+          "height_arcsec": 4769.271602789462,
+          "radius": 0.9383502051743272,
+          "pixscale": 1.6041949555295871,
+          "orientation": -174.62809598709143,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295055"
+      }
+    },
+    {
+      "frame_id": "cygnus_loop_r0c1_3h",
+      "source": "astrometry_net",
+      "ra_hours": 20.844908693308803,
+      "dec_degrees": 31.590670441965386,
+      "pixel_scale_arcsec": 1.6023888099954586,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483079 job 16295101)",
+      "generated_at": "2026-07-10T05:12:02.527Z",
+      "rotation_deg": 184.45552703489028,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483079,
+        "job_id": 16295101,
+        "solved_at": "2026-07-10T05:12:02.527Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "4b3d4b03de336c7bec3a060d2fabeb6e3662bd27591198796f59e1b10166cd1f",
+        "submitted_bytes": "FITS xylist (300 of 2716 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 312.651,
+          "center_dec": 31.656,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 312.67363039963203,
+          "dec": 31.590670441965386,
+          "width_arcsec": 4778.3234314064575,
+          "height_arcsec": 4776.721042596462,
+          "radius": 0.9383940051547303,
+          "pixscale": 1.6023888099954586,
+          "orientation": -175.54447296510972,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295101"
+      }
+    },
+    {
+      "frame_id": "cygnus_loop_r0c2_12h",
+      "source": "astrometry_net",
+      "ra_hours": 20.807688866146968,
+      "dec_degrees": 31.67269541124267,
+      "pixel_scale_arcsec": 1.6040686354538247,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483161 job 16295117)",
+      "generated_at": "2026-07-10T05:16:06.604Z",
+      "rotation_deg": 5.48573334465811,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483161,
+        "job_id": 16295117,
+        "solved_at": "2026-07-10T05:16:06.604Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "8796f1762c6bbff69d05659018a140444b973d88bddb63af6a7b95334e710a69",
+        "submitted_bytes": "FITS xylist (300 of 2926 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 312.108,
+          "center_dec": 31.674,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 312.1153329922045,
+          "dec": 31.67269541124267,
+          "width_arcsec": 4757.667572756044,
+          "height_arcsec": 4765.687915933313,
+          "radius": 0.9352821713601633,
+          "pixscale": 1.6040686354538247,
+          "orientation": 5.48573334465811,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295117"
+      }
+    },
+    {
+      "frame_id": "cygnus_loop_r0c3_4h",
+      "source": "astrometry_net",
+      "ra_hours": 20.73884467159518,
+      "dec_degrees": 31.635849393849234,
+      "pixel_scale_arcsec": 1.60350299739451,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483231 job 16295139)",
+      "generated_at": "2026-07-10T05:18:39.211Z",
+      "rotation_deg": 184.74563992454816,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483231,
+        "job_id": 16295139,
+        "solved_at": "2026-07-10T05:18:39.211Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "5b91e2ac355272dd2e38c185069b0378255007e2ec1ffe7155a2291e9b8ae699",
+        "submitted_bytes": "FITS xylist (300 of 1937 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 310.986,
+          "center_dec": 31.946,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 311.0826700739277,
+          "dec": 31.635849393849234,
+          "width_arcsec": 4534.706476631674,
+          "height_arcsec": 4537.9134826264635,
+          "radius": 0.8910154857103343,
+          "pixscale": 1.60350299739451,
+          "orientation": -175.25436007545184,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295139"
+      }
+    },
+    {
+      "frame_id": "cygnus_loop_r1c0_3h",
+      "source": "astrometry_net",
+      "ra_hours": 20.921279121072903,
+      "dec_degrees": 30.58366483430516,
+      "pixel_scale_arcsec": 1.6041520304836834,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483276 job 16295152)",
+      "generated_at": "2026-07-10T05:20:41.491Z",
+      "rotation_deg": 184.91074963208112,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483276,
+        "job_id": 16295152,
+        "solved_at": "2026-07-10T05:20:41.491Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "5c51e56b09ead31e1c6ba9dfa0461226bf87341f76176518a6a23c0b2efaf601",
+        "submitted_bytes": "FITS xylist (300 of 2019 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 313.74,
+          "center_dec": 30.72,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 313.8191868160935,
+          "dec": 30.58366483430516,
+          "width_arcsec": 4531.7294861164055,
+          "height_arcsec": 4567.020830787046,
+          "radius": 0.8935883951730985,
+          "pixscale": 1.6041520304836834,
+          "orientation": -175.08925036791888,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295152"
+      }
+    },
+    {
+      "frame_id": "cygnus_loop_r1c1_4h",
+      "source": "astrometry_net",
+      "ra_hours": 20.861039738535503,
+      "dec_degrees": 30.635568108999106,
+      "pixel_scale_arcsec": 1.6032708717850326,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483319 job 16295176)",
+      "generated_at": "2026-07-10T05:25:00.218Z",
+      "rotation_deg": 184.64965862986338,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483319,
+        "job_id": 16295176,
+        "solved_at": "2026-07-10T05:25:00.218Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "96b21173719faec20949295fc278e776d17b138ffd2577c6a08311e101015a43",
+        "submitted_bytes": "FITS xylist (300 of 2696 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 312.8505,
+          "center_dec": 30.864,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 312.91559607803254,
+          "dec": 30.635568108999106,
+          "width_arcsec": 4780.953739662968,
+          "height_arcsec": 4763.317760073332,
+          "radius": 0.9373375861808532,
+          "pixscale": 1.6032708717850326,
+          "orientation": -175.35034137013662,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295176"
+      }
+    },
+    {
+      "frame_id": "cygnus_loop_r1c2_10h",
+      "source": "astrometry_net",
+      "ra_hours": 20.787270616275705,
+      "dec_degrees": 30.717352282871648,
+      "pixel_scale_arcsec": 1.5998715470482407,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483396 job 16295198)",
+      "generated_at": "2026-07-10T05:28:21.335Z",
+      "rotation_deg": 270.66578262677416,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483396,
+        "job_id": 16295198,
+        "solved_at": "2026-07-10T05:28:21.335Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "f1fb1d7934f32908888e4a7b45563c9a80635830de35f398b9fb684d5ef29fed",
+        "submitted_bytes": "FITS xylist (300 of 1420 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 311.805,
+          "center_dec": 30.7,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 311.8090592441356,
+          "dec": 30.717352282871648,
+          "width_arcsec": 4774.01669639195,
+          "height_arcsec": 4756.41810937442,
+          "radius": 0.9359786900303112,
+          "pixscale": 1.5998715470482407,
+          "orientation": -89.33421737322583,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295198"
+      }
+    },
+    {
+      "frame_id": "Dumbbell M27_60s-272",
+      "source": "astrometry_net",
+      "ra_hours": 19.993712801411913,
+      "dec_degrees": 22.72551060733723,
+      "pixel_scale_arcsec": 0.26122341129740717,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483449 job 16295210)",
+      "generated_at": "2026-07-10T05:28:52.500Z",
+      "rotation_deg": 359.05668485856,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483449,
+        "job_id": 16295210,
+        "solved_at": "2026-07-10T05:28:52.500Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "134860a63cb40bccfa4dcd695aa55f216455c690e10341728659db4bcf0db038",
+        "submitted_bytes": "FITS xylist (300 of 1151 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.18290999999999996,
+          "scale_upper": 0.33969,
+          "scale_est": 0.2613,
+          "center_ra": 299.8575,
+          "center_dec": 22.775,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 299.9056920211787,
+          "dec": 22.72551060733723,
+          "width_arcsec": 1562.8996697923872,
+          "height_arcsec": 1561.0711059133052,
+          "radius": 0.3068029580757,
+          "pixscale": 0.26122341129740717,
+          "orientation": -0.9433151414400092,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295210"
+      }
+    },
+    {
+      "frame_id": "Hercules Cluster M13_60s-78",
+      "source": "astrometry_net",
+      "ra_hours": 16.694414175372014,
+      "dec_degrees": 36.441187073751685,
+      "pixel_scale_arcsec": 0.26115467936808895,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483466 job 16295224)",
+      "generated_at": "2026-07-10T05:29:24.593Z",
+      "rotation_deg": 358.9327580260244,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483466,
+        "job_id": 16295224,
+        "solved_at": "2026-07-10T05:29:24.593Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "a107613c30433b00f90173f8d413b2418456e212080aac370c2eb07b5b1a04b7",
+        "submitted_bytes": "FITS xylist (300 of 1207 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.18290999999999996,
+          "scale_upper": 0.33969,
+          "scale_est": 0.2613,
+          "center_ra": 250.28250000000003,
+          "center_dec": 36.41,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 250.41621263058022,
+          "dec": 36.441187073751685,
+          "width_arcsec": 1552.3034141639207,
+          "height_arcsec": 1549.4307126908718,
+          "radius": 0.30461919099914736,
+          "pixscale": 0.26115467936808895,
+          "orientation": -1.0672419739755996,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295224"
+      }
+    },
+    {
+      "frame_id": "Horsehead IC434_30s-383",
+      "source": "astrometry_net",
+      "ra_hours": 5.690583883285772,
+      "dec_degrees": -2.428956533601794,
+      "pixel_scale_arcsec": 1.1291960733779005,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483474 job 16295239)",
+      "generated_at": "2026-07-10T05:30:10.839Z",
+      "rotation_deg": 181.97049276448945,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483474,
+        "job_id": 16295239,
+        "solved_at": "2026-07-10T05:30:10.839Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "de0d33c93cb621ea96ab6eb0cf67c61bde0f7ad22e0618cb05064000b2dcf56e",
+        "submitted_bytes": "FITS xylist (300 of 605 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.79135,
+          "scale_upper": 1.4696500000000001,
+          "scale_est": 1.1305,
+          "center_ra": 85.386,
+          "center_dec": -2.16,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 85.35875824928658,
+          "dec": -2.428956533601794,
+          "width_arcsec": 6765.013675607002,
+          "height_arcsec": 6700.649499424461,
+          "radius": 1.3224681271195344,
+          "pixscale": 1.1291960733779005,
+          "orientation": -178.02950723551055,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295239"
+      }
+    },
+    {
+      "frame_id": "ic443_13h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 6.301903268042228,
+      "dec_degrees": 22.655295979176845,
+      "pixel_scale_arcsec": 1.9582539648874067,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+no-scale; submission 15483492 job 16295242)",
+      "generated_at": "2026-07-10T05:30:26.464Z",
+      "rotation_deg": 269.7962100072142,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483492,
+        "job_id": 16295242,
+        "solved_at": "2026-07-10T05:30:26.464Z",
+        "submitted_path": "xylist-top300+no-scale",
+        "submitted_sha256": "8157117041f737fd24468c6dbf5e9b36abfc67e0db575c121f69af78ee6831c7",
+        "submitted_bytes": "FITS xylist (300 of 1541 detections, flux-sorted) 8640B",
+        "hints": {},
+        "center_source": null,
+        "calibration": {
+          "ra": 94.52854902063342,
+          "dec": 22.655295979176845,
+          "width_arcsec": 7598.025383763138,
+          "height_arcsec": 5019.004912006423,
+          "radius": 1.2647310994198602,
+          "pixscale": 1.9582539648874067,
+          "orientation": -90.2037899927858,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295242"
+      }
+    },
+    {
+      "frame_id": "Iris Nebula Mosaic",
+      "source": "astrometry_net",
+      "ra_hours": 21.13602888237853,
+      "dec_degrees": 67.82449127508441,
+      "pixel_scale_arcsec": 2.2343106414315312,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+no-scale; submission 15483500 job 16295252)",
+      "generated_at": "2026-07-10T05:31:43.140Z",
+      "rotation_deg": 270.10589581849365,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483500,
+        "job_id": 16295252,
+        "solved_at": "2026-07-10T05:31:43.140Z",
+        "submitted_path": "xylist-top300+no-scale",
+        "submitted_sha256": "4307dfec696cea8671cd86fbf2ff4b04ce046bec8f9810ae3f4cfef11c142c1f",
+        "submitted_bytes": "FITS xylist (300 of 3000 detections, flux-sorted) 8640B",
+        "hints": {},
+        "center_source": null,
+        "calibration": {
+          "ra": 317.04043323567794,
+          "dec": 67.82449127508441,
+          "width_arcsec": 12512.139592016574,
+          "height_arcsec": 12295.411459797717,
+          "radius": 2.4364245812818774,
+          "pixscale": 2.2343106414315312,
+          "orientation": -89.89410418150634,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295252"
+      }
+    },
+    {
+      "frame_id": "Leo Triplet_60s-765",
+      "source": "astrometry_net",
+      "ra_hours": 11.328310858181423,
+      "dec_degrees": 13.299858271418744,
+      "pixel_scale_arcsec": 2.2537683620000006,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483524 job 16295257)",
+      "generated_at": "2026-07-10T05:31:59.059Z",
+      "rotation_deg": 0.31659662750377693,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483524,
+        "job_id": 16295257,
+        "solved_at": "2026-07-10T05:31:59.059Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "6017b590079d7b0f0b210ca8a250f8d72c062888ed2e96fa3dc6cb0988120b79",
+        "submitted_bytes": "FITS xylist (300 of 539 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.57815,
+          "scale_upper": 2.9308500000000004,
+          "scale_est": 2.2545,
+          "center_ra": 170.4915,
+          "center_dec": 13.338,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 169.92466287272134,
+          "dec": 13.299858271418744,
+          "width_arcsec": 5339.1772495780015,
+          "height_arcsec": 5262.549125270001,
+          "radius": 1.0412150594960492,
+          "pixscale": 2.2537683620000006,
+          "orientation": 0.31659662750377693,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295257"
+      }
+    },
+    {
+      "frame_id": "m13_4h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 16.693111286071325,
+      "dec_degrees": 36.46003697587999,
+      "pixel_scale_arcsec": 1.6541261288084563,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483530 job 16295267)",
+      "generated_at": "2026-07-10T05:33:15.507Z",
+      "rotation_deg": 86.27326458717455,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483530,
+        "job_id": 16295267,
+        "solved_at": "2026-07-10T05:33:15.507Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "b97f5d698d46cc9e19fc5b92a2503266d7dff968f785775a803f1d366af6cf6d",
+        "submitted_bytes": "FITS xylist (300 of 684 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 250.41449999999998,
+          "center_dec": 36.463,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 250.39666929106986,
+          "dec": 36.46003697587999,
+          "width_arcsec": 4934.258242235625,
+          "height_arcsec": 4925.987611591583,
+          "radius": 0.9683679389038615,
+          "pixscale": 1.6541261288084563,
+          "orientation": 86.27326458717455,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295267"
+      }
+    },
+    {
+      "frame_id": "m16_6h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 18.313106381928627,
+      "dec_degrees": -13.810529070176054,
+      "pixel_scale_arcsec": 1.6200467164576973,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483555 job 16295270)",
+      "generated_at": "2026-07-10T05:33:46.395Z",
+      "rotation_deg": 181.6466493305536,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483555,
+        "job_id": 16295270,
+        "solved_at": "2026-07-10T05:33:46.395Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "32cb5e550aaf2e0db429d20cdec1e7a3895848e7c3e0e796c50ac9f524eca895",
+        "submitted_bytes": "FITS xylist (300 of 1436 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 274.671,
+          "center_dec": -13.809,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 274.6965957289294,
+          "dec": -13.810529070176054,
+          "width_arcsec": 4805.05856101353,
+          "height_arcsec": 4832.599355193311,
+          "radius": 0.9465112628234816,
+          "pixscale": 1.6200467164576973,
+          "orientation": -178.3533506694464,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295270"
+      }
+    },
+    {
+      "frame_id": "m27_12h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 19.993364705723025,
+      "dec_degrees": 22.709859291656873,
+      "pixel_scale_arcsec": 1.599386156516899,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483566 job 16295283)",
+      "generated_at": "2026-07-10T05:36:34.021Z",
+      "rotation_deg": 270.95424673408047,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483566,
+        "job_id": 16295283,
+        "solved_at": "2026-07-10T05:36:34.021Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "2945217bbc98eb552f938234c4b5d1382683e925ac7104f193de95b4b2fe75c2",
+        "submitted_bytes": "FITS xylist (300 of 2057 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 299.883,
+          "center_dec": 22.705,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 299.90047058584537,
+          "dec": 22.709859291656873,
+          "width_arcsec": 4764.571360263842,
+          "height_arcsec": 4735.782409446538,
+          "radius": 0.9330271413740847,
+          "pixscale": 1.599386156516899,
+          "orientation": -89.04575326591956,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295283"
+      }
+    },
+    {
+      "frame_id": "m66_6h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 11.33690091986989,
+      "dec_degrees": 12.99244429231154,
+      "pixel_scale_arcsec": 1.9580524603410205,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+no-scale; submission 15483615 job 16295310)",
+      "generated_at": "2026-07-10T05:41:39.300Z",
+      "rotation_deg": 90.27926317441656,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483615,
+        "job_id": 16295310,
+        "solved_at": "2026-07-10T05:41:39.300Z",
+        "submitted_path": "xylist-top300+no-scale",
+        "submitted_sha256": "4dde7ef113954179ff1ab56c1e6a1f81c269347c1f63d8521919e6478273e0c3",
+        "submitted_bytes": "FITS xylist (300 of 344 detections, flux-sorted) 8640B",
+        "hints": {
+          "center_ra": 170.07,
+          "center_dec": 12.99,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 170.05351379804836,
+          "dec": 12.99244429231154,
+          "width_arcsec": 7597.24354612316,
+          "height_arcsec": 5038.068980457446,
+          "radius": 1.2661019128956068,
+          "pixscale": 1.9580524603410205,
+          "orientation": 90.27926317441656,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295310"
+      }
+    },
+    {
+      "frame_id": "Markarians Chain_90s-331_L3_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 12.46577734597212,
+      "dec_degrees": 13.159042125711292,
+      "pixel_scale_arcsec": 1.127392984780851,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483687 job 16295320)",
+      "generated_at": "2026-07-10T05:41:55.267Z",
+      "rotation_deg": 0.41009234287907853,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483687,
+        "job_id": 16295320,
+        "solved_at": "2026-07-10T05:41:55.267Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "5ded95f06bd663d2a9292d62c09774b44cb9d7772d88dabc5523f7bacb6968bb",
+        "submitted_bytes": "FITS xylist (300 of 969 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.79135,
+          "scale_upper": 1.4696500000000001,
+          "scale_est": 1.1305,
+          "center_ra": 187.2105,
+          "center_dec": 13.207,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 186.98666018958178,
+          "dec": 13.159042125711292,
+          "width_arcsec": 6480.254876520332,
+          "height_arcsec": 6493.783592337702,
+          "radius": 1.2741716067109554,
+          "pixscale": 1.127392984780851,
+          "orientation": 0.41009234287907853,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295320"
+      }
+    },
+    {
+      "frame_id": "ngc6960_10h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 20.787270616275705,
+      "dec_degrees": 30.717352282871648,
+      "pixel_scale_arcsec": 1.5998715470482407,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483694 job 16295332)",
+      "generated_at": "2026-07-10T05:43:57.097Z",
+      "rotation_deg": 270.66578262677416,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483694,
+        "job_id": 16295332,
+        "solved_at": "2026-07-10T05:43:57.097Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "f1fb1d7934f32908888e4a7b45563c9a80635830de35f398b9fb684d5ef29fed",
+        "submitted_bytes": "FITS xylist (300 of 1420 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.13099,
+          "scale_upper": 2.10041,
+          "scale_est": 1.6157,
+          "center_ra": 311.805,
+          "center_dec": 30.7,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 311.8090592441356,
+          "dec": 30.717352282871648,
+          "width_arcsec": 4774.01669639195,
+          "height_arcsec": 4756.41810937442,
+          "radius": 0.9359786900303112,
+          "pixscale": 1.5998715470482407,
+          "orientation": -89.33421737322583,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295332"
+      }
+    },
+    {
+      "frame_id": "Orion Nebula M42_60s-40",
+      "source": "astrometry_net",
+      "ra_hours": 5.582244398501561,
+      "dec_degrees": -5.2944873839600834,
+      "pixel_scale_arcsec": 2.2513770124900145,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483729 job 16295336)",
+      "generated_at": "2026-07-10T05:47:45.619Z",
+      "rotation_deg": 0.2302979745728615,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483729,
+        "job_id": 16295336,
+        "solved_at": "2026-07-10T05:47:45.619Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "574f9c9e6ed7b7689d69a730617cebc3cfb86d83799f8cfc1761fbeb8ae881a4",
+        "submitted_bytes": "FITS xylist (300 of 3000 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.5827699999999998,
+          "scale_upper": 2.9394299999999998,
+          "scale_est": 2.2611,
+          "center_ra": 83.8275,
+          "center_dec": -5.541,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.73366597752342,
+          "dec": -5.2944873839600834,
+          "width_arcsec": 6695.595235145303,
+          "height_arcsec": 6711.354874232733,
+          "radius": 1.316687762084786,
+          "pixscale": 2.2513770124900145,
+          "orientation": 0.2302979745728615,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295336"
+      }
+    },
+    {
+      "frame_id": "orion_8h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 5.58908857155001,
+      "dec_degrees": -5.40347444204724,
+      "pixel_scale_arcsec": 2.0233586447995195,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483770 job 16295350)",
+      "generated_at": "2026-07-10T05:48:31.973Z",
+      "rotation_deg": 266.1395977336998,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483770,
+        "job_id": 16295350,
+        "solved_at": "2026-07-10T05:48:31.973Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "55823d540e203971483817cfc86ea93b8c3807f603bba145bc46a5ae82a28725",
+        "submitted_bytes": "FITS xylist (300 of 1043 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.42863,
+          "scale_upper": 2.6531700000000003,
+          "scale_est": 2.0409,
+          "center_ra": 83.8215,
+          "center_dec": -5.392,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.83632857325016,
+          "dec": -5.40347444204724,
+          "width_arcsec": 5936.534263841791,
+          "height_arcsec": 6025.562044212969,
+          "radius": 1.1748213435759156,
+          "pixscale": 2.0233586447995195,
+          "orientation": -93.86040226630021,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295350"
+      }
+    },
+    {
+      "frame_id": "Owl and Surfboard M97 M108_60s-329",
+      "source": "astrometry_net",
+      "ra_hours": 11.21841032137417,
+      "dec_degrees": 55.303826623631004,
+      "pixel_scale_arcsec": 1.126094144486534,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483773 job 16295359)",
+      "generated_at": "2026-07-10T05:48:47.816Z",
+      "rotation_deg": 0.6314747708591103,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483773,
+        "job_id": 16295359,
+        "solved_at": "2026-07-10T05:48:47.816Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "d1e1b37d57e82ec1cd4659cd245ee7ce964e83ff9132186c8df4c131cb3c036b",
+        "submitted_bytes": "FITS xylist (300 of 634 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.78911,
+          "scale_upper": 1.46549,
+          "scale_est": 1.1273,
+          "center_ra": 168.72899999999998,
+          "center_dec": 55.504,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 168.27615482061256,
+          "dec": 55.303826623631004,
+          "width_arcsec": 6738.547360607419,
+          "height_arcsec": 6714.899383573203,
+          "radius": 1.3212552943720868,
+          "pixscale": 1.126094144486534,
+          "orientation": 0.6314747708591103,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295359"
+      }
+    },
+    {
+      "frame_id": "Perseus Double Cluster NGC869_10s-88",
+      "source": "astrometry_net",
+      "ra_hours": 2.344350353842282,
+      "dec_degrees": 57.147666838164525,
+      "pixel_scale_arcsec": 2.2581188104896626,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483776 job 16295366)",
+      "generated_at": "2026-07-10T05:49:19.015Z",
+      "rotation_deg": 182.01075132647605,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483776,
+        "job_id": 16295366,
+        "solved_at": "2026-07-10T05:49:19.015Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "8f4d453db3d85ad807f0df08a5a26454c40bf17bde38773239e89dce94083b96",
+        "submitted_bytes": "FITS xylist (300 of 1814 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.5827699999999998,
+          "scale_upper": 2.9394299999999998,
+          "scale_est": 2.2611
+        },
+        "center_source": null,
+        "calibration": {
+          "ra": 35.16525530763423,
+          "dec": 57.147666838164525,
+          "width_arcsec": 6738.226530501153,
+          "height_arcsec": 6722.419698827725,
+          "radius": 1.3219612209099887,
+          "pixscale": 2.2581188104896626,
+          "orientation": -177.98924867352395,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295366"
+      }
+    },
+    {
+      "frame_id": "Pleiades M45 60s-249",
+      "source": "astrometry_net",
+      "ra_hours": 3.783586798861862,
+      "dec_degrees": 24.151085922745988,
+      "pixel_scale_arcsec": 1.1292205963820336,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483784 job 16295398)",
+      "generated_at": "2026-07-10T05:52:29.041Z",
+      "rotation_deg": 181.96461340461437,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483784,
+        "job_id": 16295398,
+        "solved_at": "2026-07-10T05:52:29.041Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "e82bb8e1b0716fc6c08b780b08a5d277b444c9223eba5b0db54ee52a3758bc6b",
+        "submitted_bytes": "FITS xylist (300 of 1158 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.79135,
+          "scale_upper": 1.4696500000000001,
+          "scale_est": 1.1305,
+          "center_ra": 56.709,
+          "center_dec": 24.161,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 56.75380198292793,
+          "dec": 24.151085922745988,
+          "width_arcsec": 6736.9300780152125,
+          "height_arcsec": 6764.031372328382,
+          "radius": 1.3259223094570174,
+          "pixscale": 1.1292205963820336,
+          "orientation": -178.03538659538563,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295398"
+      }
+    },
+    {
+      "frame_id": "pleiades_12h_stacked",
+      "source": "astrometry_net",
+      "ra_hours": 3.7672070835252636,
+      "dec_degrees": 24.116749038399398,
+      "pixel_scale_arcsec": 2.023970615946162,
+      "provenance_note": "nova.astrometry.net community solve (image+scale-hint; submission 15483838 job 16295406)",
+      "generated_at": "2026-07-10T05:53:30.885Z",
+      "rotation_deg": 266.1146752771457,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483838,
+        "job_id": 16295406,
+        "solved_at": "2026-07-10T05:53:30.885Z",
+        "submitted_path": "image+scale-hint",
+        "submitted_sha256": "3658920b0a93732e7df377f1b30f408b5f278fe1c7c9c28c31e812c976e29667",
+        "submitted_bytes": "original FITS image 103668480B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 1.4286999999999999,
+          "scale_upper": 2.6533,
+          "scale_est": 2.041,
+          "center_ra": 56.499,
+          "center_dec": 24.118,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 56.50810625287895,
+          "dec": 24.116749038399398,
+          "width_arcsec": 5909.994198562793,
+          "height_arcsec": 5909.994198562793,
+          "radius": 1.1608324929380294,
+          "pixscale": 2.023970615946162,
+          "orientation": -93.88532472285432,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295406"
+      }
+    },
+    {
+      "frame_id": "Ring Nebula M57 180s-35",
+      "source": "astrometry_net",
+      "ra_hours": 18.89280725613333,
+      "dec_degrees": 33.026789168757716,
+      "pixel_scale_arcsec": 0.5223081075951579,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483847 job 16295413)",
+      "generated_at": "2026-07-10T05:55:04.735Z",
+      "rotation_deg": 359.14945471517683,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483847,
+        "job_id": 16295413,
+        "solved_at": "2026-07-10T05:55:04.735Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "4adea763b24bc77435dddc17dad719ad3c55d77947e6911445b8b1dbd238035b",
+        "submitted_bytes": "FITS xylist (300 of 705 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.3661,
+          "scale_upper": 0.6799000000000001,
+          "scale_est": 0.523,
+          "center_ra": 283.4685,
+          "center_dec": 33.024,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 283.39210884199997,
+          "dec": 33.026789168757716,
+          "width_arcsec": 1558.5673930639512,
+          "height_arcsec": 1558.5673930639512,
+          "radius": 0.3061315479365998,
+          "pixscale": 0.5223081075951579,
+          "orientation": -0.8505452848231829,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295413"
+      }
+    },
+    {
+      "frame_id": "r_mosaic_B",
+      "source": "astrometry_net",
+      "ra_hours": 5.5798531788054975,
+      "dec_degrees": -5.510345940397192,
+      "pixel_scale_arcsec": 0.47737806602318056,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483874 job 16295435)",
+      "generated_at": "2026-07-10T05:56:39.791Z",
+      "rotation_deg": 0.2146658798395144,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483874,
+        "job_id": 16295435,
+        "solved_at": "2026-07-10T05:56:39.791Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "ce7cbadfab0c8563c514f4d8878509eefdf9e0b952630fbfbd73954f1212703b",
+        "submitted_bytes": "FITS xylist (300 of 967 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.33432,
+          "scale_upper": 0.6208800000000001,
+          "scale_est": 0.4776,
+          "center_ra": 83.685,
+          "center_dec": -5.506,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.69779768208247,
+          "dec": -5.510345940397192,
+          "width_arcsec": 2571.6356416668737,
+          "height_arcsec": 2606.484240486566,
+          "radius": 0.5085509167266111,
+          "pixscale": 0.47737806602318056,
+          "orientation": 0.2146658798395144,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295435"
+      }
+    },
+    {
+      "frame_id": "r_mosaic_G",
+      "source": "astrometry_net",
+      "ra_hours": 5.579824557374321,
+      "dec_degrees": -5.510263101357315,
+      "pixel_scale_arcsec": 0.4773807438817302,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483903 job 16295448)",
+      "generated_at": "2026-07-10T05:57:25.915Z",
+      "rotation_deg": 0.20899521363469273,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483903,
+        "job_id": 16295448,
+        "solved_at": "2026-07-10T05:57:25.915Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "f710d6b9997240a808486c740f3ecc63b174dacddbc075b42e9c1274a0758407",
+        "submitted_bytes": "FITS xylist (300 of 1843 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.33432,
+          "scale_upper": 0.6208800000000001,
+          "scale_est": 0.4776,
+          "center_ra": 83.685,
+          "center_dec": -5.506,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.69736836061482,
+          "dec": -5.510263101357315,
+          "width_arcsec": 2574.036971010289,
+          "height_arcsec": 2606.9762423381285,
+          "radius": 0.5088338355759321,
+          "pixscale": 0.4773807438817302,
+          "orientation": 0.20899521363469273,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295448"
+      }
+    },
+    {
+      "frame_id": "r_mosaic_H",
+      "source": "astrometry_net",
+      "ra_hours": 5.57984574203663,
+      "dec_degrees": -5.513170089304367,
+      "pixel_scale_arcsec": 0.4773706057584856,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top150+scale-hint; submission 15483918 job 16295458)",
+      "generated_at": "2026-07-10T05:59:12.811Z",
+      "rotation_deg": 0.2152467211998685,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483918,
+        "job_id": 16295458,
+        "solved_at": "2026-07-10T05:59:12.811Z",
+        "submitted_path": "xylist-top150+scale-hint",
+        "submitted_sha256": "e20b45fffc523cc54368abc57e9468695f2fd855c800e12e4c7451e4599d8913",
+        "submitted_bytes": "FITS xylist (150 of 150 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.33425,
+          "scale_upper": 0.62075,
+          "scale_est": 0.4775,
+          "center_ra": 83.685,
+          "center_dec": -5.506,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.69768613054946,
+          "dec": -5.513170089304367,
+          "width_arcsec": 2572.0728238267207,
+          "height_arcsec": 2585.9165713937164,
+          "radius": 0.5065642243323062,
+          "pixscale": 0.4773706057584856,
+          "orientation": 0.2152467211998685,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295458"
+      }
+    },
+    {
+      "frame_id": "r_mosaic_I",
+      "source": "astrometry_net",
+      "ra_hours": 5.579833098825492,
+      "dec_degrees": -5.510229062341766,
+      "pixel_scale_arcsec": 0.477298744099338,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483944 job 16295460)",
+      "generated_at": "2026-07-10T05:59:28.579Z",
+      "rotation_deg": 0.20466315083784464,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483944,
+        "job_id": 16295460,
+        "solved_at": "2026-07-10T05:59:28.579Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "c845df3344f7be9842fceb2efa186431736b1e5e663c596e3b0f71f62a4366c4",
+        "submitted_bytes": "FITS xylist (300 of 2186 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.33418,
+          "scale_upper": 0.6206200000000001,
+          "scale_est": 0.4774,
+          "center_ra": 83.685,
+          "center_dec": -5.506,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.69749648238238,
+          "dec": -5.510229062341766,
+          "width_arcsec": 2573.117529439531,
+          "height_arcsec": 2606.5284415264846,
+          "radius": 0.5086998590724036,
+          "pixscale": 0.477298744099338,
+          "orientation": 0.20466315083784464,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295460"
+      }
+    },
+    {
+      "frame_id": "r_mosaic_O",
+      "source": "astrometry_net",
+      "ra_hours": 5.579856460599456,
+      "dec_degrees": -5.510268194639553,
+      "pixel_scale_arcsec": 0.47739442192762116,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483951 job 16295476)",
+      "generated_at": "2026-07-10T06:01:00.084Z",
+      "rotation_deg": 0.21597098546873367,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483951,
+        "job_id": 16295476,
+        "solved_at": "2026-07-10T06:01:00.084Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "c73c70e9369f178d2a4e76032895a60a352e5c4c7b1222443f7bbb371090dfe7",
+        "submitted_bytes": "FITS xylist (300 of 3000 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.3339,
+          "scale_upper": 0.6201,
+          "scale_est": 0.477,
+          "center_ra": 83.685,
+          "center_dec": -5.506,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.69784690899183,
+          "dec": -5.510268194639553,
+          "width_arcsec": 2571.2463565021676,
+          "height_arcsec": 2607.050938146739,
+          "radius": 0.5085689803670862,
+          "pixscale": 0.47739442192762116,
+          "orientation": 0.21597098546873367,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295476"
+      }
+    },
+    {
+      "frame_id": "r_mosaic_R",
+      "source": "astrometry_net",
+      "ra_hours": 5.579834599232146,
+      "dec_degrees": -5.510267293709782,
+      "pixel_scale_arcsec": 0.47747788130625685,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top300+scale-hint; submission 15483985 job 16295480)",
+      "generated_at": "2026-07-10T06:01:31.118Z",
+      "rotation_deg": 0.2134704967695888,
+      "parity": -1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483985,
+        "job_id": 16295480,
+        "solved_at": "2026-07-10T06:01:31.118Z",
+        "submitted_path": "xylist-top300+scale-hint",
+        "submitted_sha256": "c4ce0caf903735486c7586875ce429c337bddc698994fc31dd058ed536ed37ac",
+        "submitted_bytes": "FITS xylist (300 of 1000 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.33425,
+          "scale_upper": 0.62075,
+          "scale_est": 0.4775,
+          "center_ra": 83.685,
+          "center_dec": -5.506,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 83.69751898848219,
+          "dec": -5.510267293709782,
+          "width_arcsec": 2574.0832581220307,
+          "height_arcsec": 2607.5067098134687,
+          "radius": 0.5088907815775239,
+          "pixscale": 0.47747788130625685,
+          "orientation": 0.2134704967695888,
+          "parity": -1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295480"
+      }
+    },
+    {
+      "frame_id": "Whirlpool Galaxy M51 300s-91",
+      "source": "astrometry_net",
+      "ra_hours": 13.497899361924649,
+      "dec_degrees": 47.17813787631966,
+      "pixel_scale_arcsec": 0.5222315080645424,
+      "provenance_note": "nova.astrometry.net community solve (xylist-top73+scale-hint; submission 15483996 job 16295503)",
+      "generated_at": "2026-07-10T06:04:03.706Z",
+      "rotation_deg": 358.97619127370353,
+      "parity": 1,
+      "nova": {
+        "solver": "nova-api",
+        "submission_id": 15483996,
+        "job_id": 16295503,
+        "solved_at": "2026-07-10T06:04:03.706Z",
+        "submitted_path": "xylist-top73+scale-hint",
+        "submitted_sha256": "7ddfaf9a2732b0e1af39fdeeda6d10479060d8c805afe6edb101502ea3d2fff6",
+        "submitted_bytes": "FITS xylist (73 of 73 detections, flux-sorted) 8640B",
+        "hints": {
+          "scale_units": "arcsecperpix",
+          "scale_type": "ul",
+          "scale_lower": 0.3658199999999999,
+          "scale_upper": 0.67938,
+          "scale_est": 0.5226,
+          "center_ra": 202.5525,
+          "center_dec": 47.129,
+          "radius": 15
+        },
+        "center_source": "goto",
+        "calibration": {
+          "ra": 202.46849042886973,
+          "dec": 47.17813787631966,
+          "width_arcsec": 1531.705013153303,
+          "height_arcsec": 1463.2926855968478,
+          "radius": 0.2942132783289454,
+          "pixscale": 0.5222315080645424,
+          "orientation": -1.023808726296474,
+          "parity": 1
+        },
+        "wcs_url": "https://nova.astrometry.net/wcs_file/16295503"
+      }
+    }
+  ]
+}

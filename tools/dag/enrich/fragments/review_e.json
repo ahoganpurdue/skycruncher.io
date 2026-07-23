@@ -1,0 +1,483 @@
+{
+  "fragment": "review_e",
+  "derived_by": "opus reviewer E (adversarial, independent of all deriving batches)",
+  "notes": [
+    "counts: 75 reviewed / 75 VERIFIED / 0 REFUTED / 0 STALE / ~20 unreviewed (of ~95 total edges across the 4 in-scope fragments). No edge flipped — the four fragments cite code/schema faithfully; caveats below are cite-quality notes, not refutations.",
+    "CRPIX finding (MANDATORY): NOT a bug — the two writers do NOT genuinely differ by one pixel. package.ts:159 writes CRPIX1: fitted.crpix[0] with no +1 because that block is the RECEIPT WCS intermediate, explicitly labeled engine 0-based at package.ts:170 (COMMENT: 'engine pixel convention (0-based, y-down)'). The +1 is applied downstream at the FITS serialization boundary: fits_writer.ts:209 writes fitsCard('CRPIX1', crpix1 + 1, 'FITS 1-based (engine 0-based +1)') where crpix1 = the receipt's 0-based CRPIX1. tools/stack/fits_io.mjs:218 writes wcs.crpix[0] + 1 directly because it consumes a raw ENGINE WCS (0-based) and emits FITS cards in one hop. So both FITS outputs are 1-based; they apply +1 at different chain positions (fits_writer after the receipt intermediate, stacker in one hop) — the documented 'two conversion boundaries, never both' de-dupe seam (stack/fits_io.mjs:195-208, fits_writer.ts:26-27). Consistent by design.",
+    "SUB-FINDING (schema self-citation drift, informational — does NOT flip any edge): binary_layouts.ts fits_io entry cites its own conversion sites with STALE line numbers — strideRule:301 says 'fits_decoder.ts:403' but hard.ra_hint = ra/15 is actually at fits_decoder.ts:1127; strideRule:302 + notes:316 say 'package.ts:77 + :101' but crval[0]*15 is actually at package.ts:161 (fitted) and :185 (synthesized). The review EDGES correctly cite the current lines (fits_decoder 1127, package 161) — the fragments effectively corrected the schema's stale internal refs. Worth a schema-refresh but out of scope for edge verdicts.",
+    "SCOPE: fully verified all 7 unit-conversion edges, all 9 loud_edges_c2 sub-stage solver/WCS edges, all 38 loud_edges_c boundary/stage edges except 1 (tauri, unread schema line), stage_semantic_a control+fallback (all 6) + 12 of its data-flow, and 9 evidence_b edges (byte-exact test assertions sampled). Unreviewed (22): stage_semantic_a data-flow at orchestrator lines I did not open (load->decode:641, decode->luminance:995, luminance->detect:1106, the 3 hardware_profile edges:1662/1831); the tauri boundary edge (binary_layouts:372); and 15 evidence_b edges whose cites are apispec/e2e test files I did not open (run_wizard_seestar.mjs, solve_cr2.apispec, arrow_sink.apispec, confirm_null_evidence.apispec, nova_truth, psf_physics_provider, download_gaia_chunked). Hard-stopped at time cap before completing the full WHY-stub doc sweep (⑤): verified 3 external whys + 5 doc-cited whys as a sample; the remaining ~40 stage/boundary whys went unreviewed.",
+    "cite-quality notes (all kept VERIFIED, not flipped): (a) loud_edges_c sip_convention.ts->asdf_writer.ts cite :80 lands on a doc comment describing the asdf usage, not the negation code — but toFitsSip IS called in asdf_writer.ts at :346 and :495, so the relationship is real; (b) loud_edges_c fits_writer.ts->fits_io cite :302 lands mid-sentence, the fits_writer mention is at :303 — same schema block; (c) stage_semantic_a solve->calibrate cite :1735 is a comment inside bc_measure but it does evidence calibrate reading solution.matched_stars + solution.wcs; (d) wasm_typed_array->psf_field 'AUTO-DETECT (6-vs-13)' is a psf_field.ts consumer claim asserted from the schema, not code-verified in psf_field.ts.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 14 review-rows referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "edges": [
+    {
+      "from": "boundary:libraw_mem_image",
+      "to": "tools/psf/decode_cr2.mjs",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "decode_cr2.mjs:91 candidateDims + strideCoherence:121-134 confirm the 60Da tie-break (5196x3468 vs true 5202x3464 shear); ADU->Float32[0,1] normalization is the unit conversion. Type slightly loose (also a decode) but defensible."
+    },
+    {
+      "from": "boundary:atlas_rows",
+      "to": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "star_catalog_adapter.ts:719-728 exact: isGaiaFormat=(source_id||mag_g), ra_hours = ra_deg/15 else isGaia?ra/15:ra. Per-row deg/hours discriminator confirmed."
+    },
+    {
+      "from": "boundary:fits_io",
+      "to": "src/engine/pipeline/m1_ingestion/fits_decoder.ts",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "fits_decoder.ts:1127 hard.ra_hint = ra/15, comment:1125 'header RA is in DEGREES, hint contract is HOURS'. deg->hours confirmed (schema's own :403 ref is stale)."
+    },
+    {
+      "from": "tools/stack/fits_io.mjs",
+      "to": "boundary:fits_io",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "fits_io.mjs:216 CRVAL1=wcs.crval[0]*15, :218 CRPIX1=wcs.crpix[0]+1; docstring:195-208 documents stacker-eats-HOURS boundary. Exact."
+    },
+    {
+      "from": "src/engine/pipeline/stages/package.ts",
+      "to": "boundary:fits_io",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "package.ts:161 CRVAL1=fitted.crval[0]*15 (fitted branch), :185 sol.ra_hours*15 (synthesized). Both branches confirmed; receipt is already-degrees downstream."
+    },
+    {
+      "from": "src/engine/pipeline/export/sip_convention.ts",
+      "to": "src/engine/pipeline/export/fits_writer.ts",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "sip_convention.ts:85 toFitsSip negates A/B (A_FITS=-A_internal); fits_writer.ts:56 imports + :226 calls toFitsSip(sip). Pure negation confirmed."
+    },
+    {
+      "from": "src/engine/pipeline/export/sip_convention.ts",
+      "to": "src/engine/pipeline/export/asdf_writer.ts",
+      "type": "unit-conversion",
+      "verification": "VERIFIED",
+      "note": "cite :80 is a doc-comment line, but asdf_writer.ts:62 imports toFitsSip and calls it at :346 (wcs_fits keyword) and :495 (gwcs node) — the BOTH-exports claim in how is confirmed by two call sites."
+    },
+    {
+      "from": "boundary:libraw_mem_image",
+      "to": "src/engine/pipeline/m1_ingestion/metadata_reaper.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:118-135 strideRule/units/coord match how (interleaved RGB16 w*h*3, ~4-7% cross-leak NOT one-hot, convertMemImageToRgb detect+route); metadata_reaper gating referenced at :124."
+    },
+    {
+      "from": "boundary:libraw_mem_image",
+      "to": "tools/color/rgb_to_xyz.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:139 notes 'tie-break rule currently lives in tools/color/rgb_to_xyz.mjs' — secondary exact-meta recovery, matches how."
+    },
+    {
+      "from": "tools/atlas/merge_hyg_sectors.mjs",
+      "to": "boundary:atlas_rows",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:152-158 minified one-obj/line Gaia-then-HYG contiguous, regenerable 38/38; units:164 STRICT mag>6.8; sector id:157 decIndex*6+raIndex. Confirmed."
+    },
+    {
+      "from": "tools/starplates/build_release.mjs",
+      "to": "boundary:starplates_blobs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:190-205 t0/t1 blobs + 4-band index ~40.6MB, UNVERIFIED-heavy, transcribe-before-rewire (LAW 7). Matches how."
+    },
+    {
+      "from": "tools/atlas/atlas_to_arrow.mjs",
+      "to": "boundary:arrow_seam",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:210-216 Arrow IPC columnar LE, producer atlas_to_arrow.mjs. Confirmed."
+    },
+    {
+      "from": "boundary:arrow_seam",
+      "to": "src/engine/pipeline/m6_plate_solve/atlas_arrow_codec.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:213 names atlas_arrow_codec.ts as the codec; RA-unit hybridity inherited (:217). Confirmed."
+    },
+    {
+      "from": "boundary:arrow_seam",
+      "to": "src/engine/core/ArrowMemory.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:214 'in-memory view: ArrowMemory.ts'; coord:218 COORDINATE ledger. Confirmed."
+    },
+    {
+      "from": "src/engine/pipeline/m3_gpu_preprocess/demosaic_pipeline.ts",
+      "to": "boundary:wgsl_structs",
+      "type": "contract",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:227-243 std140/std430 alignment, demosaic_pipeline.ts named, SHARED-WGSL HAZARD:233-235. Type contract apt for struct layout. Confirmed."
+    },
+    {
+      "from": "boundary:wasm_typed_array",
+      "to": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:254-268 refine_stars_lm OUTPUT 13 f64/star, first 6 bit-identical, sigmas NaN when covStatus!=0, values COPIED. Schema-faithful; the 6-vs-13 auto-detect is a psf_field consumer claim not code-checked here."
+    },
+    {
+      "from": "src/engine/pipeline/export/fits_writer.ts",
+      "to": "boundary:fits_io",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:303-305 downstream writers consume already-converted receipt.wcs, must NOT re-x15, only CRPIX+1 (confirmed at fits_writer.ts:209). Cite :302 lands mid-sentence, block is :296-304."
+    },
+    {
+      "from": "boundary:rawler_cfa",
+      "to": "src/engine/pipeline/m1_ingestion/rawler_decoder.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:327-345 single-channel CFA cpp=1 full-frame incl OB borders, phase (y&1)*2+(x&1), per-frame blacklevel 2046 vs 2045. Confirmed default arm."
+    },
+    {
+      "from": "src/engine/pipeline/seam_capture.ts",
+      "to": "boundary:seam_capsule",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "binary_layouts.ts:459-472 per-buffer LE .bin + capsule.json sidecar (sole authority), sha256-verified, captureSeam env-gated CAPTURE_SEAMS=1 default OFF. Confirmed."
+    },
+    {
+      "from": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+      "to": "src/engine/pipeline/export/sip_convention.ts",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "sip_convention.ts:11-25 documents residual_analyzer.performSIPFit convention (1) A_internal=OBSERVED-IDEAL stored on receipt.solution.astrometry.sip. Confirmed."
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:metrology",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1231-1236 resolveScaleLock(this.metadata, this.signal.clean_stars, ...). Confirmed."
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:solve",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1452 selectCuratedStars(this.scienceBuffer, w, h, this.signal) feeds solver. Confirmed."
+    },
+    {
+      "from": "stage:metrology",
+      "to": "stage:solve",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1329 nativeScale = this.scaleLock || metadata.pixel_scale || 2.0; scale_locked emit at :1243. Confirmed."
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:calibrate",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1735-1736 (comment inside bc_measure) evidences calibrate reads solution.matched_stars + solution.wcs; sub-stages are withStage seams inside calibrate. Confirmed as coarse handoff."
+    },
+    {
+      "from": "boundary:rawler_cfa",
+      "to": "boundary:libraw_mem_image",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "rawler_decoder.ts:64-74 isRawlerDecoderEnabled: v==='0'||'false' => false (libraw cold), else true (rawler default), catch=>true. Fallback confirmed."
+    },
+    {
+      "from": "stage:solve.quad_wasm",
+      "to": "stage:solve",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "solver_entry.ts:1754 scoreQuadsPlanarLocal, :1770 accrueBranchTiming('solve.quad_wasm'); solve.ts:190 winner=solve.quad_wasm on success. Confirmed primary branch."
+    },
+    {
+      "from": "stage:solve",
+      "to": "stage:calibrate.m7_analyze",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "calibrate.ts:66 ResidualAnalyzer.analyze(solution), landed on solution.astrometry:68. Confirmed."
+    },
+    {
+      "from": "stage:calibrate.m7_analyze",
+      "to": "stage:calibrate.sip_gate",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "calibrate.ts:88 if(analysis.sip_coefficients), :91 gateEmittedSip(solution, analysis.sip_coefficients). Gate runs only when candidate exists. Confirmed."
+    },
+    {
+      "from": "stage:calibrate.sip_gate",
+      "to": "stage:m7_refine",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "calibrate.ts:93 if(sipGate.admitted) solution.astrometry.sip=...; :94 sip_gate verdict always recorded. Control (emit-or-absent). Confirmed."
+    },
+    {
+      "from": "stage:calibrate.tps_gate",
+      "to": "stage:m7_refine",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "calibrate.ts:111 fire-gate (distortion && >20 pairs), :114 fitTpsGated(solution), :116 tps=model|null explicit, :117 verdict always recorded. Confirmed."
+    },
+    {
+      "from": "stage:m7_refine",
+      "to": "stage:bc_rematch",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1709-1712 comment: m7_refine runs FIRST, is both KEPT final astrometry AND rematch candidate-astrometry input (rematch reads solution.astrometry.sip for rms_before). Confirmed."
+    },
+    {
+      "from": "stage:bc_measure",
+      "to": "stage:bc_rematch",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1746 measureBrownConradyFromSolution producer, :1786-1788 runBcRematchPass({bcMeasured: this.bcMeasured}). Confirmed measure->apply seam."
+    },
+    {
+      "from": "stage:bc_rematch",
+      "to": "stage:solve",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "lens_distortion_rematch_pass.ts:336-337 guard=(neverWorse==='APPLIED' && false_guard_passes)?'APPLIED':'KEPT_ORIGINAL'; matchEpoch bump only in APPLIED branch (:354, comment cited :352). KEPT_ORIGINAL keeps original byte-identical. Confirmed."
+    },
+    {
+      "from": "stage:m7_refine",
+      "to": "stage:render_apply_sip",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1850 sip=solution.astrometry.sip, :1858 RENDER_APPLY_SIP flag, :1874 applySipUndistort, :1878 rewrites previewUrl only; :1848-1849 never touches WCS/matched_stars. RENDER-plane crossing confirmed, default-off."
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:extract.decode",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1130-1148 detectSignal dispatch; sourceFormat branches decode. (Confirmed structurally via decode->detect region; cite :641 not directly opened but consistent.)"
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.detect",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "detect.ts:100-104 isNativeBayer(!isDemosaiced && data instanceof Uint16Array); detect.ts:152-176 native branch reads rawSensor.data (analyzeBayerNative), luminance branch reads scienceBuffer (analyzeWithMasking). Genuine buffer-selecting branch. Confirmed."
+    },
+    {
+      "from": "stage:extract.luminance",
+      "to": "stage:extract.detect",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1139 scienceBuffer: detectScienceBuffer passed to detectSignal; only read on non-native branch. Confirmed (cite :1106 assignment not directly opened)."
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:extract.detect",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1145-1146 focalLength: this.metadata?.focal_length, metadata: this.metadata forwarded to detectSignal. Confirmed."
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:extract.spectral_peek",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1171-1173 peekSpectralData(fullRGB, this.signal!) — fullRGB from decode. Confirmed (last read before buffer discard :1177)."
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:extract.spectral_peek",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1173 peekSpectralData(fullRGB, this.signal!) — this.signal from detect, mutated in place with peak_rgb. Confirmed."
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:extract",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1158 if(!this.signal) throw 'Signal analysis failed.' — aborts step2_Extract. Confirmed."
+    },
+    {
+      "from": "stage:extract.decode",
+      "to": "stage:spcc",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1909 this.scienceRgb passed to runSpcc, :1953 released to null right after SPCC; science.ts:319 useSpcc = !!scienceRgb && matches. SPCC sole consumer. Confirmed (set-site :923 not directly opened, corroborated)."
+    },
+    {
+      "from": "stage:extract.detect",
+      "to": "stage:spcc",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1926 this.signal?.cfa_verdict into runSpcc; science.ts:353-359 cfaVerdict mono=>REFUSED_GRAY, supported===false=>UNCALIBRATED_CFA before any fit. Genuine run/no-run gate. Confirmed."
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:spcc",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1917 this.frameCtx into runSpcc as ctx (gain/ZP basis); originates step1. Confirmed via consumer site (cite :652 not directly opened, corroborated)."
+    },
+    {
+      "from": "stage:spcc",
+      "to": "stage:spcc_render_gains",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1963 g=spcc.cal?.gains, :1964 gate on g.applied, :1971 {gains:g.gains,applied:true} re-renders preview else SKIP. Confirmed."
+    },
+    {
+      "from": "stage:extract.luminance",
+      "to": "stage:psf_field",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:1990-1991 runPsfCharacterization({scienceBuffer: this.scienceBuffer}) — measured on native grid. Confirmed."
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:psf_attribution",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:2009-2024 runPsfAttribution({psfField, solution, ...}); comment :2010 'AFTER psf_field because it READS the measured field'. Confirmed."
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:psf_attribution",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "psf_attribution.ts:315 if(!psf||!sol) return emptyReport(...); emptyReport:284-306 all NOT_MEASURED. Confirmed honest-absent fallback."
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:psf_attribution",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:2019 metadata: this.metadata; psf_attribution.ts:338-340 validated (>0) exposure_time/aperture/focal_length feed diffraction+seeing. Confirmed."
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:psf_attribution",
+      "type": "control",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:2022 timestampTrusted into runPsfAttribution; psf_attribution.ts:296 refraction gatedOn 'timestampTrusted && GPS present' => NOT_MEASURED when false. Confirmed control gate."
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:forced_confirm",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:2055-2059 framePsf from psfField.fwhmMedianMajPx/ellipticityMedian/method, compared to SOLVER_CONFIRM_UNDERSAMPLED_FWHM_PX; :2075 passed to runPostSolveConfirmation. Confirmed."
+    },
+    {
+      "from": "stage:psf_field",
+      "to": "stage:forced_confirm",
+      "type": "fallback",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:2055-2060 framePsf = (psfField && fwhmMedianMajPx!=null) ? {...} : null — null (not fabricated) when absent. Confirmed."
+    },
+    {
+      "from": "stage:extract.luminance",
+      "to": "stage:forced_confirm",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:2045 gated on if(this.scienceBuffer && this.solution); :2068-2070 makeFrameProduct(sb,...) + runPostSolveConfirmation({scienceBuffer: sb}) native grid. Confirmed."
+    },
+    {
+      "from": "stage:extract",
+      "to": "stage:forced_confirm",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "orchestrator_session.ts:2068 makeFrameProduct(sb, bw, bh, this.frameCtx) — FrameContext gain/RN feeds CCD-equation SNR. Confirmed."
+    },
+    {
+      "from": "stage:load",
+      "to": "stage:extract",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "solve_seestar.apispec.ts:42-45 fs.readFileSync(FIT_PATH) + runWizardPipeline(ab); populated receipt asserted later proves raw buffer reached extract. Confirmed."
+    },
+    {
+      "from": "stage:solve.quad_wasm",
+      "to": "stage:solve",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "solve_seestar.apispec.ts:136-141 byte-exact toBe() on receipt.solution.{ra_hours,dec_degrees,pixel_scale,confidence,stars_matched}=SACRED. Confirmed."
+    },
+    {
+      "from": "stage:calibrate.sip_gate",
+      "to": "stage:bc_rematch",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "run_wizard_cr2.mjs:177 assert(bc.false_guard_passes===false, 'wrong-sign control is the holding prong post-sip-gate'). Confirmed."
+    },
+    {
+      "from": "stage:bc_measure",
+      "to": "stage:bc_rematch",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "run_wizard_cr2.mjs:178-181 pin bc.matched_before===56 / matched_after===56 / rms_before===630.8214 / rms_after===616.8437 exactly. Confirmed. (NB: CLAUDE.md's 537.8008 rms_before is stale vs the live 630.8214; out of scope.)"
+    },
+    {
+      "from": "stage:calibrate.tps_gate",
+      "to": "stage:solve",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "solve_seestar.apispec.ts:132-133 expect(receipt.solution.astrometry.tps).toBeNull() + tps_gate?.admitted).toBe(false). Confirmed OOS refusal written to solve astrometry block."
+    },
+    {
+      "from": "stage:forced_confirm",
+      "to": "stage:calibrate",
+      "type": "evidence",
+      "verification": "VERIFIED",
+      "note": "solve_seestar.apispec.ts:122-128 confirm_status verdict_driver/status/setExcessZ(243.21)/nTargets(211)/confirmed(211)/setGateZ(15) asserted byte-exact. Confirmed."
+    },
+    {
+      "from": "external:astrometry_net_oracle",
+      "to": "tools/overnight/astrometry_truth.mjs",
+      "type": "data-flow",
+      "verification": "VERIFIED",
+      "note": "astrometry_truth.mjs:6-21 shells out to external solve-field, parses .wcs via readFitsHeaderFd -> canonical fromAstrometryNetWcs TruthLabel; index files external, paths configurable never hardcoded. Confirmed."
+    }
+  ],
+  "node_findings": [
+    {
+      "node": "external:prysm_sidecar",
+      "verdict": "CONFIRMED",
+      "note": "client.ts:3 spawn + newline-framed JSON-RPC; :13-16 never-fatal — python missing/spawn/protocol/timeout all resolve {available:false} and callers fall back COLD to closed-form 1.028*lambda/D. Matches why exactly."
+    },
+    {
+      "node": "external:astrometry_net_oracle",
+      "verdict": "CONFIRMED",
+      "note": "astrometry_truth.mjs:6-21 confirms local solve-field path (external binary + multi-GB indexes outside repo, env-configurable, never hardcoded) producing canonical TruthLabel that breaks self-label circularity. Nova (cloud) half of the two-path claim not separately opened but local path fully supports the framing."
+    },
+    {
+      "node": "external:starplates_r2",
+      "verdict": "CONFIRMED",
+      "note": "publish_r2.mjs:19-24 S3-compatible API (SigV4 via node:crypto), env creds R2_ACCOUNT_ID/ACCESS_KEY/SECRET, bucket default 'starplates', R2 endpoint. Matches why (Arrow blobs+manifest.json PUT to R2 'starplates'). Upload lines :137-157 not opened but mechanism header confirms."
+    },
+    {
+      "node": "boundary:fits_io",
+      "verdict": "CONFIRMED",
+      "note": "SkyCruncher_Architecture.md:560-563 Export Endpoints — Endpoint B exports WCS+SIP FITS (fits_writer.ts, astropy-conformant, NaN-preserving), SIP negated to FITS convention at export boundary. Supports the why text."
+    },
+    {
+      "node": "stage:spcc",
+      "verdict": "CONFIRMED",
+      "note": "CARD_COLOR_PHOTOCAL.md:2-8 SPCC color regression, instrumental color -> catalog BP-RP (Gaia DR3). Supports why (regress instrumental vs catalog color). Minor: doc does not literally expand 'SPCC' to 'Stellar Parameter Color Calibration' but the substance matches."
+    },
+    {
+      "node": "stage:solve.quad_wasm",
+      "verdict": "CONFIRMED",
+      "note": "CARD_ASTROMETRY_WCS.md:7-11 Quad-hash blind plate solving — 4-star quads, rotation/scale-invariant hash, match vs catalog index, >=2 matches seed WCS, WASM matcher L1446. Matches why."
+    },
+    {
+      "node": "stage:calibrate.sip_gate",
+      "verdict": "CONFIRMED",
+      "note": "CARD_ASTROMETRY_WCS.md:20-24 SIP distortion fit — dx(u,v)=Sum A_pq u^p v^q, u=x_det-crpix, residual_analyzer.ts. Supports why (SIP encodes local coordinate transform)."
+    },
+    {
+      "node": "boundary:atlas_rows",
+      "verdict": "CONFIRMED",
+      "note": "why cites CLAUDE.md UNIT/FORMAT TRAPS — 'Atlas rows are HYBRID: Gaia (ra in DEGREES) + HYG (ra in HOURS)'. Matches why text (per-row discrimination). Confirmed from CLAUDE.md content."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "name": "skycruncher",
+  "private": true,
+  "version": "1.3.0",
+  "type": "module",
+  "description": "SkyCruncher — a deterministic astrophotography plate-solver and measurement instrument (Vite/React/TS + Rust->WASM + Tauri).",
+  "author": "ahoganpurdue",
+  "license": "Apache-2.0",
+  "homepage": "https://skycruncher.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ahoganpurdue/skycruncher.io.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ahoganpurdue/skycruncher.io/issues"
+  },
+  "keywords": [
+    "astronomy",
+    "astrophotography",
+    "plate-solving",
+    "astrometry",
+    "photometry",
+    "wasm",
+    "tauri"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "prep:demo": "node tools/build/prep_demo_assets.mjs",
+    "build": "npm run prep:demo && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "e2e:seestar": "node tools/e2e/run_wizard_seestar.mjs",
+    "gates": "node tools/gates/check_gates.mjs --check",
+    "gates:update": "node tools/gates/check_gates.mjs",
+    "fingerprint": "node tools/gates/failure_fingerprint.mjs",
+    "rig": "node tools/overnight/dashboard/launch.mjs",
+    "rig:app": "node tools/overnight/dashboard/rig_app.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "~2.10.1",
+    "@tauri-apps/plugin-dialog": "^2.6.0",
+    "@tauri-apps/plugin-fs": "~2.4.0",
+    "@tauri-apps/plugin-log": "^2.8.0",
+    "@tauri-apps/plugin-process": "^2.3.0",
+    "@tauri-apps/plugin-updater": "^2.9.0",
+    "apache-arrow": "^21.1.0",
+    "dockview-react": "^7.0.3",
+    "exifr": "^7.1.3",
+    "libraw-wasm": "^1.1.2",
+    "lucide-react": "^0.300.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.2",
+    "@tauri-apps/cli": "^2.10.1",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/browser": "^4.0.18",
+    "@webgpu/types": "^0.1.69",
+    "playwright": "^1.58.2",
+    "tailwindcss": "^4.3.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "^4.0.18"
+  }
+}

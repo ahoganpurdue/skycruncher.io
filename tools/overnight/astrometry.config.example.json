@@ -1,0 +1,11 @@
+{
+  "_README": "Copy to astrometry.local.json (gitignored) OR set the ASTROMETRY_* env vars. Env wins. ALL paths are EXTERNAL to this repo by contract — never point these inside the project tree.",
+  "_solveField": "Path/command to the external solve-field binary. On a native Linux/WSL install it is usually just 'solve-field' (on PATH).",
+  "solveField": "solve-field",
+  "_wslDistro": "If solve-field lives inside a WSL distro, name it here (e.g. 'Ubuntu-24.04'); the wrapper invokes `wsl -d <distro> -e solve-field …` and auto-translates Windows paths (K:\\a\\b) to /mnt/k/a/b. Leave null for a native binary.",
+  "wslDistro": null,
+  "_indexDir": "External index directory the owner provisioned on a drive with headroom (e.g. /mnt/e/astrometry_indexes inside WSL, or E:\\astrometry_indexes natively). Used by --check-install; solve-field itself reads its own backend .cfg add_path.",
+  "indexDir": null,
+  "_backendConfig": "Optional path to a custom astrometry backend .cfg whose `add_path` points at indexDir. A WSL-side path when wslDistro is set. Leave null to use solve-field's default cfg.",
+  "backendConfig": null
+}

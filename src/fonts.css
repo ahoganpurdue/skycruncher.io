@@ -1,0 +1,50 @@
+/* ============================================================================
+   SKYCRUNCHER — SELF-HOSTED IDENTITY FONTS
+   ----------------------------------------------------------------------------
+   Inter (rsms/inter) + JetBrains Mono (JetBrains) — both SIL OFL 1.1.
+   Bundled LOCALLY under public/fonts/ (served at /fonts/*). NO external CDN:
+   the app runs offline in Tauri and under a strict CSP that forbids remote
+   hosts. Files are the latin-subset VARIABLE builds (single file spans the
+   full weight axis) — the UI uses weights 300–800 (font-light … font-black)
+   plus italic on sans captions; the variable axis covers all of them with no
+   synthetic weights and no per-weight file sprawl.
+
+   Family names here MUST match the @theme --font-sans / --font-mono stacks in
+   index.css exactly ("Inter", "JetBrains Mono"). font-display: swap keeps text
+   visible on the fallback while the woff2 loads. License: public/fonts/OFL.txt
+   ========================================================================== */
+
+/* latin subset — Basic Latin + Latin-1 + common punctuation/symbols. */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/inter-latin-wght-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url("/fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Hardened per owner ruling 2026-07-10: no pre-configured fs scope anywhere. Every fs permission below is command-enable ONLY (the plugin's scope is default-deny), so the only paths the app can read/write are the ones the user explicitly picks through the dialog plugin — picks are auto-granted into the fs scope at pick time and persisted across restarts by tauri-plugin-persisted-scope. Multiple input/output folders = multiple picks; grants accumulate. process is narrowed to restart (updater relaunch); exit is not granted.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "fs:allow-read-file",
+    "fs:allow-read-dir",
+    "fs:allow-write-file",
+    "updater:default",
+    "process:allow-restart"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "$doc": "SINGLE SOURCE for the unified version manifest — structure + manifest-owned version numbers. Read by BOTH the TS view (src/engine/versions/manifest.ts) and the dep-free MCP server (tools/mcp/instrument_manifest.mjs -> tools/mcp/server.mjs instrument_status). RULE: a version that already lives in a real home carries NO literal here — it carries a `ref` naming that home, and each reader resolves it FROM that home so the number is never duplicated (LAW: single source per number, nothing hand-duplicated that can drift). Bump a manifest-OWNED version (capture record, dossier, intake provenance, api driver, mcp server/tools, binary layouts) HERE and nowhere else. Owner ask B5 (2026-07-10).",
+  "surfaces": [
+    {
+      "surface": "receipt_schema",
+      "ref": "schema_versions:RECEIPT_SCHEMA_VERSION",
+      "changelogAnchor": "src/engine/pipeline/stages/schema_versions.ts"
+    },
+    {
+      "surface": "capture_record_schema",
+      "version": "1.0.0",
+      "changelogAnchor": "src/engine/events/capture_record.ts"
+    },
+    {
+      "surface": "mcp_server",
+      "version": "1.0.0",
+      "changelogAnchor": "tools/mcp/server.mjs"
+    },
+    {
+      "surface": "headless_api_driver",
+      "version": "1.0.0",
+      "changelogAnchor": "tools/api/headless_driver.ts"
+    },
+    {
+      "surface": "intake_provenance",
+      "version": "1",
+      "schemaTag": "skycruncher.intake.provenance/1",
+      "changelogAnchor": "tools/overnight/fetch_intake.mjs"
+    },
+    {
+      "surface": "dossier_schema",
+      "version": "1",
+      "schemaTag": "community-dump/1",
+      "changelogAnchor": "tools/community/assemble_dossier.mjs"
+    },
+    {
+      "surface": "desktop_app",
+      "ref": "package.json:version",
+      "changelogAnchor": "src-tauri/tauri.conf.json"
+    },
+    {
+      "surface": "binary_layouts",
+      "version": "0.5.0",
+      "changelogAnchor": "src/engine/contracts/binary_layouts.ts"
+    },
+    {
+      "surface": "csl_thesis_schema",
+      "version": "0.2.0",
+      "schemaTag": "csl.thesis/0.2.0",
+      "changelogAnchor": "tools/theses/thesis_schema.ts"
+    }
+  ],
+  "mcpTools": {
+    "solve_fits": "1.0.0",
+    "inspect_receipt": "1.0.0",
+    "rig_profiles": "1.0.0",
+    "instrument_status": "1.0.0",
+    "list_widgets": "1.0.0",
+    "render_widget": "1.0.0",
+    "thesis_submit": "0.2.0",
+    "thesis_list": "0.2.0",
+    "thesis_get": "0.2.0",
+    "thesis_stamp": "0.1.0"
+  }
+}

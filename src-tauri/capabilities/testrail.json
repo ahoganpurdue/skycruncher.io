@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "testrail",
+  "description": "DESKTOP TEST RAIL v0 capability (branch rail/desktop-v0 — NEVER merges). Additive beside default.json for the 'main' window: grants ONLY the log plugin so the self-driving rail's RAIL| result lines reach tauri-dev stdout (the machine-evidence of record). The custom app commands the rail invokes (solve_greenfield, demosaic_native) are application-defined and NOT gated by the ACL, so no per-command permission is needed. No fs/event/webview grants — the rail neither writes files from the webview nor opens windows.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "log:default"
+  ]
+}

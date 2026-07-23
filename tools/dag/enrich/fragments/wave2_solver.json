@@ -1,0 +1,527 @@
+{
+  "fragment": "wave2_solver",
+  "derived_by": "opus wave-2 writer (domain: src/engine/pipeline/m6_plate_solve/*)",
+  "notes": [
+    "Domain: module nodes whose id starts with src/engine/pipeline/m6_plate_solve/. Every edge FROM endpoint is inside this domain; TO endpoints reach into stages/, m2_hardware/, m4_signal_detect/, m7_astrometry/, and sibling m6 nodes (all base nodes verified present).",
+    "Did NOT restate the three existing from-m6 enrichment edges (gaia_cell_source->star_catalog_adapter data-flow; gpu_quads/quad_build->boundary:gpu_quad_scoring data-flow; gpu_quads/quad_scoring_backend->boundary:gpu_quad_scoring control). No (from,to,type) key here collides with enrichment.json.",
+    "Typed semantic edges are ADDED on top of base import edges (different type keys) per the enrichment contract; e.g. forced_confirm imports deep_verify (base import edge) and this fragment adds a distinct 'contract' edge for the shared statistic. That is the intended overlay, not a restatement.",
+    "LOUD unit class: the catalog RA is HOURS internally (star_catalog_adapter normalizes the Gaia-degrees/HYG-hours hybrid to HOURS; the boundary:atlas_rows->star_catalog_adapter unit edge in loud_edges_c already carries that per-row discrimination). deep_verify.projectCatalogToPixels treats crval[0]/ra_hours as HOURS -> gnomonic TAN -> CD-inverse -> pixel; the HOURS convention is noted in each edge's `how`. uw_tight_reverify.buildMatch does a HOURS->DEGREES conversion (cat.ra_hours*15) internally when emitting MatchedStar.catalog.ra — folded into that module's why rather than an invented node-to-node edge.",
+    "KNOWN DEFECT recorded, not edged: deep_verify.projectCatalogToPixels applies the LINEAR CD-inverse ONLY, never the fitted SIP polynomial (deep_verify.ts:223-235), so forced_confirm probes off-axis positions diverge on a SIP-carrying frame. Mechanism is code-confirmed; standing P-item. Left in the harvest edge's `how` as a lossy/transform caveat.",
+    "quad backend fallback: the GPU arm is a candidate generator only; the CPU f64 verify+fit own the verdict. Flag OFF -> gpu_quad_backend never imported (byte-identical). Expressed as a control edge to the flag and a fallback edge to the GPU backend module.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 2 node-decls + 3 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "src/engine/pipeline/m6_plate_solve/solver_entry.ts": {
+      "why": {
+        "text": "The M6 plate-solve entry point: solvePlate (and the autoSolvePlate facade) run the whole blind/quad/ultra-wide solve orchestration, and it is imported by orchestrator_session, stages/solve.ts, stages/solve_context.ts, Mainlogic_entry, and most tools/ harnesses. Without it there is no plate solve at all — the wizard step-4/5 has no solver to call.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "229"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "3061-3062"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts": {
+      "why": {
+        "text": "Singleton catalog access (getinstance / loadCatalog / ensureSectorLoaded / findStarsInField). It is the single place the hybrid Gaia-degrees / HYG-hours atlas rows are normalized to internal RA HOURS, and it is imported by ~15 consumers (solver_entry, uw_deep_evidence, m7 metrology, m8 color_index, and many tools). Break it and there is no reference catalog to match against, and no forced-photometry positions to project.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+            "lines": "386-396"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+            "lines": "403-418"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+            "lines": "869"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/deep_verify.ts": {
+      "why": {
+        "text": "The forced-photometry primitives for the solver: forcedMeasure (matched-aperture flux at FIXED catalog positions), projectCatalogToPixels (HOURS sky -> pixel), the deterministic scrambled-null sampler, binomialExcessZ, and deepVerifyEscalation. It is the shared math for the ultra-wide escalation, the post-solve harvest, and the confirmation gate. Without it the sub-threshold ultra-wide rescue and every CATALOG_FORCED product lose their statistic.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+            "lines": "87-108"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+            "lines": "209-249"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+            "lines": "437-497"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/forced_confirm.ts": {
+      "why": {
+        "text": "The set-level family-wise confirmation gate (confirmForcedSet + the per-star conjunction confirmForcedStar). It promotes CATALOG_FORCED candidates to CATALOG_FORCED_CONFIRMED only when the real confirmed count beats a frame-wide scrambled null at a binomial excess, otherwise the whole set collapses to zero. Without it the ~2 sigma candidate floor would be laundered into 'confirmed' across ~500 candidates and the phantom-confirmation rate per solve would be unbounded.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+            "lines": "289-332"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+            "lines": "401-475"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/confirm_status.ts": {
+      "why": {
+        "text": "Pure classifier that turns the already-computed deep_confirmed block into ONE four-state verdict (CONFIRMED / REFUSED / INSUFFICIENT_TARGETS / NOT_RUN) so the UI and the receipt read the same conclusion. It owns no calibrated constant (the set-gate Z is cited in from the call site). Without it a solve whose confirmation was refused or never run would still display as a bare 'solved' with a false confidence number.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/confirm_status.ts",
+            "lines": "19-43"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/confirm_status.ts",
+            "lines": "97-138"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/fdr_confirm.ts": {
+      "why": {
+        "text": "The N-invariant false-discovery-rate confirmation statistic (empirical right-tail p-values against the scrambled-null SNR pool, Benjamini-Hochberg / Benjamini-Yekutieli step-up). Since the 2026-07-15 sigma-swap it is the PRIMARY verdict driver (confirm_status reads its would_be_status when present); the legacy set-excess z is known to be proportional to sqrt(N)-malformed and is kept only as a diagnostic fallback. Without it the confirm verdict reverts to that malformed gate.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/fdr_confirm.ts",
+            "lines": "77-83"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/fdr_confirm.ts",
+            "lines": "105-120"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts": {
+      "why": {
+        "text": "The ultra-wide fit-tight-reverify escalation tier: the wide-net gate saturates below the +5 sigma bar even for TRUE solutions on huge fields because the radius-inflated net lets chance track matches, so this tier FITS Brown-Conrady distortion on provisional matches then RE-VERIFIES through a tight net (with an inner-region pinhole fallback). buildMatch also carries the load-bearing HOURS->DEGREES conversion (catalog.ra = ra_hours*15). Without it true ultra-wide solutions are rejected at the wide gate.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+            "lines": "1-37"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+            "lines": "112-131"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+            "lines": "317-388"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/tps_eval.ts": {
+      "why": {
+        "text": "The pure thin-plate-spline forward evaluator (kernel U(r)=r^2 ln r + affine + spline sum), with ZERO imports. It is shared verbatim by tps_fitter.ts (the wasm-bearing engine fit-core) and export/asdf_writer.ts (a deliberately engine-free leaf that must run under plain tsx). Keeping it here is what stops the ASDF byte path from dragging wasm onto its import chain and keeps the two consumers from forking the spline math (LAW 4).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_eval.ts",
+            "lines": "1-11"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_eval.ts",
+            "lines": "26-33"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/tps_fitter.ts": {
+      "why": {
+        "text": "Fits a regularized thin-plate spline to the matched-star residual field and appends it to solution.astrometry.tps — the non-polynomial companion to the SIP fitter and the representation ASDF/GWCS carries as a lookup table. It is a coordinate-space fit over already-solved pairs: it never resamples pixels and never mutates WCS / matched_stars / confidence, so both sacred solves stay byte-identical. Without it there is no spline distortion carry for frames the SIP polynomial cannot follow.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+            "lines": "1-19"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+            "lines": "21-39"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m6_plate_solve/standard_stars.ts": {
+      "why": {
+        "text": "Defines the StandardStar type (ra_hours in decimal HOURS, dec_degrees, magnitude_V, B-V color index) and the built-in photometric reference catalog, and is imported across the solver, planetary adapter, starplates provider, ultra-wide tiers, and m8 color. It is the shared row shape every catalog consumer projects and matches; without it the solve and color lanes have no common reference-star type.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/standard_stars.ts",
+            "lines": "24-30"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/standard_stars.ts",
+            "lines": "86"
+          }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/solver_entry.ts:1138",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "StarCatalogAdapter.getinstance().findStarsInField(ra0, dec0, fetchRadiusDeg, targetJd) -> StandardStar[]; ra_hours in internal HOURS, dec_degrees, magnitude_V, color_index_BV",
+        "transform": "cone query over the loaded sectors; the adapter has already normalized the Gaia-degrees/HYG-hours hybrid to HOURS, so the solver consumes uniform-HOURS rows (no per-row unit branch on this side)",
+        "lossy": false
+      },
+      "why": {
+        "text": "solvePlate seeds the blind/quad matcher from this catalog cone; loadCatalog + ensureSectorLoaded must have run first (solver_entry.ts:256, and the anchor/escalation paths page their own sectors). This is the sole reference-star source the quad match and verify chain compare against.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "256"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "1138"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+      "type": "control",
+      "cite": "src/engine/pipeline/m6_plate_solve/solver_entry.ts:1514",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "deepVerifyEscalation(...).excessZ (binomial excess of predicted-position acceptances over the scrambled on-frame null)",
+        "transform": "if excessZ >= SOLVER_UW_ESCALATE_MIN_EXCESS_Z the sub-threshold anchor-sweep candidate WCS is handed to the normal verifyWCS chain; a pass returns success (status SUCCESS_UW_ESCALATED), a below-gate excess collapses the candidate as junk",
+        "lossy": false
+      },
+      "why": {
+        "text": "The ultra-wide anchored sweep can peak below the wide-net sigma bar for a TRUE center; catalog-forced photometry at that center is the extra evidence that rescues it. The escalation number is a real accept gate here (not diagnostic-only), producing a locked solution when it and verifyWCS both pass.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "1483-1526"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/solver_entry.ts:2786",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "post-solve harvest: catalog rows (ra_hours HOURS, dec_degrees) + solution.wcs -> projectCatalogToPixels -> in-frame ForcedPosition[] (native pixels), then runForcedPhotometry over the luminance grid -> CATALOG_FORCED ForcedMeasurement[]",
+        "transform": "gnomonic TAN about crval[0] (HOURS) -> linear CD-inverse -> pixel, capped to SOLVER_DEEP_HARVEST_MAX_POSITIONS; matched-aperture flux/SNR at fixed positions. CAVEAT: projection is LINEAR CD only, never the fitted SIP polynomial (deep_verify.ts:223-235), so off-axis positions on a SIP-carrying frame land at the wrong pixels (standing P-item)",
+        "lossy": true
+      },
+      "why": {
+        "text": "runPostSolveDeepHarvest densifies the solve with forced photometry at catalog-predicted positions; an active lens prior re-projects those positions through the Brown-Conrady toNative model so apertures hit native pixels. All measurements are tagged CATALOG_FORCED and never laundered into blind discoveries.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "2786-2810"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+            "lines": "223-249"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/solver_entry.ts:2987",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "accepted CATALOG_FORCED candidates (ForcedMeasurement[]) + in-frame catalog positions + native Float32 luminance + rApPx/sigmaPix/fwhmPx + FramePsfRef + config overrides (SOLVER_CONFIRM_SET_EXCESS_Z, SOLVER_CONFIRM_SNR_FLOOR, ...) -> confirmForcedSet -> ForcedConfirmSetResult",
+        "transform": "runPostSolveConfirmation runs the per-star conjunction + set-level family-wise excess gate; result becomes solution.deep_confirmed (confirmed count zeroed when the gate collapses)",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is where the ~2 sigma candidate pool is promoted (or refused) under the set-level gate. The live gate constant SOLVER_CONFIRM_SET_EXCESS_Z is injected here from pipeline_config, decoupled from the module default; the FDR shadow flag is threaded through the same call.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "2987-3009"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/solver_entry.ts:2358",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "candidate wcs + full detection list + frame dims + safeScale + wide-net params -> runUwTightReverifyDeep (variant A) -> UwDeepEvidenceResult | null",
+        "transform": "the async wrapper pages a sampled atlas pattern (center + four corners) for a DEEP catalog the >16deg blind path otherwise skips, deep-wide-matches the full detection set, and runs the pure tight-reverify core on that evidence",
+        "lossy": false
+      },
+      "why": {
+        "text": "Round-1 measured the tight tier STARVES on the wide-net bright subset (~10-16 pairs) because ultra-wide fields skip deep-sector paging; variant A repairs the evidence source without touching the pure tier math. Gated by SOLVER_UW_TIGHT_DEEP.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "2354-2375"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+      "type": "fallback",
+      "cite": "src/engine/pipeline/m6_plate_solve/solver_entry.ts:2377",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "on a wide-net FAIL (uwSigma < UW_MIN_SIGMA || uwUnique < UW_MIN_UNIQUE) and shouldAttemptTightReverify, runUwTightReverify(wcs, catalogStars, detected, wideMatches, config) -> UwTightReverifyResult",
+        "transform": "fit Brown-Conrady on provisional matches then re-verify through a tight net; SOLVER_UW_FIT_REVERIFY (default ON) runs it as a verdict-NEUTRAL diagnostic, SOLVER_UW_TIGHT_ACCEPT (default OFF) is what lets an accepted result adopt the tight matches as the solution",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the degradation arm for ultra-wide frames that fail the wide gate; it is fail-soft (any error -> declined, never breaks a solve) and pin-safe (SeeStar is narrow, CR2 passes the wide gate, so neither sacred enters this branch regardless of either flag).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/solver_entry.ts",
+            "lines": "2340-2403"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+      "type": "contract",
+      "cite": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts:57",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "reuses forcedMeasure, scrambledPositions (local-annulus mode), binomialExcessZ, ForcedMeasurement, ForcedPosition from deep_verify — unchanged",
+        "transform": "the set-level family-wise gate computes its excess with the SAME binomialExcessZ the +10 sigma-class escalation uses, and draws its per-star + frame-wide nulls with the SAME deterministic sampler, so the two confirmation statistics cannot fork",
+        "lossy": false
+      },
+      "why": {
+        "text": "Deliberate single-source contract: no numeric primitive is re-implemented in forced_confirm. If binomialExcessZ or the scrambled sampler changed, both the escalation and the confirmation gate must move together — that shared-math coupling is the point of importing rather than copying.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+            "lines": "51-60"
+          },
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+            "lines": "404-410"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+      "to": "src/engine/pipeline/m4_signal_detect/detection_cuts.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts:237",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "computeBlobShapeStats(L, w, h, m.x, m.y, m.bg, peakAbove, m.flux) -> { momentFwhmPx, momentEllipticity, sharpness }",
+        "transform": "the C2 shape-consistency test measures the candidate stamp's moments on the native grid and compares momentFwhm to the frame PSF within tolerance, plus ellipticity/sharpness ceilings, to reject hot pixels (sharpness->1) and cosmics (high ellipticity)",
+        "lossy": false
+      },
+      "why": {
+        "text": "Shape consistency reuses the detection lane's moment stats rather than a private copy; when the frame PSF is absent/undersampled or SNR is below the stable-moment floor the test honestly returns NOT_MEASURED and the burden shifts to the local null + set gate.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+            "lines": "215-247"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/fdr_confirm.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts:488",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "candidate + scrambled-null SNR pools (plain numbers) -> computeFdrSetShadow (ALWAYS) and computeFdrShadow (only when input.fdrShadow)",
+        "transform": "the set-level FDR shadow is computed unconditionally from the SAME empirical null the family-wise gate draws and rides on fdr_set_shadow; the phase-1 N-invariant block attaches only under the flag. Neither moves the live setExcessZ gate fields (byte-identical when off)",
+        "lossy": false
+      },
+      "why": {
+        "text": "The swap-ready FDR verdict is banked alongside the shipped gate so confirm_status can later drive on it (it does, since the 2026-07-15 flip). Computing it from the already-drawn null keeps it a bounded O(N+M) push of numbers with no extra photometry.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/forced_confirm.ts",
+            "lines": "430-507"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/confirm_status.ts",
+      "to": "src/engine/pipeline/stages/package.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/package.ts:1355",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "classifyConfirmStatus(sol.deep_confirmed, PIPELINE_CONSTANTS.SOLVER_CONFIRM_SET_EXCESS_Z) -> ConfirmStatusBlock { status, setExcessZ, nTargets, confirmed, setGateZ, fdr_shadow, verdict_driver }",
+        "transform": "package.ts derives the single four-state verdict over the already-computed deep_confirmed block for the receipt's confirm_status field; the fdr_set_shadow carrier is stripped from the deep_confirmed dump so it surfaces ONCE here",
+        "lossy": false
+      },
+      "why": {
+        "text": "The receipt/UI read the packaged confirm_status rather than re-deriving the verdict, so a REFUSED or too-few-targets solve cannot masquerade as a plain confident 'solved'. The set-gate Z is cited in from pipeline_config, so package/confirm_status own no calibrated constant.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "1330-1356"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/tps_eval.ts",
+      "type": "contract",
+      "cite": "src/engine/pipeline/m6_plate_solve/tps_eval.ts:5",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "tpsKernel + evalTpsField (pure, Math-only) reused by the fitter and re-exported as evalField",
+        "transform": "tps_fitter solves the regularized TPS linear system then evaluates the fitted field through the SHARED evaluator; export/asdf_writer bakes its GWCS tabular lookup from the same tps_eval, so the two byte paths cannot diverge",
+        "lossy": false
+      },
+      "why": {
+        "text": "One implementation, no code in two places (LAW 4). Housing the evaluator in an import-free leaf is specifically what keeps wasm off the ASDF serializer's chain while guaranteeing the fitter and the serializer evaluate the spline identically.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_eval.ts",
+            "lines": "1-11"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+      "to": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts:22",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "matched-star residual pairs via ResidualAnalyzer.skyToLinearPixel: per pair u = detected.x - crpix[0], v = detected.y - crpix[1]; dx = detected.x - expX, dy = detected.y - expY (linear-WCS projection of the catalog star)",
+        "transform": "the spline is fit to the SAME detected-minus-linear-prediction displacement the SIP fitter models; planet sentinels (residual_arcsec >= 999) are filtered so they cannot inject huge outliers",
+        "lossy": false
+      },
+      "why": {
+        "text": "TPS and SIP model the identical quantity and must share the projection convention; sourcing it from ResidualAnalyzer.skyToLinearPixel (single source of truth) is what keeps the two distortion models consistent instead of re-deriving the linear pixel projection.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/tps_fitter.ts",
+            "lines": "21-30"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/star_catalog_adapter.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts:88",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "ensureSectorLoaded(ra, dec, pageDeg) over center+four corners, then findStarsInField(crval[0], crval[1], halfDiagDeg, CATALOG_EPOCH_JD) -> deep StandardStar[] (ra_hours HOURS), brightest-N capped",
+        "transform": "pages a SAMPLED atlas pattern across the candidate footprint (each disk <= SECTOR_LOAD_MAX_RADIUS_DEG) and pools the deep rows the >16deg blind path skipped; the atlas singleton caches sectors so repeated fires re-page cheaply",
+        "lossy": false
+      },
+      "why": {
+        "text": "Fail-soft coordinate-space wrapper: any paging/fetch error returns null and the caller declines. It only repairs the EVIDENCE SOURCE for the tight tier; the science buffer is never touched here.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts",
+            "lines": "64-94"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts:102",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "deepCat (StandardStar[]) + deepWideMatch(...) provisional MatchedStar[] -> runUwTightReverify(wcs, catalogStars=deepCat, wideMatches=deepMatches, config) -> UwTightReverifyResult",
+        "transform": "wide-matches the FULL detection list against the deep catalog for >=100 fit pairs, then hands the deep catalog + deep matches to the PURE tight-reverify core (the module keeps no atlas/IO of its own)",
+        "lossy": false
+      },
+      "why": {
+        "text": "Separation of concerns: uw_deep_evidence owns the async atlas paging + deep wide-match, uw_tight_reverify stays a pure coordinate-space function over whatever catalog/matches it is given, so the tier math is testable without atlas or wasm.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/uw_deep_evidence.ts",
+            "lines": "96-107"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+      "to": "src/engine/pipeline/m2_hardware/lens_distortion_refit.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts:349",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "DistortionPair[] (normalized xn,yn,dx,dy per provisional match) -> fitBrownConrady(pairs, [cx,cy], hd) -> { k1, k2, n_used, not_measured }",
+        "transform": "fits radial Brown-Conrady k1/k2 on the wide-match residual field in normalized coords; a not_measured or non-finite k1 marks fitBad and routes to the inner-region pinhole fallback",
+        "lossy": false
+      },
+      "why": {
+        "text": "The tight tier needs a distortion model before it can re-verify at fit precision on a wide field; fitBrownConrady is the shared refit primitive (the same lane the lens-distortion rematch pass uses).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+            "lines": "347-351"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+      "to": "src/engine/pipeline/m2_hardware/lens_distortion.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts:382",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "makeBrownConradyDistortion(fit.k1, fit.k2 ?? 0, imageW, imageH) -> LensDistortionModel with toNative(x,y,out)",
+        "transform": "the fitted model is applied via model.toNative in tightMatchPass to bend the linear-WCS-projected catalog positions into native pixels before the tight-net match, so the tight sigma is measured against distortion-corrected predictions",
+        "lossy": false
+      },
+      "why": {
+        "text": "makeBrownConradyDistortion is the shared forward-distortion constructor; using it (rather than a private polynomial) keeps the tight tier's reprojection identical to the prior/rematch lanes and to the inner-frac arithmetic in the module header.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/uw_tight_reverify.ts",
+            "lines": "381-387"
+          }
+        ]
+      }
+    }
+  ]
+}

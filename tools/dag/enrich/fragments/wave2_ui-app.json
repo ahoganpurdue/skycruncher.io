@@ -1,0 +1,500 @@
+{
+  "fragment": "wave2_ui-app",
+  "derived_by": "opus wave-2 writer (domain ui-app: the wizard/dashboard/widget UI layer)",
+  "notes": [
+    "DOMAIN RECONCILIATION: the assigned prefix 'src/ui/' matches ZERO base nodes. The UI application layer actually lives under 'src/engine/ui/' (113 base nodes: wizard steps, step-6 calibration charts, save/export sinks, widget registry, replay dashboard). 'src/engine/ui/' is claimed by NO other domain in the table (core-color owns src/core/; every src/engine/pipeline/* prefix is owned by ingest-hw/detect/solver/stages/psf/export-events/psf; contracts owns src/engine/contracts/). Per the writer instruction ('If prefixes match <5 nodes, inspect dag_base.json for the actual UI path prefixes and use those — but NEVER a prefix listed in another domain'), every FROM node below is under src/engine/ui/.",
+    "DIRECTION: every emitted edge has FROM inside src/engine/ui/ and matches the base import direction (importer -> imported), which is exactly the arc the enrichment layer annotates. INBOUND consumption (engine data flowing INTO a UI module where the base import runs the other way, e.g. capture_persist.ts -> widgets/widget_persist.ts) is expressed by the OWNING domain, not here — wave2_export-events.json already carries that one. No collision: all FROM nodes here are src/engine/ui/*.",
+    "NON-BASE ENDPOINT SKIPPED: save_export.ts imports the Arrow producer from 'packages/toolchest/src/index' (save_export.ts:191-192), but packages/toolchest is outside the extractor's src/+tools/ walk and is NOT a base node (loud_edges_c.json recorded the same for boundary:toolchest_arrow_export). The save_export -> Arrow crossing is therefore unexpressed rather than mis-attributed.",
+    "sexagesimal.ts, corrected_view.ts, render_prefs.ts, widget_persist.ts, persist_migration.ts, diag_prefs.ts and registry.ts are load-bearing but are LEAF/pure modules (they call localStorage or pure helpers, not other base modules) — expressed as WHY nodes, not edges, except where a real cross-module call exists (ForensicCalibrationStep -> diag_prefs, save_export -> connectors).",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 2 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "src/engine/ui/PipelineWizard.tsx": {
+      "why": {
+        "text": "The 7-step wizard modal — the app's only interactive solve surface. It creates/drives the OrchestratorSession through usePipelineFSM, owns the step-2 metadata form (USER-provenance optics + UTC time-trust parse), and hosts the DEFAULT-OFF render-plane toggles (Oklab, corrected-view) that never touch the solve. Without it there is no interactive path to run a solve or edit observation metadata.",
+        "cites": [
+          {
+            "path": "src/engine/ui/PipelineWizard.tsx",
+            "lines": "161-194"
+          },
+          {
+            "path": "src/engine/ui/PipelineWizard.tsx",
+            "lines": "216-257"
+          },
+          {
+            "path": "src/engine/ui/PipelineWizard.tsx",
+            "lines": "750-804"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/wizard_steps.ts": {
+      "why": {
+        "text": "Single source of truth for wizard step copy (STEP_META) and the visual-step-to-session-method offset, read by PipelineWizard and every step component via getStepMeta. Without it the step headers, progress pips and titles lose their labels and the visual-step vs session-method mapping is undocumented.",
+        "cites": [
+          {
+            "path": "src/engine/ui/wizard_steps.ts",
+            "lines": "1-56"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/widgets/registry.ts": {
+      "why": {
+        "text": "The widget registry: data collection is DECOUPLED from display — a widget's dataSelector is a pure read over the already-collected receipt/event bus (never collects, mutates, or fabricates) and weightTier gates render cost ONLY. Imported by the dock, shelf and tests. Without it no widget can be discovered or selected for render, and the 'a widget never emits a placeholder number' law loses its enforcement point.",
+        "cites": [
+          {
+            "path": "src/engine/ui/widgets/registry.ts",
+            "lines": "6-21"
+          },
+          {
+            "path": "src/engine/ui/widgets/registry.ts",
+            "lines": "103-137"
+          },
+          {
+            "path": "src/engine/ui/widgets/registry.ts",
+            "lines": "331-337"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/utils/save_export.ts": {
+      "why": {
+        "text": "The unified export dispatcher + availability matrix — the one place that knows how each format (receipt/FITS/ASDF/Arrow) is written and returns an honest disabled row + human reason for any format the current run cannot produce (no run, no fitted WCS, no science frame; PNG/C2PA declared-coming, never faked). It also picks the runtime sink (Tauri native save-dialog vs browser Blob download). Without it the step-7 selector and desktop AnalysisPanel lose exports and the fitted-WCS-only export law loses its UI-side gate.",
+        "cites": [
+          {
+            "path": "src/engine/ui/utils/save_export.ts",
+            "lines": "10-20"
+          },
+          {
+            "path": "src/engine/ui/utils/save_export.ts",
+            "lines": "58-100"
+          },
+          {
+            "path": "src/engine/ui/utils/save_export.ts",
+            "lines": "150-212"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/calibration/chart_math.ts": {
+      "why": {
+        "text": "Pure, React-free math for the step-6 instrument charts: nice-tick placement, honest coefficient formatting (fmtCoef returns em-dash for absent, never a fake 0), the Brown-Conrady radial-shift model in pixels, the vignette relative-illumination model, and the labeled quiver magnification. Without it the distortion/vignette curves and residual quiver scale cannot be drawn from measured values.",
+        "cites": [
+          {
+            "path": "src/engine/ui/calibration/chart_math.ts",
+            "lines": "9-72"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/calibration/quiver_model.ts": {
+      "why": {
+        "text": "Data prep for the step-6 residual vector field: projects every verified matched star through the LINEAR WCS (the same ResidualAnalyzer convention M7 used) and derives honest display stats. Both the live-solution builder and the receipt-fed builder finalize through ONE stats tail (LAW 4), so the step-6 quiver and the Widget-Shelf quiver are statistically identical, and both return null below a 15-arrow floor rather than a sparse fake field. Without it the residual field cannot be shown or kept consistent across the two surfaces.",
+        "cites": [
+          {
+            "path": "src/engine/ui/calibration/quiver_model.ts",
+            "lines": "33-76"
+          },
+          {
+            "path": "src/engine/ui/calibration/quiver_model.ts",
+            "lines": "90-112"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/format/sexagesimal.ts": {
+      "why": {
+        "text": "Display-only sexagesimal coordinate formatting: RA is HOURS internally everywhere in the engine, Dec is degrees, and this converts to compact H/M/S and D/M/S strings for UI copy only, returning 'NOT MEASURED' on non-finite input. It explicitly never feeds a measurement, receipt, solver or WCS path. Without it either coordinates render as raw decimals or a formatter leaks the RA-hours unit trap into a value path.",
+        "cites": [
+          {
+            "path": "src/engine/ui/format/sexagesimal.ts",
+            "lines": "5-33"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/corrected_view.ts": {
+      "why": {
+        "text": "Pure (React/DOM-free) render-plane availability probe for the corrected-view toggle, shared by the wizard pill and the session's warp method. Only a fitted SIP polynomial (both a[][] and b[][] present) can drive the preview warp; absent one it reports NOT AVAILABLE — an honest disabled state, never a fabricated correction. It carries the convention trap: engine-internal SIP is self-consistent and must NOT get the FITS-boundary negation applied here. Without it the toggle can't honestly report absence and could double-negate the distortion.",
+        "cites": [
+          {
+            "path": "src/engine/ui/corrected_view.ts",
+            "lines": "10-26"
+          },
+          {
+            "path": "src/engine/ui/corrected_view.ts",
+            "lines": "42-64"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/render_prefs.ts": {
+      "why": {
+        "text": "Persisted render-layer opt-in flags (Oklab stretch, corrected view) — PIXEL/RENDER ledger, DEFAULT OFF, and byte-identical to the pre-flag output when off. Every accessor is try/caught for headless safety. Without it the render toggles lose persistence and the default-off / byte-identical-off guarantee has no single anchor.",
+        "cites": [
+          {
+            "path": "src/engine/ui/render_prefs.ts",
+            "lines": "1-43"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/dashboard/replay/replay_state.ts": {
+      "why": {
+        "text": "Pure scrub math for the replay dashboard: given a run's CaptureEnvelope[] and a scrub time t it derives per-stage phase (pending/active/complete), elapsed ms, verdicts-so-far and the time-filtered record slice — no React, no Date.now. Honest-or-absent: a stage not yet reached is pending with a null verdict; durations and counts are never interpolated. Without it the time-slider and replay-aware widgets have no state-at-t to render.",
+        "cites": [
+          {
+            "path": "src/engine/ui/dashboard/replay/replay_state.ts",
+            "lines": "16-25"
+          },
+          {
+            "path": "src/engine/ui/dashboard/replay/replay_state.ts",
+            "lines": "142-197"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/widgets/widget_persist.ts": {
+      "why": {
+        "text": "The one versioned localStorage surface for every widget-dock and replay-dashboard preference: a {v,data} envelope so a schema change can migrate or cleanly INVALIDATE a stale blob (return null, caller falls back to default) instead of crashing on it. Every access is try/caught, so it is headless/Node-safe. Without it a persistence-format change would throw on old blobs and each surface would re-invent its own storage guard.",
+        "cites": [
+          {
+            "path": "src/engine/ui/widgets/widget_persist.ts",
+            "lines": "8-21"
+          },
+          {
+            "path": "src/engine/ui/widgets/widget_persist.ts",
+            "lines": "40-68"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/persist_migration.ts": {
+      "why": {
+        "text": "One-time, copy-on-read migration of legacy 'astrologic.*' persisted keys to the 'skycruncher.*' namespace (LAW 6 rename). It copies each legacy key whose new counterpart is absent, never deletes the old key (downgrade-safe, idempotent), and runs at boot before any component reads a preference; every access is try/caught for headless safety. Without it the renamed build silently loses every persisted user preference.",
+        "cites": [
+          {
+            "path": "src/engine/ui/persist_migration.ts",
+            "lines": "1-46"
+          }
+        ]
+      }
+    },
+    "src/engine/ui/diag_prefs.ts": {
+      "why": {
+        "text": "Perf-gating for expensive diagnostic visuals (step-6 calibration charts, residual quiver, PSF strips): the manual wizard flow computes them lazily at render, AUTO runs skip them unless the persisted full-diagnostics opt-in is set. Without it AUTO runs pay for chart/quiver/PSF geometry the owner performance directive says to skip.",
+        "cites": [
+          {
+            "path": "src/engine/ui/diag_prefs.ts",
+            "lines": "1-31"
+          }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/ui/utils/save_packet.ts",
+      "to": "src/engine/pipeline/stages/receipt_serializer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/utils/save_packet.ts:26",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the AstroPacket result model (opaque object with heavy Float32Array buffers)",
+        "transform": "serializeReceipt applies the typed-array-stripping replacer + stable ordering, producing the downloadable JSON receipt string; save_packet only does the Blob/anchor/download mechanics",
+        "lossy": true
+      }
+    },
+    {
+      "from": "src/engine/ui/utils/save_fits.ts",
+      "to": "src/engine/pipeline/export/fits_writer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/utils/save_fits.ts:20",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "(receipt, image: FitsImage, {libraryVersion}) -> a fresh exact-sized Uint8Array of big-endian FITS bytes",
+        "transform": "serializeFits builds the FITS file; save_fits wraps the returned buffer in a Blob and triggers the browser download. Throws (no download) when the receipt has no FITTED WCS — the export law is enforced inside the serializer",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/utils/save_asdf.ts",
+      "to": "src/engine/pipeline/export/asdf_writer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/utils/save_asdf.ts:20",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "(receipt, image: AsdfImage, {libraryVersion}) -> a fresh exact-sized Uint8Array of ASDF (science frame + GWCS) bytes",
+        "transform": "serializeAsdf builds the ASDF file; save_asdf wraps the returned buffer in a Blob and triggers the browser download (thin sink, byte production entirely in the shared serializer)",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/pipeline/stages/receipt_serializer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/utils/save_export.ts:170",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "receipt (result model) -> JSON receipt string via serializeReceipt",
+        "transform": "the unified dispatcher's 'receipt' case; the string is then written through the runtime-appropriate sink (Tauri fs.writeFile or browser download)",
+        "lossy": true
+      }
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/pipeline/export/fits_writer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/utils/save_export.ts:176",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "(receipt, image, {libraryVersion: pkg.version}) -> FITS Uint8Array via serializeFits",
+        "transform": "the dispatcher's 'fits' case; throws NO_FRAME when image is absent before calling the serializer",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/pipeline/export/asdf_writer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/utils/save_export.ts:182",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "(receipt, image, {libraryVersion: pkg.version}) -> ASDF Uint8Array via serializeAsdf",
+        "transform": "the dispatcher's 'asdf' case; throws NO_FRAME when image is absent before calling the serializer",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/pipeline/export/fits_writer.ts",
+      "type": "control",
+      "cite": "src/engine/ui/utils/save_export.ts:60",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "hasFittedWcs(receipt) = (receipt.wcs.SOURCE === 'FITTED') gates the FITS/ASDF availability rows",
+        "transform": "exportAvailability surfaces the FIRST unmet precondition (no run -> no fitted WCS -> no frame) as a human disabled reason; a SYNTHESIZED (approximate) WCS is never offered as a science export",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the UI-side half of the fitted-WCS-only export law (LAW 3, honest-or-absent): the availability matrix disables FITS/ASDF with a human reason when no star-verified WCS exists, so a user is never offered a science export the serializer would refuse. The serializer's own throw is the second, independent guard.",
+        "cites": [
+          {
+            "path": "src/engine/ui/utils/save_export.ts",
+            "lines": "58-100"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/ui/utils/save_export.ts",
+      "to": "src/engine/ui/dashboard/solve_queue/connectors.ts",
+      "type": "control",
+      "cite": "src/engine/ui/utils/save_export.ts:152",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "isTauriRuntime() selects the write sink for every format",
+        "transform": "TRUE -> tauriSave (native save-dialog + fs.writeFile via lazily-imported tauri plugins so the browser bundle never loads them); FALSE -> browserDownload (Blob + anchor click). Same bytes either way",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/calibration/quiver_model.ts",
+      "to": "src/engine/pipeline/m7_astrometry/residual_analyzer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/calibration/quiver_model.ts:67",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "per matched star: catalog (ra, dec) [sky, RA hours] + the solution WCS {crpix, cd, crval} -> ResidualAnalyzer.skyToLinearPixel -> projected pixel (x,y) [solve-buffer px]; arrow dx/dy = detected − projected (px)",
+        "transform": "the SAME linear-WCS projection convention the M7 fit used, so the quiver residual matches the fitted residual; this is the sky->pixel frame crossing at the heart of the residual field",
+        "lossy": false
+      },
+      "why": {
+        "text": "The quiver must project through the identical convention M7 used or the displayed residual arrows disagree with the fitted residuals. skyToLinearPixel takes catalog sky coordinates (RA in HOURS internally) and the linear WCS and returns solve-buffer pixels; the arrow is detected − projected. Using any other projection would show a coherent bias that isn't in the fit.",
+        "cites": [
+          {
+            "path": "src/engine/ui/calibration/quiver_model.ts",
+            "lines": "54-76"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/hooks/usePipelineFSM.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/PipelineWizard.tsx:162",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "(file: File, hint?: {ra,dec,label}) -> {step, session: OrchestratorSession, metadata, isInitializing, nextStep/prevStep/setStep, updateMetadata}",
+        "transform": "the FSM hook creates the session once per file and owns the step state machine + metadata edits; PipelineWizard renders from and drives it",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/hooks/usePipelineEvents.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/PipelineWizard.tsx:178",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "session.events (the pipeline event bus) -> a batched readonly PipelineEvent[] snapshot",
+        "transform": "one subscription powers the header event count, the Back guard (no navigation mid-stage via inspectorModel.stageRunning), the inspector drawer, and the corrected-view recompute trigger",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/pipeline/m2_hardware/sensor_db.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/PipelineWizard.tsx:308",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a camera-BODY string from cameraDropdownOptions() -> findSensorByCamera(bodyId) -> {pixel_size_um}, written to metadata as pixel_pitch_um + optics_source:'USER'",
+        "transform": "the BODY is stored (never the chip sensor_model) because the solve re-resolves optics via resolveOpticsFromExif -> findSensorByCamera(camera_model), which is BODY-keyed; an unresolved / Unknown selection seeds NO fabricated pitch (honest-or-absent)",
+        "lossy": false
+      },
+      "why": {
+        "text": "Storing the sensor_model instead of the body would make the solve's BODY-keyed re-resolve MISS (the old 3/15 seam noted in-file at C9). The body resolves tier-1 exact; an Unknown/Manual pick records the selection honestly and seeds no fake pixel pitch (LAW 3).",
+        "cites": [
+          {
+            "path": "src/engine/ui/PipelineWizard.tsx",
+            "lines": "299-320"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/pipeline/m2_hardware/lens_profiles.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/PipelineWizard.tsx:323",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a lens model string -> findLensByModel(model) -> {model, focal_lengths[0]}, written to metadata as lens_model + focal_length + optics_source:'USER'",
+        "transform": "a resolved lens seeds the first focal length; an unresolved free string records lens_model with no fabricated focal length (honest-or-absent). Focal length seeds only the solver's scale prior, never the fitted result",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/PipelineWizard.tsx",
+      "to": "src/engine/pipeline/orchestrator_session.ts",
+      "type": "control",
+      "cite": "src/engine/ui/PipelineWizard.tsx:249",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the corrected-view toggle + session.getCorrectedViewInfo() availability gate session.renderCorrectedPreviewUrl()",
+        "transform": "OFF (or no fitted distortion available) -> correctedUrl stays null, the SIP warp is never allocated and the preview renders byte-identically; ON + available -> the render-plane de-distorted preview URL is computed. RENDER PLANE ONLY — never touches the solve/WCS/matched stars",
+        "lossy": false
+      },
+      "why": {
+        "text": "The corrected view is a render-plane display option that consumes the coordinate + pixel ledgers and feeds neither (LAW 1). The OFF path allocates no warp so the preview is byte-identical, and getCorrectedViewInfo() reports NOT AVAILABLE honestly when no fitted SIP exists — the pill is only shown post-solve where the preview canvas lives.",
+        "cites": [
+          {
+            "path": "src/engine/ui/PipelineWizard.tsx",
+            "lines": "226-257"
+          },
+          {
+            "path": "src/engine/ui/PipelineWizard.tsx",
+            "lines": "717-728"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/ui/ForensicCalibrationStep.tsx",
+      "to": "src/engine/ui/calibration/quiver_model.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/ForensicCalibrationStep.tsx:93",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the live PlateSolution -> buildQuiverModel(solution) -> QuiverModel | null",
+        "transform": "built LAZILY inside a useMemo only when charts are enabled AND an M7 astrometry analysis exists (~one projection per matched star); null (too few arrows / no analysis) renders an honest empty state, never a fabricated field",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/ForensicCalibrationStep.tsx",
+      "to": "src/engine/ui/calibration/CalibrationCharts.tsx",
+      "type": "data-flow",
+      "cite": "src/engine/ui/ForensicCalibrationStep.tsx:227",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "measured profile coefficients -> chart components: {k1,k2,k3, rRefPx: fit.r_ref_px} -> DistortionChart; vignette_v1 -> VignetteChart; QuiverModel + pixel_scale -> ResidualQuiver",
+        "transform": "charts render only when distortionMeasured (fit.n_matches >= 10 && r_ref_px > 0); honest zeros are labeled as no-measurement, and the quiver needs >= 15 arrows",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/ForensicCalibrationStep.tsx",
+      "to": "src/engine/ui/diag_prefs.ts",
+      "type": "control",
+      "cite": "src/engine/ui/ForensicCalibrationStep.tsx:48",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "diagnosticsVisualsEnabled(autoRun) || chartsRequested -> chartsEnabled",
+        "transform": "gates whether the quiver model + distortion/vignette geometry are computed at all; AUTO runs render text stats only unless the persisted full-diagnostics opt-in (or a this-mount request) turns visuals on",
+        "lossy": false
+      },
+      "why": {
+        "text": "Chart/quiver geometry is expensive and is a MANUAL-flow default; AUTO runs skip it for speed unless the user opted into full diagnostics. This gate is the owner performance directive expressed at the step-6 boundary — geometry is always lazy (render-time), never in the pipeline hot path.",
+        "cites": [
+          {
+            "path": "src/engine/ui/ForensicCalibrationStep.tsx",
+            "lines": "42-96"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/ui/calibration/CalibrationCharts.tsx",
+      "to": "src/engine/ui/calibration/chart_math.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/calibration/CalibrationCharts.tsx:156",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "distortion: (r in [0,1], k1,k2,k3, rRefPx) -> distortionShiftPx sample curve; vignette: (r, v1) -> vignetteGainAt; axes via niceTicks; labels via fmtCoef",
+        "transform": "the chart components sample the pure math models at render time to build the SVG paths and tick labels — all presentation geometry over MEASURED coefficients, nothing fabricated",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/calibration/quiver_model.ts",
+      "to": "src/engine/ui/calibration/chart_math.ts",
+      "type": "data-flow",
+      "cite": "src/engine/ui/calibration/quiver_model.ts:47",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "(medianResidualPx, targetPx = 0.03 * frame diagonal) -> quiverMagnification -> a labeled {1,2,5}x10^n scale factor clamped to [1,500]",
+        "transform": "finalizeQuiverModel derives the honest arrow magnification so the median residual arrow is ~targetPx long on the plot; the factor is shown in the legend so arrows are never silently exaggerated",
+        "lossy": false
+      }
+    },
+    {
+      "from": "src/engine/ui/dashboard/replay/replay_state.ts",
+      "to": "src/engine/events/capture_record.ts",
+      "type": "contract",
+      "cite": "src/engine/ui/dashboard/replay/replay_state.ts:151",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "CaptureEnvelope[] (per-stage capture record: stage_id, seq, t_start/t_end, ms, ok, verdict, counts, warnings) -> ReplayFrame (per-stage phase + tallies + record slice at scrub time t)",
+        "transform": "deriveReplayFrame maps each envelope to a phase at t (pending/active/complete) and reveals verdict/ms/ok/counts ONLY once complete; a not-yet-reached stage is pending with a null verdict (honest-or-absent), never an interpolated timing",
+        "lossy": false
+      },
+      "why": {
+        "text": "replay_state depends on the CaptureEnvelope layout produced by the events layer and transforms it into the scrub-time contract the time-slider and replay widgets consume. It fabricates nothing between events: durations and counts come straight from the emitter, and phases are the only thing that move with the scrub.",
+        "cites": [
+          {
+            "path": "src/engine/ui/dashboard/replay/replay_state.ts",
+            "lines": "16-25"
+          },
+          {
+            "path": "src/engine/ui/dashboard/replay/replay_state.ts",
+            "lines": "105-133"
+          }
+        ]
+      }
+    }
+  ]
+}

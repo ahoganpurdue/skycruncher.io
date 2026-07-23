@@ -1,0 +1,455 @@
+{
+  "fragment": "wave2_psf",
+  "derived_by": "opus wave-2 writer (domain: src/engine/pipeline/m10_psf/*)",
+  "notes": [
+    "Domain: the 8 m10_psf module nodes (psf_field, psf_core, psf_stage, rl_deconv, vignette_map, psf_physics, psf_physics_provider, nebulosity_layer). Every 'from' is one of these; 'to' is an existing base node.",
+    "The base already carries the mechanical IMPORT edges (type 'import') for these files; this fragment adds only SEMANTIC edges (data-flow / control / fallback / unit-conversion) whose (from,to,type) keys are distinct from those import edges, so nothing is restated.",
+    "Two m10 edges already live in enrichment.json and are NOT re-emitted: boundary:wasm_typed_array -> psf_field.ts (the refine_stars_lm 13-f64 crossing) and external:prysm_sidecar -> psf_physics_provider.ts (the JSON-RPC sidecar). Those are producer-side crossings INTO the domain; this fragment's edges are the domain's outputs to its consumers plus the in-domain data-flow.",
+    "PARITY/SIGN gap (matches loud_edges_c wave-1 finding): psf_physics.raAxisDirectionDeg / zenithPaImageDeg / synthesizeCd read the CD-matrix determinant SIGN to fix handedness, but that sign cancels under the [0,180) line fold used for every reported PA (psf_physics.ts:92-95,104-105,208). No parity-sign edge is emitted — the repo law 'do not assert sign' holds and no line flips a parity sign across a domain boundary.",
+    "The PSF_FLUX_VIGNETTE_CORRECT flag (default OFF) that gates vignette production lives in the CONSUMER stages (psf_characterize.ts:66, science.ts:376) reading PIPELINE_CONSTANTS, NOT inside vignette_map.ts, so it is a control gate whose 'from' is outside this domain — recorded in the vignette_map why rather than emitted as an edge.",
+    "psf_physics_provider.ts is NOT wired into any pipeline stage yet (WIRING: NONE, psf_physics_provider.ts:24-29); its only live edge is the in-domain PRYSM->heuristic cold fallback plus the already-present external sidecar edge. Its why documents the byte-identical-by-construction default.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 1 node-decl + 1 edge referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "src/engine/pipeline/m10_psf/psf_field.ts": {
+      "why": {
+        "text": "Entry point of the PSF-field measurement: characterizePsfField fits a per-star 2D Gaussian (compiled wasm refine_stars_lm) at the SOLVED star positions on the native pixel grid and returns the FWHM / ellipticity / orientation field plus a 3x3 coma map. Without it there is no measured PSF for psf_attribution to decompose against, no frame-PSF shape reference for forced_confirm, and the receipt psf_field block is empty. It degrades honestly to a moment measure when no compiled fitter is present rather than fabricating a fit.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_field.ts",
+            "lines": "1-27"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_field.ts",
+            "lines": "270-313"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m10_psf/psf_core.ts": {
+      "why": {
+        "text": "Shared PSF measurement primitives on the native pixel grid: moment-based measureStar, robustStats, pixel-noise sigma, local-maxima finder, the sigma-clipped empirical-kernel stacker, and the 3x3 region-grid helper. It is imported by psf_field, psf_stage and rl_deconv, so it is the single home for the moment maths (ported byte-for-byte from the tools/psf lane, LAW 4). Without it psf_field has no seed/fallback measure and psf_stage cannot build the RL deconvolution kernel.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_core.ts",
+            "lines": "1-16"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_core.ts",
+            "lines": "126-183"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m10_psf/vignette_map.ts": {
+      "why": {
+        "text": "Fits a PER-BAND vignette/transmission map (gain(r)=1+a2*r^2+a4*r^4 from the frame's own sky) and evaluates gainAt(x,y,band) as a per-star flux-recovery divisor. It is the measurement-level optical-falloff correction consumed four ways (psf_field amp on luma, SPCC on r/g/b, forced photometry on luma, receipt serialization); the per-band fit is load-bearing because a single achromatic gain cancels in color ratios and would not correct color. It refuses under-constrained fits (valid=false + refusal) so a consumer skips rather than applying identity-with-noise. Default-OFF at the consumer gate, so absence is byte-identical.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/vignette_map.ts",
+            "lines": "1-39"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/vignette_map.ts",
+            "lines": "129-213"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m10_psf/rl_deconv.ts": {
+      "why": {
+        "text": "Windowed damped Richardson-Lucy deconvolution on native-grid luminance windows, plus the nebulosity-protected variant that splits an extended diffuse floor (box blur at a scale much larger than the PSF) from the compact star residual, sharpens only the compact part, and adds the diffuse back verbatim. psf_stage's live deconv lane calls the protected variant; the raw engine and dilateMask are also reused by nebulosity_layer. Without it the (default-off) deconvolution lane and the diffuse/compact separation do not exist.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/rl_deconv.ts",
+            "lines": "1-22"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/rl_deconv.ts",
+            "lines": "143-183"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m10_psf/psf_stage.ts": {
+      "why": {
+        "text": "The optional post-solve PSF measurement + deconvolution stage (runPsfStage): a cheap measurement pass powers the text FWHM/ellipticity stats, then a default-on deconvolution lane stacks an empirical kernel and runs protected RL on bounded windows around bright/smeared targets. It is strictly optional (nothing calls it unless the user asks for PSF diagnostics) and its absence changes no solve. Without it the PSF diagnostics panel and the deconvolution strip have no producer.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_stage.ts",
+            "lines": "1-25"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_stage.ts",
+            "lines": "220-332"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m10_psf/psf_physics.ts": {
+      "why": {
+        "text": "Pure closed-form celestial-mechanics and optics predictors in engine-native arcsec (sidereal drift, diffraction floor, seeing, coma-form fit, atmospheric dispersion, and the CD-to-Jacobian pixel-to-sky shape deprojection). It reads no pixels and mutates no solve; psf_attribution compares these predictors against the measured psf_field, and stages/science reuses targetGeometry/airmassFromAltitude for SPCC airmass provenance. Without it psf_attribution cannot attribute measured anisotropy to physical systematics and SPCC loses its airmass basis.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_physics.ts",
+            "lines": "1-31"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_physics.ts",
+            "lines": "122-135"
+          }
+        ]
+      }
+    },
+    "src/engine/pipeline/m10_psf/nebulosity_layer.ts": {
+      "why": {
+        "text": "Multiscale starlet (a-trous / IUWT) decomposition of a native-grid luminance frame into an additive-complete layer set (star, nebulosity, sky_gradient, residual) whose sum reconstructs the input within float epsilon. It elevates rl_deconv's single-scale diffuse stub to a first-class multiscale render layer and is honest-or-absent (nebulosity.data is null below the support floor). It is a DEFAULT-OFF render producer with no stage wired into the solve path, so the receipt nebulosity_layer block is null on every real receipt today; without it that render decomposition and its receipt block do not exist.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/nebulosity_layer.ts",
+            "lines": "1-57"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/nebulosity_layer.ts",
+            "lines": "294-440"
+          }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_core.ts",
+      "type": "fallback",
+      "cite": "src/engine/pipeline/m10_psf/psf_field.ts:425",
+      "verification": "EXTRACTED",
+      "why": {
+        "text": "When the compiled wasm LM fitter is absent (a strict ESM mock throws on the undefined export, or refine_stars_lm is not a function) resolveDefaultFitter returns null and the whole run degrades to the moment measure (psf_core.measureStar / fitFromMoment), labelling the report MOMENT_FALLBACK. Per-star, an LM fit rejected as non-physical (NaN/negative sigma, off-center, wider than the stamp) also falls back to the moment measure rather than being dropped. It never fabricates a Gaussian fit it did not run (honest-or-absent).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_field.ts",
+            "lines": "184-197"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_field.ts",
+            "lines": "416-429"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "to": "src/engine/pipeline/stages/psf_characterize.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/psf_characterize.ts:70",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "PsfFieldReport: method (WASM_LM_GAUSSIAN | MOMENT_FALLBACK | NOT_MEASURED), fwhmMedianMajPx/MinPx (px, null when unmeasured), ellipticityMedian, orientationMedianDeg, per-star fits[] (native-grid x/y px, sigmas, ellipticity, optional JtJ paramSigmas), nCovOk, and the 3x3 regions[] coma map",
+        "transform": "runPsfCharacterization calls characterizePsfField with the science luminance buffer, the catalog-matched star positions (planet_ sentinels filtered), and an options block; it then stamps report.grid = SCIENCE_NATIVE | SCIENCE_BINNED2X from its own native-vs-2x-binned dimension check",
+        "lossy": false
+      },
+      "why": {
+        "text": "psf_characterize is the stage wrapper that feeds characterizePsfField the solved matched-star positions and tags the grid the FWHM numbers live in. The grid tag is load-bearing: the same fwhm number means different sky angles on a native vs a 2x-binned buffer, so a mis-tag would mis-scale every downstream arcsec conversion.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/psf_characterize.ts",
+            "lines": "43-77"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "to": "src/engine/pipeline/stages/package.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/package.ts:1291",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "PsfFieldReport (as i.psfField) including the internal match_epoch signature the field was measured under",
+        "transform": "buildReceipt serializes it via serializePsfFieldBlock and derives psf_field.stale_pre_rematch = isStalePreRematch(solution.matchEpoch, report.match_epoch); null passes straight through (honest-or-absent), and the raw per-star fits stay a diagnostic detail not serialized",
+        "lossy": true
+      },
+      "why": {
+        "text": "The receipt psf_field block carries only the compact aggregate map and covariance summary, and a stale_pre_rematch flag when the PSF was measured against the pre-rematch match set. Without the match_epoch carry the receipt could silently present a PSF field measured at positions that a later rematch moved.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_field.ts",
+            "lines": "144-148"
+          },
+          {
+            "path": "src/engine/pipeline/stages/psf_characterize.ts",
+            "lines": "85-109"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_field.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m10_psf/psf_field.ts:436",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "scalar luminance-band gain g = gainAt(map, x, y, 'luma') >= 1 (dimensionless flux-recovery factor) evaluated at each fit's native position",
+        "transform": "each PsfFieldFit gets vignetteGain = g and ampVignetteCorrected = amp * g reported ALONGSIDE the raw amp; the extracted amp is divided by the transmission at the star position, never a buffer pre-warp (MULTILAYER doctrine)",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the CELL-2 measurement-level flux correction on the luminance band: the star amp is corrected by the map value at its position, the native pixels are never warped. It is applied only when the caller supplies a map (flag on), so absence is byte-identical and the raw amp is always preserved.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_field.ts",
+            "lines": "432-443"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/vignette_map.ts",
+            "lines": "274-287"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "to": "src/engine/pipeline/m8_photometry/spcc_calibrator.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m8_photometry/spcc_calibrator.ts:663",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "three PER-BAND gains gainAt(map, x, y, 'r'|'g'|'b') (dimensionless), plus serializeVignetteMap(map) for the receipt",
+        "transform": "each matched star's forced fluxes are multiplied per channel: fR*=gainAt(r), fG*=gainAt(g), fB*=gainAt(b) at the star's native position before the color fit; the serialized per-band a2/a4/fit_rms/valid ride the spcc receipt block",
+        "lossy": false
+      },
+      "why": {
+        "text": "SPCC is the COLOR consumer, so it must use the PER-BAND gains: an achromatic single gain cancels in the flux_b/flux_r ratio and would not correct color at all. Applying r/g/b independently is the whole reason vignette_map fits per channel. Gated by PSF_FLUX_VIGNETTE_CORRECT (default off) so the color fit is byte-identical when absent.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m8_photometry/spcc_calibrator.ts",
+            "lines": "604-665"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/vignette_map.ts",
+            "lines": "17-23"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/vignette_map.ts",
+      "to": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m6_plate_solve/deep_verify.ts:195",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "scalar luminance-band gain gainAt(map, p.x, p.y, 'luma') (dimensionless) at each forced-photometry probe position",
+        "transform": "each forced result gets flux_vignette_corrected = flux * gainAt(...,'luma') reported alongside the raw flux; set only when a vignette map is supplied",
+        "lossy": false
+      },
+      "why": {
+        "text": "Forced photometry (catalog-position confirmation) is a luminance-band flux consumer, so it uses the luma gain to recover optical-falloff-corrected flux at the probe position without touching the pixels. Additive and default-off: the raw flux and confirmation verdict are unchanged when no map is present.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m6_plate_solve/deep_verify.ts",
+            "lines": "67-100"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_physics.ts",
+      "to": "src/engine/pipeline/stages/psf_attribution.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/psf_attribution.ts:405",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "grid-independent ARCSEC predictors: per-channel diffractionFwhmArcsec (1.028*lambda/D), siderealTrailArcsec (15.041*cos(Dec)*t), seeingArcsec, and the RA-axis drift line PA (deg)",
+        "transform": "psf_attribution divides each arcsec predictor by the science-grid pixel_scale to reach px and compares against the MEASURED psf_field FWHM/orientation; the predictors are re-derived in engine-native arcsec so the comparison is binning-safe",
+        "lossy": false
+      },
+      "why": {
+        "text": "psf_physics returns everything in arcsec on purpose: arcsec is grid-independent, so the same predictor is valid on a native or 2x-binned buffer and only the consumer's divide-by-pixel_scale changes. The diffraction floor is per-channel (chromatic) and the sidereal drift is exact given Dec and exposure (immutable celestial mechanics).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_physics.ts",
+            "lines": "37-53"
+          },
+          {
+            "path": "src/engine/pipeline/stages/psf_attribution.ts",
+            "lines": "355-407"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_physics.ts",
+      "to": "src/engine/pipeline/stages/psf_attribution.ts",
+      "type": "unit-conversion",
+      "cite": "src/engine/pipeline/stages/psf_attribution.ts:556",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "in: a measured PIXEL-space PSF shape (fwhmMajPx, fwhmMinPx, orientationDeg in image space) + a CD matrix (deg/px); out: a SkyShape (fwhmMajArcsec, fwhmMinArcsec, orientationDeg in the tangent (xi,eta) frame, ellipticity)",
+        "transform": "cdToJacobianArcsec scales CD by 3600 to a Jacobian J (arcsec/px), then deprojectShapeByJacobian propagates the shape covariance Sigma_sky = J*Sigma_px*J^T and re-extracts major/minor FWHM + PA in arcsec — the honest anisotropic conversion the scalar pixel_scale (which assumes isotropic square pixels) approximates",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the load-bearing pixel-to-sky shape conversion: a scalar pixel_scale throws away skew, rotation and non-square anisotropy of the local plate, which matters exactly where PSF elongation is being attributed. Propagating the covariance through the CD Jacobian is the only honest way to turn a measured pixel ellipse into a sky-angle ellipse.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_physics.ts",
+            "lines": "312-379"
+          },
+          {
+            "path": "src/engine/pipeline/stages/psf_attribution.ts",
+            "lines": "545-557"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_physics.ts",
+      "to": "src/engine/pipeline/stages/science.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/stages/science.ts:72",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "field-center altitude (deg) and plane-parallel airmass sec(z) from targetGeometry(raHours, decDeg, lat, lon, date) + airmassFromAltitude(altDeg)",
+        "transform": "science computes the SPCC extinction-provenance airmass at the plate center; the same alt-az apparent-place path psf_attribution uses is reused verbatim (altDeg rounded to 3dp then airmass to 3dp) so the SPCC and attribution airmass agree; below ~3 deg the airmass diverges and is refused (honest-or-absent)",
+        "lossy": false
+      },
+      "why": {
+        "text": "UNIT NOTE: targetGeometry takes RA in HOURS (raHours), the engine-internal convention — feeding degrees here would mislocate the star by 15x and poison the airmass. psf_physics is the single home for this apparent-place geometry, so SPCC and psf_attribution get bit-consistent airmass for the same field center and instant.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_physics.ts",
+            "lines": "144-161"
+          },
+          {
+            "path": "src/engine/pipeline/stages/science.ts",
+            "lines": "40-76"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/rl_deconv.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_stage.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m10_psf/psf_stage.ts:379",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "RlProtectedResult { estimate Float32 (deconvolved window, same w*h), snapshots[], itersRun, diffuse Float32 (preserved extended component), diffuseRadius }",
+        "transform": "psf_stage passes a plane-flattened window + the truncated empirical kernel + a saturated-core freeze mask to richardsonLucyWindowProtected; it re-measures FWHM on the returned estimate and builds the before/after tiles and the iteration strip",
+        "lossy": false
+      },
+      "why": {
+        "text": "psf_stage's live deconv lane calls the PROTECTED variant (not the raw RL): the diffuse floor (Ha/OIII/dust) is split out via a box blur at a scale much larger than the PSF, only the compact star residual is sharpened, and the diffuse is added back verbatim so real nebulosity is never flattened or ringed. Deconv remains default-off.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/rl_deconv.ts",
+            "lines": "143-183"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_stage.ts",
+            "lines": "370-385"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/rl_deconv.ts",
+      "to": "src/engine/pipeline/m10_psf/nebulosity_layer.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m10_psf/nebulosity_layer.ts:59",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "dilateMask(mask, w, h, r): Chebyshev (square) dilation of a 0/1 Uint8Array mask by r px via separable max",
+        "transform": "nebulosity_layer dilates the compact star mask by starDilatePx to form the star FOOTPRINT that is excluded from the nebulosity band, so star halos are not mislabelled as diffuse emission",
+        "lossy": false
+      },
+      "why": {
+        "text": "The star footprint used to carve stars (and their halos) out of the nebulosity band is exactly rl_deconv.dilateMask, the same dilation the RL saturated-core freeze uses. Without the dilation, bright-star halos would leak into the nebulosity layer and fabricate diffuse structure around every star.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/nebulosity_layer.ts",
+            "lines": "349-350"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/rl_deconv.ts",
+            "lines": "50-72"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_core.ts",
+      "to": "src/engine/pipeline/m10_psf/psf_stage.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/m10_psf/psf_stage.ts:323",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "PsfKernel { k Float64 (flux-normalized to sum 1), size, nStars } from buildEmpiricalKernel, plus PsfStarMeasure moment measures (FWHM/ellipticity/peakAboveBg) from measureStar and the peak/neighbor helpers",
+        "transform": "psf_stage stacks the FWHM-consistent measured stars into an empirical kernel, truncates it (truncateKernel), and uses it as the RL deconvolution kernel; the moment measures also drive target selection (brightest / worst-FWHM) and the text stats",
+        "lossy": false
+      },
+      "why": {
+        "text": "The empirical PSF kernel that RL deconvolves with is stacked by psf_core.buildEmpiricalKernel from the sharpest measured stars; it returns null below 5 registerable stars and psf_stage then skips the deconv lane honestly. Without psf_core there is no kernel and no measurement pass.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_core.ts",
+            "lines": "191-242"
+          },
+          {
+            "path": "src/engine/pipeline/m10_psf/psf_stage.ts",
+            "lines": "319-332"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/psf_stage.ts",
+      "to": "src/engine/pipeline/orchestrator_session.ts",
+      "type": "data-flow",
+      "cite": "src/engine/pipeline/orchestrator_session.ts:2246",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "PsfReport { pedestal, sigmaPixel, satLevel, nMeasured, fwhmMedianPx, ellipticityMedian, regionFwhm 3x3, kernel|null, deconv PsfDeconvReport|null, approximate[], timings } with grid tag",
+        "transform": "orchestrator wraps runPsfStage in withStage('psf'), stamps report.grid = SCIENCE_NATIVE | SCIENCE_BINNED2X from its own dimension check, and stores it on this.psfReport for the PSF panel",
+        "lossy": false
+      },
+      "why": {
+        "text": "runPsfStage is invoked only on an explicit PSF-diagnostics request (strictly optional stage); the report is held on the session for the UI panel and never gates or mutates the solve, so its absence changes no scenario.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "2246-2259"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/pipeline/m10_psf/nebulosity_layer.ts",
+      "to": "src/engine/pipeline/stages/package.ts",
+      "type": "fallback",
+      "cite": "src/engine/pipeline/stages/package.ts:1489",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "NebulosityLayerReceipt | null from buildNebulosityLayerReceipt(i.nebulosityDecomposition ?? null): per-layer present/integrated_flux/support_frac/snr/scale_band/significance plus method, sigma_noise and reconstruction_max_abs_err",
+        "transform": "buildReceipt calls buildNebulosityLayerReceipt with the (default-absent) decomposition; a null decomposition yields a null block (honest producer-gap) and the byte-identical solve/receipt path is unchanged",
+        "lossy": false
+      },
+      "why": {
+        "text": "The producer (decomposeNebulosityLayers) is a DEFAULT-OFF render tool with no stage wired into the solve path, so nebulosityDecomposition is always absent today and the receipt serializes nebulosity_layer: null (the widget shows DECOMPOSITION NOT RUN). This is an honest producer-gap, not a bug; wiring a producer stage lights the block up with zero further receipt wiring.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/m10_psf/nebulosity_layer.ts",
+            "lines": "460-517"
+          },
+          {
+            "path": "src/engine/pipeline/stages/package.ts",
+            "lines": "1483-1489"
+          }
+        ]
+      }
+    }
+  ]
+}

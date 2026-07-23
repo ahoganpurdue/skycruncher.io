@@ -1,0 +1,36 @@
+# SkyCruncher local OTel collector — receives Claude Code telemetry on
+# 127.0.0.1:4318 (http/protobuf, matching .claude/settings.local.json env) and
+# writes JSONL to test_results/otel/ (gitignored). No cloud, no secrets.
+# Start via start_collector.cmd — it sets CWD to the repo root so the relative
+# exporter paths below land in the right place.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 127.0.0.1:4318
+
+processors:
+  batch:
+
+exporters:
+  file/metrics:
+    path: test_results/otel/metrics.jsonl
+    rotation:
+      max_megabytes: 50
+      max_backups: 3
+  file/logs:
+    path: test_results/otel/logs.jsonl
+    rotation:
+      max_megabytes: 50
+      max_backups: 3
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file/metrics]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file/logs]

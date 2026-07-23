@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyCruncher · DAG Collaboration Space</title>
+<link rel="stylesheet" href="dag_style.css">
+</head>
+<body>
+
+<header>
+  <h1>SKYCRUNCHER <span class="dim">· DAG COLLABORATION SPACE</span></h1>
+
+  <div class="hdr-group">
+    <span class="lbl">view</span>
+    <div class="seg" id="view-seg">
+      <button data-view="graph" class="on">graph</button>
+      <button data-view="matrix">matrix</button>
+      <button data-view="procedure" title="Procedure (receipt walk) — ordered walk driven by banked-receipt stage-order edges">receipt walk</button>
+      <button data-view="steps" title="Procedure (curated map) — the curated steps_map.json walk (judgment-derived, owner-rulable data)">curated map</button>
+    </div>
+  </div>
+
+  <div class="hdr-group">
+    <span class="lbl">level</span>
+    <div class="seg" id="level-seg">
+      <button data-level="subsystem" class="on">subsystem</button>
+      <button data-level="stage">stage</button>
+      <button data-level="boundary">boundary</button>
+    </div>
+  </div>
+
+  <div class="hdr-group" id="layout-group">
+    <span class="lbl">layout</span>
+    <div class="seg" id="layout-seg">
+      <button data-layout="force" class="on">web (force)</button>
+      <button data-layout="layered">flow (layered)</button>
+    </div>
+  </div>
+
+  <div class="hdr-group">
+    <span class="lbl">walked by</span>
+    <div class="chip-row" id="ft-chips"></div>
+  </div>
+</header>
+
+<div id="banner"></div>
+<div id="orphan-banner" style="display:none"></div>
+
+<div id="layout">
+  <div id="rail">
+    <div class="rail-h">Edge layers</div>
+    <div id="layer-list"></div>
+
+    <div class="rail-h">Clockdrive <span class="rail-h-sub">roadmap overlay</span></div>
+    <div id="clockdrive-toggles">
+      <label class="layer-row cd-toggle" title="pre-registered / running / adopted theses (graph view only)">
+        <input type="checkbox" id="cd-theses" checked>
+        <span class="swatch cd-swatch"></span><span class="name">theses</span><span class="cnt" id="cd-theses-cnt">0</span>
+      </label>
+      <label class="layer-row cd-toggle" title="owner decision items / proposals (graph view only)">
+        <input type="checkbox" id="cd-proposals" checked>
+        <span class="swatch cd-swatch"></span><span class="name">proposals</span><span class="cnt" id="cd-proposals-cnt">0</span>
+      </label>
+    </div>
+    <div class="legend-ev cd-legend">
+      <div class="row"><svg width="26" height="12"><rect x="1" y="1" width="24" height="10" rx="3" fill="none" stroke="var(--c-clockdrive)" stroke-width="1.2" stroke-dasharray="3 2"/></svg> Clockdrive thesis/proposal — pending</div>
+      <div class="row"><svg width="26" height="12"><rect x="1" y="1" width="24" height="10" rx="3" fill="rgba(217,178,90,0.10)" stroke="var(--c-clockdrive)" stroke-width="0.8" opacity="0.5"/><line x1="3" y1="6" x2="23" y2="6" stroke="var(--c-clockdrive)" stroke-width="1.2" opacity="0.6"/></svg> Clockdrive thesis/proposal — dead</div>
+    </div>
+
+    <div class="rail-h">Evidence states</div>
+    <div class="legend-ev">
+      <div class="row"><svg width="26" height="6"><line x1="0" y1="3" x2="26" y2="3" stroke="#66748f" stroke-width="2" stroke-dasharray="4 3"/></svg> EXTRACTED (unverified claim)</div>
+      <div class="row"><svg width="26" height="6"><line x1="0" y1="3" x2="26" y2="3" stroke="#66748f" stroke-width="1" stroke-opacity="0.85"/></svg> mechanical: parser-derived, drift-gate-checked</div>
+      <div class="row"><svg width="26" height="6"><line x1="0" y1="3" x2="26" y2="3" stroke="#3ddc97" stroke-width="2"/></svg> VERIFIED</div>
+      <div class="row"><svg width="26" height="6"><line x1="0" y1="3" x2="26" y2="3" stroke="#ff5c5c" stroke-width="2"/><line x1="10" y1="-1" x2="16" y2="7" stroke="#ff5c5c" stroke-width="2"/></svg> REFUTED</div>
+      <div class="row"><svg width="26" height="6"><line x1="0" y1="3" x2="26" y2="3" stroke="#f0b23e" stroke-width="2"/></svg> STALE</div>
+      <div class="row"><svg width="26" height="8"><circle cx="13" cy="4" r="3.5" fill="#f778ba"/></svg> has comments</div>
+      <div class="row"><svg width="26" height="8"><circle cx="13" cy="4" r="3.5" fill="none" stroke="#f778ba" stroke-width="1.4"/></svg> proposed connection (owner)</div>
+    </div>
+
+    <div class="rail-h">Notes</div>
+    <div id="rail-notes" class="rail-note"></div>
+  </div>
+
+  <div id="stage-area">
+    <div id="focus-bar"></div>
+    <div id="iso-bar"></div>
+    <div id="loading">loading graph…</div>
+    <div id="graph-view" style="display:none"></div>
+    <div id="matrix-view" style="display:none"><div id="matrix-wrap"></div></div>
+    <div id="procedure-view" style="display:none"></div>
+    <div id="steps-view" style="display:none"></div>
+  </div>
+
+  <div id="panel">
+    <div class="p-empty" id="panel-empty">Select a node, edge, or matrix cell.<br><br>
+      Hover anything for its WHY. Click for HOW, cites, and comments.
+      Comments and questions attach to stable node/edge IDs, so they carry across
+      both views automatically.</div>
+    <div id="panel-body"></div>
+  </div>
+</div>
+
+<div id="tip"></div>
+
+<script type="module" src="dag_app.js"></script>
+</body>
+</html>

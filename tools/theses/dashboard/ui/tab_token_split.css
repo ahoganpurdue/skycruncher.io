@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   #tokens tab — token-composition panel (tab_token_split.js). Tab-local styles;
+   palette tokens (--panel/--ink/--mono …) come from style.css :root.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --tks-input: #4cc2ff;    /* fresh input (sky) */
+  --tks-output: #3ddc97;   /* output (emerald) */
+  --tks-cread: #e0a53a;    /* cache read (amber — the dominant share) */
+  --tks-ccreate: #b487ff;  /* cache creation (violet) */
+}
+
+#tks-panel { margin: 4px 0 6px; }
+
+/* scope selector */
+.tks-scope { display: inline-flex; gap: 0; border: 1px solid var(--line-strong); border-radius: 7px; overflow: hidden; margin: 4px 10px 10px 0; vertical-align: middle; }
+.tks-scope-btn {
+  font: 600 11.5px var(--sans); color: var(--ink-2); background: var(--panel);
+  border: 0; border-right: 1px solid var(--line); padding: 6px 13px; cursor: pointer;
+}
+.tks-scope-btn:last-child { border-right: 0; }
+.tks-scope-btn.on { background: var(--accent-dim); color: var(--ink); }
+.tks-scope-btn:hover:not(.on) { background: var(--panel-2); }
+
+.tks-select {
+  font: 11.5px var(--mono); color: var(--ink); background: var(--panel);
+  border: 1px solid var(--line-strong); border-radius: 6px; padding: 5px 8px;
+  max-width: 100%; vertical-align: middle; margin-bottom: 10px;
+}
+
+/* stacked composition bar */
+.tks-bar {
+  display: flex; width: 100%; height: 30px; border-radius: 7px; overflow: hidden;
+  border: 1px solid var(--line); background: var(--panel-2);
+}
+.tks-seg { height: 100%; display: block; min-width: 0; transition: filter 0.1s; }
+.tks-seg:hover { filter: brightness(1.2); }
+.tks-input { background: var(--tks-input); }
+.tks-output { background: var(--tks-output); }
+.tks-cread { background: var(--tks-cread); }
+.tks-ccreate { background: var(--tks-ccreate); }
+
+.tks-comp-body { display: flex; flex-wrap: wrap; gap: 14px 34px; margin-top: 12px; align-items: flex-start; }
+
+.tks-rows { display: grid; gap: 5px; min-width: 260px; }
+.tks-row { display: grid; grid-template-columns: 14px 120px 1fr auto; align-items: center; gap: 9px; font-size: 12.5px; }
+.tks-sw { width: 13px; height: 13px; border-radius: 3px; }
+.tks-sw.tks-input { background: var(--tks-input); }
+.tks-sw.tks-output { background: var(--tks-output); }
+.tks-sw.tks-cread { background: var(--tks-cread); }
+.tks-sw.tks-ccreate { background: var(--tks-ccreate); }
+.tks-k { color: var(--ink-2); }
+.tks-v { font: 12px var(--mono); color: var(--ink); text-align: right; }
+.tks-p { font: 700 12px var(--mono); color: var(--ink); text-align: right; min-width: 46px; }
+
+.tks-meta { flex: 1 1 300px; min-width: 260px; }
+.tks-metaline { font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+.tks-metaline code { font: 11px var(--mono); color: var(--ink-2); background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+.tks-nm { color: var(--tks-cread); font-weight: 600; }
+.tks-caveat { font-size: 11px; color: var(--muted); line-height: 1.55; margin-top: 6px; border-left: 2px solid var(--line-strong); padding-left: 9px; }
+.tks-headline {
+  margin-top: 10px; font-size: 12.5px; color: var(--ink-2);
+  border: 1px solid var(--line); border-radius: 7px; background: var(--panel); padding: 7px 11px;
+}
+.tks-headline b { color: var(--tks-cread); font: 700 13px var(--mono); }
+
+.tks-otel { margin-top: 12px; font: 10.5px var(--mono); color: var(--faint); line-height: 1.6; max-width: 860px; }
+
+@media (max-width: 620px) {
+  .tks-row { grid-template-columns: 14px 96px 1fr auto; }
+}

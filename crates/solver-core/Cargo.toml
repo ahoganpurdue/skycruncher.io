@@ -1,0 +1,25 @@
+[package]
+name = "solver-core"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+build = "build.rs"
+
+[dependencies]
+solver-contracts = { path = "../solver-contracts" }
+arrow-array = "=54.3.1"
+arrow-buffer = "=54.3.1"
+arrow-ipc = "=54.3.1"
+arrow-schema = "=54.3.1"
+bytes = "1.9"          # Bytes::from_owner(mmap) -> Buffer (zero-copy, no unsafe)
+memmap2 = "0.9"
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10"          # no `asm` feature (breaks MSVC); SHA-NI auto-detected at runtime
+md-5 = "0.10"
+thiserror.workspace = true
+rayon = { version = "1.10", optional = true }
+
+[features]
+default = []
+parallel = ["dep:rayon"]

@@ -1,0 +1,580 @@
+{
+  "fragment": "why_d",
+  "derived_by": "haiku batch D (librarian WHY stubs + doc-binding badges)",
+  "notes": [
+    "nodes with null why: stage:load, stage:extract.luminance, stage:extract, stage:metrology, stage:calibrate, stage:build_identity, stage:package, stage:receipt_serializer, stage:rematch_invalidation, stage:science, stage:solve_context, boundary:fits_nan_mask, boundary:tauri_native_ipc, boundary:variance_map",
+    "not attempted: none (all 55 attempted)",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 9 node-decls referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "stage:load": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "stage:extract.decode": {
+      "why": {
+        "text": "Decodes raw image formats (CR2, RAW) using the rawler decoder (default) or libraw (cold path), extracting pixel data and metadata for downstream processing.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "1849-1852"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#O.1 Module 1 — RAW decoder cutover (rawler default, LibRaw cold path)"
+      }
+    },
+    "stage:extract.luminance": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "stage:extract.detect": {
+      "why": {
+        "text": "Performs morphological signal detection to extract star candidates from the luminance plane using thresholding and connectivity analysis.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "334-339"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#Module 4: Signal Detection (Morphological Extraction)"
+      }
+    },
+    "stage:extract.spectral_peek": {
+      "why": {
+        "text": "Analyzes spectral / color manifolds to provide early information about color content and spectral properties for downstream color calibration.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "178-179"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#§1.3 Color Spaces (Spectral Manifolds)"
+      }
+    },
+    "stage:extract": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "stage:metrology": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "stage:solve.quad_wasm": {
+      "why": {
+        "text": "Executes quad-hash based blind plate solving in WASM, matching detected star quads against catalog patterns to determine initial astrometric solution.",
+        "cites": [
+          {
+            "path": "docs/reference/CARD_ASTROMETRY_WCS.md",
+            "lines": "7-12"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/reference/CARD_ASTROMETRY_WCS.md#1. Quad-hash blind plate solving"
+      }
+    },
+    "stage:solve": {
+      "why": {
+        "text": "Orchestrates plate solving via pattern recognition, combining quad matching, catalog cross-matching, and astrometric refinement to produce a World Coordinate System solution.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "248-253"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#Module 6: Plate Solving (Pattern Recognition)"
+      }
+    },
+    "stage:calibrate.m7_analyze": {
+      "why": {
+        "text": "Module 7 analyzes and refines astrometric calibration through polynomial fitting and matrix solving to achieve sub-pixel precision in coordinate solutions.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "437-442"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#Module 7: Astrometric Refinement (Precision Calibration)"
+      }
+    },
+    "stage:calibrate.sip_gate": {
+      "why": {
+        "text": "Fits Simple Imaging Polynomial distortion correction to encode the local coordinate transformation, ensuring plate solution accuracy across the image field.",
+        "cites": [
+          {
+            "path": "docs/reference/CARD_ASTROMETRY_WCS.md",
+            "lines": "20-25"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/reference/CARD_ASTROMETRY_WCS.md#3. SIP (Simple Imaging Polynomial) distortion fit"
+      }
+    },
+    "stage:calibrate.tps_gate": {
+      "why": {
+        "text": "Produces Thin-Plate Spline (TPS) distortion surface as an alternative high-fidelity astrometric calibration for export and remapping.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/processing_flow.md",
+            "lines": "138-152"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/processing_flow.md#Export surfaces (step-6-adjacent, not all in the browser download)"
+      }
+    },
+    "stage:m7_refine": {
+      "why": {
+        "text": "Performs precision astrometric calibration refinement using normal equations and matrix solving to achieve final plate-solution accuracy.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "437-442"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#Module 7: Astrometric Refinement (Precision Calibration)"
+      }
+    },
+    "stage:bc_measure": {
+      "why": {
+        "text": "Measures Brown-Conrady lens distortion (radial k1/k2 only) in a single, side-effect-free pass over the solved match set (measureBrownConradyFromSolution), recording lens_distortion_measured; the solve stays byte-identical.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1746"
+          },
+          {
+            "path": "docs/02-specs/ITERATIVE_BC_SPEC.md",
+            "lines": "1-3"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "src/engine/pipeline/orchestrator_session.ts#bc_measure withStage (single-pass measureBrownConradyFromSolution, radial k1/k2); ITERATIVE_BC_SPEC.md = ROADMAP-DRAFT (the iterative/atmosphere-corrected design, unbuilt)"
+      }
+    },
+    "stage:bc_rematch": {
+      "why": {
+        "text": "Re-matches stars against the catalog after Brown-Conrady distortion correction is applied, refining the astrometric solution with improved coordinate accuracy.",
+        "cites": [
+          {
+            "path": "docs/02-specs/RENDER_LOOP_CLOSURE_PLAN.md",
+            "lines": "5-10"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/02-specs/RENDER_LOOP_CLOSURE_PLAN.md#Increment I1 — Unify the warp (SIP∪TPS∪BC → one displacement, one resample)"
+      }
+    },
+    "stage:calibrate.hardware_profile": {
+      "why": {
+        "text": "Generates the forensic hardware-profile report (HardwareProfiler.generateReport) from the solved plate + metadata + signal statistics + per-star spectral measurements (M2 spectral forensics). Produces a report — not a persistent per-rig store deposit (that is the separate workbench_deposit node).",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/calibrate.ts",
+            "lines": "172-183"
+          },
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1831-1834"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "src/engine/pipeline/stages/calibrate.ts#generateHardwareProfile (forensic report; distinct from the workbench_deposit per-rig store)"
+      }
+    },
+    "stage:render_apply_sip": {
+      "why": {
+        "text": "Applies the fitted SIP inverse to re-warp the DISPLAY preview only (ImageProcessor.applySipUndistort rewrites previewUrl) — RENDER-plane, DEFAULT OFF (RENDER_APPLY_SIP), byte-identical when off; never touches WCS/matched_stars and does not feed export.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/orchestrator_session.ts",
+            "lines": "1848-1878"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "src/engine/pipeline/orchestrator_session.ts#render_apply_sip withStage (RENDER-plane, default-off, previewUrl only — LAW 1; export SIP is the separate fits_writer/asdf_writer path)"
+      }
+    },
+    "stage:spcc": {
+      "why": {
+        "text": "Performs SpectroPhotometric Color Calibration (SPCC): regresses instrumental color against catalog Gaia BP-RP to measure the color transform (slope/intercept/r2) plus a zero-point.",
+        "cites": [
+          {
+            "path": "docs/reference/CARD_COLOR_PHOTOCAL.md",
+            "lines": "2-11"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/reference/CARD_COLOR_PHOTOCAL.md#1. SPCC color regression (SpectroPhotometric Color Calibration, PixInsight lineage)"
+      }
+    },
+    "stage:spcc_render_gains": {
+      "why": {
+        "text": "Computes channel-gain TLS/EIV estimators from SPCC and applies white-balance gains in the render lane for photometric display correction.",
+        "cites": [
+          {
+            "path": "docs/reference/CARD_COLOR_PHOTOCAL.md",
+            "lines": "55-61"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/reference/CARD_COLOR_PHOTOCAL.md#8. SPCC channel-gains TLS/EIV estimator + render-lane white-balance application"
+      }
+    },
+    "stage:psf_field": {
+      "why": {
+        "text": "Characterizes the point-spread function field across the image by fitting 2D Gaussians per-star via Levenberg-Marquardt, producing FWHM and ellipticity maps.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "1678-1686"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#L.4 Module 10 — PSF-characterization post-solve stage + Richardson-Lucy deconv"
+      }
+    },
+    "stage:psf_attribution": {
+      "why": {
+        "text": "Reads the measured PSF field (copies, never mutates) and decomposes the measured stellar anisotropy into physically-calculable systematics {drift / diffraction / seeing / differential-refraction / coma} plus a residual — an APPROXIMATE, report-only attribution. It performs attribution, not deconvolution.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/stages/psf_attribution.ts",
+            "lines": "312-334"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "src/engine/pipeline/stages/psf_attribution.ts#runPsfAttribution (systematics attribution, report-only; deconvolution is psf_characterize/rl_deconv)"
+      }
+    },
+    "stage:forced_confirm": {
+      "why": {
+        "text": "Performs forced photometry at catalog positions with deep verification and family-wise statistical escalation to confirm detections and measure deep-confirmed photometry.",
+        "cites": [
+          {
+            "path": "docs/WHITEPAPER.md",
+            "lines": "226-233"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/WHITEPAPER.md#5. Beyond quads: other identification machinery > 5.3 Deep-verification and forced confirmation"
+      }
+    },
+    "stage:calibrate": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "stage:package": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "stage:receipt_serializer": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "stage:schema_versions": {
+      "why": {
+        "text": "Manages and declares receipt schema versions across the pipeline, tracking evolution and backward-compatibility guarantees for data serialization.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "1799-1806"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#N.3 Receipt schema — 2.5.0 → 2.6.0 → 2.7.0 lineage"
+      }
+    },
+    "stage:solve_context": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "stage:solve_provenance": {
+      "why": {
+        "text": "Records the lean success provenance solved_via in {blind | assisted:user | assisted:metadata | assisted:tool}, derived from the hint-resolution rung (a hinted solve is not a lesser solve; acceptance never consults the hint). No confidence levels; no wall-clock enters any field.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "1859"
+          },
+          {
+            "path": "src/engine/pipeline/stages/schema_versions.ts",
+            "lines": "115-118"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#O.2 Receipt schema 2.11.0 — solve_provenance / solved_via (hint rung, not confidence)"
+      }
+    },
+    "stage:user_annotations": {
+      "why": {
+        "text": "Captures observer-supplied free-text TESTIMONY in the receipt (schema 2.12.0): description / location / bortle / rig-notes / session-issues (all STRINGS + provenance), NEVER parsed into the solve; null when the observer supplied nothing.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "1860"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#O.2 Receipt schema 2.12.0 — user_annotations (free-text testimony, never parsed into the solve)"
+      }
+    },
+    "stage:user_target_hint": {
+      "why": {
+        "text": "Receives and records user-provided target hints (location, optics class) to assist the solver with prior information.",
+        "cites": [
+          {
+            "path": "docs/TEST_SUITE_PLAN.md",
+            "lines": "441-462"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/TEST_SUITE_PLAN.md#Stage 9 — Receipt trains 2.14.0: `rawler_calibration` + `user_target_hint`"
+      }
+    },
+    "stage:workbench_deposit": {
+      "why": {
+        "text": "Deposits per-rig optical calibration profiles into the Optical Workbench persistent store, keyed by user identity and lens, never fatal if absent.",
+        "cites": [
+          {
+            "path": "docs/OPTICAL_WORKBENCH_SCHEMA.md",
+            "lines": "1-6"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/OPTICAL_WORKBENCH_SCHEMA.md#Optical Workbench — Per-Rig Profile Store (REFERENCE, owner-ratified 2026-07-09)"
+      }
+    },
+    "boundary:arrow_seam": {
+      "why": {
+        "text": "Defines the Arrow IPC serialization boundary for catalog and dataplane export, including manifest schema and byte-contract specifications.",
+        "cites": [
+          {
+            "path": "docs/STARPLATES_SPEC.md",
+            "lines": "233"
+          },
+          {
+            "path": "docs/STARPLATES_SPEC.md",
+            "lines": "356"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "208-218"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/STARPLATES_SPEC.md#3.2 Per-cell file: Arrow IPC file format + #5.2 Response bytes: Arrow IPC stream (arrow_seam byte contract: binary_layouts.ts:208-218)"
+      }
+    },
+    "boundary:atlas_rows": {
+      "why": {
+        "text": "Hybrid atlas row format combining Gaia (RA in degrees) and HYG (RA in hours) data, requiring per-row discrimination for correct coordinate handling.",
+        "cites": [
+          {
+            "path": "CLAUDE.md",
+            "lines": "32-42"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "CLAUDE.md#UNIT/FORMAT TRAPS (each cost hours once)"
+      }
+    },
+    "boundary:fits_io": {
+      "why": {
+        "text": "Implements FITS file writing with astropy conformance, NaN-preservation, and proper WCS/SIP header encoding for data export.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "560-568"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#Module 9: Serialization & Export (Finalization) > Export Endpoints"
+      }
+    },
+    "boundary:libraw_mem_image": {
+      "why": {
+        "text": "Interleaved RGB16 memory layout contract for libraw CR2 decoding (w*h*3 dominant-channel CFA data); ~4-7% cross-leak, never one-hot; dimensions require stride coherence verification.",
+        "cites": [
+          {
+            "path": "docs/WHITEPAPER.md",
+            "lines": "82-97"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/WHITEPAPER.md#2. Ingestion and decode > 2.2 CR2 via libraw — the mem_image contract"
+      }
+    },
+    "boundary:rawler_cfa": {
+      "why": {
+        "text": "Rawler decoder demosaicing of CFA Bayer and X-Trans patterns, now the default arm (libraw retained as cold path); handles per-camera CFA geometry.",
+        "cites": [
+          {
+            "path": "docs/01-canonical/SkyCruncher_Architecture.md",
+            "lines": "585-613"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/01-canonical/SkyCruncher_Architecture.md#Module 1: RAW Decoding & Metadata Extraction > Steps & Functions"
+      }
+    },
+    "boundary:seam_capsule": {
+      "why": {
+        "text": "Per-buffer seam-capture capsule: raw little-endian .bin buffers (flat row-major, no header) + a capsule.json sidecar (sole layout authority, sha256-verified on load), snapshotted by captureSeam (env-gated CAPTURE_SEAMS=1, default OFF) for byte-level seam replay/testing.",
+        "cites": [
+          {
+            "path": "src/engine/pipeline/seam_capture.ts",
+            "lines": "392"
+          },
+          {
+            "path": "src/engine/contracts/binary_layouts.ts",
+            "lines": "457-472"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "src/engine/contracts/binary_layouts.ts#seam_capsule (per-buffer capture capsule, LAW 7); src/engine/pipeline/seam_capture.ts#captureSeam"
+      }
+    },
+    "boundary:starplates_blobs": {
+      "why": {
+        "text": "Starplates cell data storage format and rendering; Arrow IPC files + manifest encoding for catalog distribution and on-demand sector loading.",
+        "cites": [
+          {
+            "path": "tools/renderlab/README.md",
+            "lines": "22-48"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "tools/renderlab/README.md#Data"
+      }
+    },
+    "boundary:tauri_native_ipc": {
+      "why": null,
+      "walked_by": [],
+      "badges": {}
+    },
+    "boundary:toolchest_arrow_export": {
+      "why": {
+        "text": "Headless toolchest API export interface using Arrow IPC format for serialized catalog and measurement data delivery from Node environment.",
+        "cites": [
+          {
+            "path": "tools/api/arrow_sink.apispec.ts",
+            "lines": "89-116"
+          },
+          {
+            "path": "docs/DATA_PLATFORM.md",
+            "lines": "31"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/DATA_PLATFORM.md#3. RECEIPTS / EXPORTS — measurements out (headless Arrow IPC export, gated by tools/api/arrow_sink.apispec.ts)"
+      }
+    },
+    "boundary:wasm_typed_array": {
+      "why": {
+        "text": "Typed-array crossing boundary between WASM and JavaScript, defining memory layout contracts and endianness for numeric data interchange.",
+        "cites": [
+          {
+            "path": "docs/DATA_PLATFORM.md",
+            "lines": "2-13"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/DATA_PLATFORM.md#SkyCruncher Data Platform — system I/O map"
+      }
+    },
+    "boundary:wgsl_structs": {
+      "why": {
+        "text": "GPU shader struct layout specifications for WebGPU compute and rendering, defining alignment and memory ordering for shared GPU primitives.",
+        "cites": [
+          {
+            "path": "docs/02-specs/WEBGPU_RENDER_PLAN.md",
+            "lines": "448-486"
+          }
+        ]
+      },
+      "walked_by": [],
+      "badges": {
+        "doc_binding": "docs/02-specs/WEBGPU_RENDER_PLAN.md#7.2 The three shared primitives, spec'd once"
+      }
+    }
+  },
+  "edges": []
+}

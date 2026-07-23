@@ -1,0 +1,407 @@
+{
+  "fragment": "wave2_core-color",
+  "derived_by": "wave-2 Opus writer, domain src/engine/core/ (core-color)",
+  "notes": [
+    "Domain = every module node under src/engine/core/ (the domain table's 'src/core/' prefix has no matching base id; the actual core modules live under src/engine/core/ and no other domain claims them). Every edge FROM is a src/engine/core/* node.",
+    "Priority: the LOUD class per the brief — RA-HOURS-vs-DEGREES-vs-RADIANS conversions (SkyTransform, TimeService, apparent_place), color-space rotations (camera matrix, Oklab), pixel-native-vs-binned crossings, and honest-or-absent fallback arms (StatisticsProvider WASM/CPU, master_calibration REFUSED, optics hint last-resort).",
+    "Edge direction for data-flow is producer->consumer (what actually moves), which is the OPPOSITE of the base 'import' edge in several cases (e.g. camera_color_matrix -> ImageProcessor: the matrix payload flows into the render even though ImageProcessor imports the matrix module). This never restates a base 'import' edge — the type differs and the key (from,to,type) is distinct.",
+    "wasm-crossing edges target boundary:wasm_typed_array (the enumerated typed-array boundary in binary_layouts). The wasm crate itself (src/engine/wasm_compute/src/lib.rs) is not a base node, so the crossing is expressed against the boundary, matching wave-1's non-base-producer handling.",
+    "SkyTransform imports m7_astrometry/astrometry_engine (line 9) but no use of it appears in the body read this session — no edge asserted for it (honest gap). The RA-in-HOURS WCS-struct convention (createWCSTransform crval=[raHours,decDeg]) is folded into the SkyTransform why rather than a standalone edge.",
+    "All edges verification=EXTRACTED; an independent reviewer flips to VERIFIED.",
+    "RESTORATION-DELTA (2026-07-22 main adoption): removed 2 node-decls + 4 edges referencing restoration-branch ids that are absent on main. Full id list, subsystem families, element counts and return triggers: tools/dag/enrich/RESTORATION_DELTA_2026-07-22.md. Restore this content from rest/* history when those subsystems land on main; never invent replacement edges."
+  ],
+  "nodes": {
+    "src/engine/core/UnitConverter.ts": {
+      "why": {
+        "text": "The single centralized converter for astronomical angle units — RA hours<->degrees (x15), degrees<->radians, degrees<->arcseconds, plus arcsec/pixel scale — so magic numbers (15, 3600, PI/180) never scatter through the pipeline. It encodes the load-bearing trap that RA is carried in HOURS internally: degToHours applies the standard 0-24 astronomical wrap. Without it every coordinate/scale consumer would re-derive these factors inline and a single wrong 15 or 3600 would silently shear every solve.",
+        "cites": [
+          {
+            "path": "src/engine/core/UnitConverter.ts",
+            "lines": "5-8"
+          },
+          {
+            "path": "src/engine/core/UnitConverter.ts",
+            "lines": "18-37"
+          },
+          {
+            "path": "src/engine/core/UnitConverter.ts",
+            "lines": "75-83"
+          }
+        ]
+      }
+    },
+    "src/engine/core/SkyTransform.ts": {
+      "why": {
+        "text": "The spherical-trig / projection engine: gnomonic (TAN) sky<->tangent-plane, bulk pixel->sky, and WCS synthesis/fit (createWCSTransform, fitWCS, upscaleWCS, pixelToSky). It is the seam where RA-HOURS/Dec-DEGREES are converted to radians for the wasm math kernels and back, and where the WCS struct's crval is stored as [RA hours, Dec degrees]. Imported by ~12 modules; if its unit handling or the offset-free fitWCS centroid trick regressed, every plate solve's scale/rotation would be wrong and the seestar/cr2 pinned solves would break.",
+        "cites": [
+          {
+            "path": "src/engine/core/SkyTransform.ts",
+            "lines": "1-6"
+          },
+          {
+            "path": "src/engine/core/SkyTransform.ts",
+            "lines": "107-131"
+          },
+          {
+            "path": "src/engine/core/SkyTransform.ts",
+            "lines": "159-225"
+          }
+        ]
+      }
+    },
+    "src/engine/core/TimeService.ts": {
+      "why": {
+        "text": "Centralized temporal engine: Julian Date, Julian centuries/years since J2000.0, GMST/LMST, precession, proper motion, and RA/Dec<->Alt/Az. The rigorous transforms (precession, apparent alt-az) delegate to apparent_place.ts (IAU 2006/2000B); the legacy IAU 1982 GMST is kept only for standalone external callers. Imported by ~8 modules; a JD or precession error would mis-place ephemeris anchors and the zenith/alt-az hint seed, and (per the timestamp trap) a bogus clock feeding it yields phantom geometry.",
+        "cites": [
+          {
+            "path": "src/engine/core/TimeService.ts",
+            "lines": "22-28"
+          },
+          {
+            "path": "src/engine/core/TimeService.ts",
+            "lines": "40-65"
+          },
+          {
+            "path": "src/engine/core/TimeService.ts",
+            "lines": "95-158"
+          }
+        ]
+      }
+    },
+    "src/engine/core/optics_manager.ts": {
+      "why": {
+        "text": "Owns the physical optics/atmosphere model: Brown-Conrady distortion apply/remove (used by SkyTransform's projection), FOV math, and the trust-ordered focal-length resolution that seeds the blind scale search. Imported by ~12 modules. The heuristic FL priors are named constants (never bare literals) routed through the hint-provider seam so an assumption can never leak into the UI as a measured value; a break here mis-seeds the scale search or double-applies distortion.",
+        "cites": [
+          {
+            "path": "src/engine/core/optics_manager.ts",
+            "lines": "1-8"
+          },
+          {
+            "path": "src/engine/core/optics_manager.ts",
+            "lines": "24-70"
+          }
+        ]
+      }
+    },
+    "src/engine/core/optics_hint_provider.ts": {
+      "why": {
+        "text": "The untrusted-focal-length hint seam: when a file's nominal FL is the electronics-less factory-default 50 mm and the user gave no hint, the first non-null provider supplies a labelled ASSUMPTION (assumed:true, e.g. WIDE_FIELD_FL_PRIOR_MM = 14 mm) that seeds the scale search and is recorded in the receipt. It is the future plug point for the ML hint-recommender; because hints only seed and the math verify gate is the sole arbiter, a wrong hint can fail to verify but never corrupt a verified answer.",
+        "cites": [
+          {
+            "path": "src/engine/core/optics_hint_provider.ts",
+            "lines": "1-24"
+          },
+          {
+            "path": "src/engine/core/optics_hint_provider.ts",
+            "lines": "28-59"
+          }
+        ]
+      }
+    },
+    "src/engine/core/StatisticsProvider.ts": {
+      "why": {
+        "text": "Centralized image statistics: iterative sigma-clipped background/noise (median + sigma), basic stats, per-channel histograms, and black-point estimation. The background estimator runs in WASM with an explicit CPU MAD-based iterative-sigma-clip fallback when the wasm call throws. Imported by ~6 modules (detection, background modelling); a wrong background/sigma shifts every detection threshold.",
+        "cites": [
+          {
+            "path": "src/engine/core/StatisticsProvider.ts",
+            "lines": "12-53"
+          },
+          {
+            "path": "src/engine/core/StatisticsProvider.ts",
+            "lines": "116-138"
+          }
+        ]
+      }
+    },
+    "src/engine/core/colormath.ts": {
+      "why": {
+        "text": "Minimal color-mathematics layer: sRGB<->XYZ (with the sRGB EOTF), xy<->XYZ, XYZ->Oklab, XYZ->CIE-Lab, and the Planckian-locus generator. Imported by ~5 modules for atmospheric-extinction color work and display-ready previews. Its srgbToXYZ is the transform the camera-matrix program flags as the historical 'assumed already sRGB' gap, so its correctness bounds any color-temperature or extinction estimate built on it.",
+        "cites": [
+          {
+            "path": "src/engine/core/colormath.ts",
+            "lines": "14-39"
+          },
+          {
+            "path": "src/engine/core/colormath.ts",
+            "lines": "60-122"
+          }
+        ]
+      }
+    },
+    "src/engine/core/oklab.ts": {
+      "why": {
+        "text": "Pure branch-free Oklab/OkLCh transforms (Ottosson 2020) for the RENDER layer only (PIXEL ledger) — linear sRGB<->Oklab, Oklab<->OkLCh, hue-preserving sRGB gamut projection, and the sRGB encode. By contract it never touches the LINEAR physics upstream of the stretch, the WCS, matched_stars, or any receipt value, and any lightness read off a post-transform pixel is render-only APPROXIMATE. Consumed solely by ImageProcessor's default-off Oklab stretch path.",
+        "cites": [
+          {
+            "path": "src/engine/core/oklab.ts",
+            "lines": "1-21"
+          },
+          {
+            "path": "src/engine/core/oklab.ts",
+            "lines": "88-120"
+          }
+        ]
+      }
+    },
+    "src/engine/core/ImageProcessor.ts": {
+      "why": {
+        "text": "The render-lane image utility (PIXEL/RENDER ledger): full-res browser decode, magnifier crop, the STF v2 auto-stretch (subtractive background neutralization + highlight/SPCC white balance + color-preserving MTF), the default-off Oklab stretch path, the per-body camera-matrix projection, and the single SIP undistort warp (LAW 1's one warp). Honest-or-absent throughout: with no color transform / no SPCC gains / no SIP the output is byte-identical to the plain-render path. Imported by the orchestrator, ingest stage, and format registry.",
+        "cites": [
+          {
+            "path": "src/engine/core/ImageProcessor.ts",
+            "lines": "112-145"
+          },
+          {
+            "path": "src/engine/core/ImageProcessor.ts",
+            "lines": "354-375"
+          },
+          {
+            "path": "src/engine/core/ImageProcessor.ts",
+            "lines": "408-443"
+          }
+        ]
+      }
+    },
+    "src/engine/core/camera_color_matrix.ts": {
+      "why": {
+        "text": "Holds the per-body camera-RGB -> linear-sRGB forward color matrix (dcraw/LibRaw adobe_coeff ColorMatrix2 constants) so the render can rotate a scientific camera's native primaries into sRGB before the STF stretch, instead of assuming the science RGB was already sRGB. resolveColorTransform folds the implied D65 white balance into one 3x3 and returns null for bodies with no published matrix (e.g. SeeStar/IMX462), so the render falls back to the empirical white-balance path rather than fabricating a matrix. The 60Da entry is deliberately DISTINCT from the 60D (Halpha-extended red response) to avoid mis-projecting deep-red nebula color.",
+        "cites": [
+          {
+            "path": "src/engine/core/camera_color_matrix.ts",
+            "lines": "1-28"
+          },
+          {
+            "path": "src/engine/core/camera_color_matrix.ts",
+            "lines": "48-77"
+          },
+          {
+            "path": "src/engine/core/camera_color_matrix.ts",
+            "lines": "198-232"
+          }
+        ]
+      }
+    },
+    "src/engine/core/AtmosphericManager.ts": {
+      "why": {
+        "text": "Centralizes how Earth's atmosphere affects light: Kasten-Young air mass, per-channel Rayleigh optical depth converted to MAGNITUDES via the 2.5/ln10 Beer-Lambert factor (a fix over the earlier tau*X mislabel that under-corrected extinction), zenith flux multipliers, and the 'Cronos check' that validates observation time/geometry against the unset-clock forensics rule. Imported by ~3 modules; its extinction magnitudes feed color/zenith correction and its Cronos gate protects against bogus-clock phantom geometry.",
+        "cites": [
+          {
+            "path": "src/engine/core/AtmosphericManager.ts",
+            "lines": "15-53"
+          },
+          {
+            "path": "src/engine/core/AtmosphericManager.ts",
+            "lines": "68-99"
+          }
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "src/engine/core/camera_color_matrix.ts",
+      "to": "src/engine/core/ImageProcessor.ts",
+      "type": "data-flow",
+      "cite": "src/engine/core/ImageProcessor.ts:157",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "ColorTransform.matrix — a 3x3 camera-raw-RGB -> linear-sRGB rotation (D65 preMul folded column-wise), row-major number[][], produced by resolveColorTransform from the per-body ColorMatrix2",
+        "transform": "float32ToImageDataAutoStretch calls applyColorMatrixLinear(src, w, h, colorTransform.matrix) to project each interleaved RGB pixel into linear sRGB BEFORE the STF calibration/stretch",
+        "lossy": true
+      },
+      "why": {
+        "text": "The matrix is the sole per-body chromatic-rotation input to the render; out-of-gamut negatives are clamped to 0 (deep-red/blue rotations lost), and when resolveColorTransform returns null the render aliases the input and is byte-identical to the pre-color path.",
+        "cites": [
+          {
+            "path": "src/engine/core/camera_color_matrix.ts",
+            "lines": "205-221"
+          },
+          {
+            "path": "src/engine/core/ImageProcessor.ts",
+            "lines": "361-375"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/core/ImageProcessor.ts",
+      "to": "src/engine/core/oklab.ts",
+      "type": "data-flow",
+      "cite": "src/engine/core/ImageProcessor.ts:336",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "per-pixel calibrated LINEAR sRGB triplet [r,g,b] (float, background-neutralized + WB-gained)",
+        "transform": "renderOklabStretch runs linearSrgbToOklab -> oklabToOklch, applies a lightness-only MTF stretch with a chroma-space desat guard, gamutClipPreserveHue, then oklchToLinearSrgb -> encodeSrgb; hue is held exactly, output is Uint8",
+        "lossy": true
+      },
+      "why": {
+        "text": "The Oklab path is render-only and DEFAULT-OFF (renderOpts.oklab), branching after all shared LINEAR calibration so the flag-off render is byte-identical; every post-transform readout is APPROXIMATE (Oklab L is not photometric luminance) and Math.cbrt is only per-platform deterministic.",
+        "cites": [
+          {
+            "path": "src/engine/core/ImageProcessor.ts",
+            "lines": "244-249"
+          },
+          {
+            "path": "src/engine/core/oklab.ts",
+            "lines": "30-58"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/core/ImageProcessor.ts",
+      "to": "src/engine/pipeline/m2_hardware/scale_manager.ts",
+      "type": "unit-conversion",
+      "cite": "src/engine/core/ImageProcessor.ts:81",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "magnifier center (centerX, centerY) in NATIVE sensor pixel coordinates",
+        "transform": "when the science buffer is the binned size (scienceW*scienceH), getCrop calls scales.nativeToscience(centerX, centerY) to map native -> science(binned) pixel space before indexing the buffer",
+        "lossy": false
+      },
+      "why": {
+        "text": "A native-vs-binned pixel-space mismatch would index the wrong region; the conversion is applied only when the buffer length equals the binned dimensions, otherwise the native coords are used as-is.",
+        "cites": [
+          {
+            "path": "src/engine/core/ImageProcessor.ts",
+            "lines": "77-93"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/core/SkyTransform.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "unit-conversion",
+      "cite": "src/engine/core/SkyTransform.ts:113",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "WCS scalars (crval[0] RA in HOURS, crval[1] Dec in DEGREES, CD matrix in DEGREES) plus a Float64Array of pixel (x,y) coords for bulkPixelsToSky / gnomonic / fit_wcs kernels",
+        "transform": "every angle is converted to RADIANS before crossing into the wasm_compute kernel (hoursToRad for RA, degToRad for Dec and CD terms); the returned radians are converted back with radToHours (RA) / radToDeg (Dec) on the way out",
+        "lossy": false
+      },
+      "why": {
+        "text": "This is the LOUD hours<->degrees<->radians seam: the JS side speaks RA-hours/Dec-degrees, the wasm math speaks radians, and the round-trip conversion lives entirely in SkyTransform. Getting hoursToRad vs degToRad wrong on RA would shear the whole solution by the 15x hours/degrees factor.",
+        "cites": [
+          {
+            "path": "src/engine/core/SkyTransform.ts",
+            "lines": "46-72"
+          },
+          {
+            "path": "src/engine/core/SkyTransform.ts",
+            "lines": "107-131"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/core/SkyTransform.ts",
+      "to": "src/engine/core/optics_manager.ts",
+      "type": "data-flow",
+      "cite": "src/engine/core/SkyTransform.ts:66",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "tangent-plane coordinates (xi, eta) in DEGREES plus a DistortionModel (Brown-Conrady k1/k2/k3/p1/p2)",
+        "transform": "gnomonicProject calls OpticsManager.applyDistortion(xi, eta, ...) to push ideal->observed on the forward projection; inverseGnomonic calls OpticsManager.removeDistortion to undo it before de-projecting to sky",
+        "lossy": false
+      },
+      "why": {
+        "text": "Distortion is applied in tangent-plane degrees, symmetric between the forward and inverse projections; only invoked when a distortion profile is supplied, so the undistorted path is unchanged.",
+        "cites": [
+          {
+            "path": "src/engine/core/SkyTransform.ts",
+            "lines": "46-102"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/core/AtmosphericManager.ts",
+      "to": "src/engine/core/TimeService.ts",
+      "type": "data-flow",
+      "cite": "src/engine/core/AtmosphericManager.ts:90",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "target RA in HOURS, Dec in DEGREES, observer lat/lon in DEGREES, and an observation Date",
+        "transform": "validateObservationTime converts the Date to JD via TimeService.toJulianDate, then TimeService.computeAltAz to get the target altitude for the below-horizon check",
+        "lossy": false
+      },
+      "why": {
+        "text": "The Cronos horizon check consumes TimeService's JD + alt-az; a target more than 2 degrees below the horizon fails validation as TARGET_BELOW_HORIZON.",
+        "cites": [
+          {
+            "path": "src/engine/core/AtmosphericManager.ts",
+            "lines": "90-98"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/core/optics_manager.ts",
+      "to": "src/engine/core/optics_hint_provider.ts",
+      "type": "fallback",
+      "cite": "src/engine/core/optics_manager.ts:12",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a FocalLengthHintContext (untrusted EXIF focal length, lens model string, optional explicit user hint)",
+        "transform": "when the nominal focal length is not trustworthy (electronics-less factory-default 50 mm), getEffectiveFocalLength queries queryFocalLengthHintProviders; the first non-null provider returns a labelled OpticsHint (assumed:true, e.g. WIDE_FIELD_FL_PRIOR_MM = 14) that REPLACES the untrusted FL as a scale-search seed",
+        "lossy": false
+      },
+      "why": {
+        "text": "Last-resort degradation arm (honest-or-absent): the hint is an ASSUMPTION recorded in the receipt (optics_hints), null when the FL is trusted evidence so nothing is assumed; because hints only seed and the math verify gate arbitrates, a wrong hint can only fail to verify, never corrupt a verified solve.",
+        "cites": [
+          {
+            "path": "src/engine/core/optics_manager.ts",
+            "lines": "10-27"
+          },
+          {
+            "path": "src/engine/core/optics_hint_provider.ts",
+            "lines": "8-24"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/core/StatisticsProvider.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "data-flow",
+      "cite": "src/engine/core/StatisticsProvider.ts:24",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "a Float32Array pixel buffer plus iterations and sigma_clip scalars",
+        "transform": "estimateBackground calls wasm.estimate_background_wasm(data, iterations, sigma_clip) which returns a 2-element [median, sigma] summary from iterative sigma-clipping",
+        "lossy": true
+      },
+      "why": {
+        "text": "The full pixel buffer crosses into wasm and only a 2-scalar background/noise summary returns; this median/sigma is the reference every detection threshold is measured against.",
+        "cites": [
+          {
+            "path": "src/engine/core/StatisticsProvider.ts",
+            "lines": "18-28"
+          }
+        ]
+      }
+    },
+    {
+      "from": "src/engine/core/StatisticsProvider.ts",
+      "to": "boundary:wasm_typed_array",
+      "type": "fallback",
+      "cite": "src/engine/core/StatisticsProvider.ts:29",
+      "verification": "EXTRACTED",
+      "how": {
+        "what": "the same Float32Array buffer, on the wasm-failure arm",
+        "transform": "if wasm.estimate_background_wasm throws, a try/catch falls back to a pure-CPU iterative sigma-clip (MAD*1.4826 sigma) computing the same {median, sigma}, logging a PERFORMANCE CRITICAL warning",
+        "lossy": true
+      },
+      "why": {
+        "text": "Honest degradation path: the CPU arm produces the same summary contract as the wasm arm so consumers never see a gap, only a slower run when wasm is unavailable.",
+        "cites": [
+          {
+            "path": "src/engine/core/StatisticsProvider.ts",
+            "lines": "29-52"
+          }
+        ]
+      }
+    }
+  ]
+}
